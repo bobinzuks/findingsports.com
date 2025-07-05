@@ -3,15 +3,21 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { OAuth2Client } = require('google-auth-library');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+    credentials: true
+}));
 app.use(express.json());
-app.use(express.static('.'));
+
+// IMPORTANT: Serve static files from mockup directory
+app.use(express.static(path.join(__dirname, '..')));
 
 // In-memory database (replace with real database in production)
 const users = new Map();
@@ -291,7 +297,7 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
     res.json({ success: true });
 });
 
-// Games API (demo data)
+// Games API (demo data) - PUBLIC ACCESS FOR VIEWING
 app.get('/api/games', (req, res) => {
     const { location, sport } = req.query;
     
@@ -322,6 +328,58 @@ app.get('/api/games', (req, res) => {
             host: { name: 'Carlos', id: 'user_carlos' },
             date: '2025-01-07T16:00:00Z',
             indoor: false
+        },
+        {
+            id: 3,
+            type: 'volleyball',
+            title: 'Beach Volleyball',
+            location: 'Vancouver',
+            venue: 'English Bay Beach',
+            coords: [49.2863, -123.1437],
+            attendees: 8,
+            maxAttendees: 12,
+            host: { name: 'Sarah', id: 'user_sarah' },
+            date: '2025-01-06T16:00:00Z',
+            indoor: false
+        },
+        {
+            id: 4,
+            type: 'basketball',
+            title: 'Competitive 5v5',
+            location: 'Richmond',
+            venue: 'Richmond Olympic Oval',
+            coords: [49.1747, -123.1503],
+            attendees: 7,
+            maxAttendees: 10,
+            host: { name: 'Mike', id: 'user_mike' },
+            date: '2025-01-07T19:00:00Z',
+            indoor: true
+        },
+        {
+            id: 5,
+            type: 'tennis',
+            title: 'Tennis Doubles',
+            location: 'Burnaby',
+            venue: 'Central Park Tennis Courts',
+            coords: [49.2276, -122.9989],
+            attendees: 3,
+            maxAttendees: 4,
+            host: { name: 'Emma', id: 'user_emma' },
+            date: '2025-01-06T10:00:00Z',
+            indoor: false
+        },
+        {
+            id: 6,
+            type: 'soccer',
+            title: 'Sunday League Practice',
+            location: 'Surrey',
+            venue: 'Newton Athletic Park',
+            coords: [49.1322, -122.8907],
+            attendees: 15,
+            maxAttendees: 20,
+            host: { name: 'Diego', id: 'user_diego' },
+            date: '2025-01-07T14:00:00Z',
+            indoor: false
         }
     ];
 
@@ -339,7 +397,7 @@ app.get('/api/games', (req, res) => {
     res.json({ games: filteredGames });
 });
 
-// Join game
+// Join game - REQUIRES AUTH
 app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
     const { gameId } = req.params;
     
@@ -351,7 +409,7 @@ app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
     });
 });
 
-// Create game
+// Create game - REQUIRES AUTH
 app.post('/api/games', authenticateToken, (req, res) => {
     const gameData = req.body;
     
@@ -372,12 +430,31 @@ app.post('/api/games', authenticateToken, (req, res) => {
     });
 });
 
+// IMPORTANT: Catch-all route - serve index.html for client-side routing
+app.get('*', (req, res) => {
+    // Don't serve index for API routes
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    
+    // Serve the appropriate HTML file
+    if (req.path.includes('login')) {
+        res.sendFile(path.join(__dirname, '..', 'login-google.html'));
+    } else if (req.path.includes('onboarding')) {
+        res.sendFile(path.join(__dirname, '..', 'onboarding', 'index.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '..', 'index.html'));
+    }
+});
+
 // Start server
-app.listen(PORT, () => {
-    console.log(`Finding Sports backend running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Finding Sports backend running on http://0.0.0.0:${PORT}`);
     console.log('Environment:', {
         port: PORT,
+        nodeEnv: process.env.NODE_ENV,
         hasJwtSecret: !!process.env.JWT_SECRET,
-        hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID
+        hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+        corsOrigin: process.env.CORS_ORIGIN || 'all'
     });
 });

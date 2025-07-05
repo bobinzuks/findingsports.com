@@ -297,7 +297,7 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
     res.json({ success: true });
 });
 
-// Games API (demo data)
+// Games API (demo data) - PUBLIC ACCESS FOR VIEWING
 app.get('/api/games', (req, res) => {
     const { location, sport } = req.query;
     
@@ -328,6 +328,58 @@ app.get('/api/games', (req, res) => {
             host: { name: 'Carlos', id: 'user_carlos' },
             date: '2025-01-07T16:00:00Z',
             indoor: false
+        },
+        {
+            id: 3,
+            type: 'volleyball',
+            title: 'Beach Volleyball',
+            location: 'Vancouver',
+            venue: 'English Bay Beach',
+            coords: [49.2863, -123.1437],
+            attendees: 8,
+            maxAttendees: 12,
+            host: { name: 'Sarah', id: 'user_sarah' },
+            date: '2025-01-06T16:00:00Z',
+            indoor: false
+        },
+        {
+            id: 4,
+            type: 'basketball',
+            title: 'Competitive 5v5',
+            location: 'Richmond',
+            venue: 'Richmond Olympic Oval',
+            coords: [49.1747, -123.1503],
+            attendees: 7,
+            maxAttendees: 10,
+            host: { name: 'Mike', id: 'user_mike' },
+            date: '2025-01-07T19:00:00Z',
+            indoor: true
+        },
+        {
+            id: 5,
+            type: 'tennis',
+            title: 'Tennis Doubles',
+            location: 'Burnaby',
+            venue: 'Central Park Tennis Courts',
+            coords: [49.2276, -122.9989],
+            attendees: 3,
+            maxAttendees: 4,
+            host: { name: 'Emma', id: 'user_emma' },
+            date: '2025-01-06T10:00:00Z',
+            indoor: false
+        },
+        {
+            id: 6,
+            type: 'soccer',
+            title: 'Sunday League Practice',
+            location: 'Surrey',
+            venue: 'Newton Athletic Park',
+            coords: [49.1322, -122.8907],
+            attendees: 15,
+            maxAttendees: 20,
+            host: { name: 'Diego', id: 'user_diego' },
+            date: '2025-01-07T14:00:00Z',
+            indoor: false
         }
     ];
 
@@ -345,7 +397,7 @@ app.get('/api/games', (req, res) => {
     res.json({ games: filteredGames });
 });
 
-// Join game
+// Join game - REQUIRES AUTH
 app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
     const { gameId } = req.params;
     
@@ -357,7 +409,7 @@ app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
     });
 });
 
-// Create game
+// Create game - REQUIRES AUTH
 app.post('/api/games', authenticateToken, (req, res) => {
     const gameData = req.body;
     

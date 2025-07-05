@@ -430,3 +430,49 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #ff5722;
 }
+
+/* Guest UI */
+.guest-login-btn {
+    background: #5E9EFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-left: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.guest-login-btn:hover {
+    background: #4A8AEB;
+    transform: translateY(-1px);
+}
+
+.guest-banner {
+    background: #2A2B35;
+    border: 1px solid #5E9EFF;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.guest-banner-text {
+    color: #E8E9F0;
+    font-size: 14px;
+}
+
+.guest-banner-btn {
+    background: #5E9EFF;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}

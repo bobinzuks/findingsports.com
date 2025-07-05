@@ -111,7 +111,10 @@ class FindingSportsAPI {
     // Games methods
     async getGames(filters = {}) {
         const params = new URLSearchParams(filters);
-        return await this.request(`/api/games?${params}`);
+        // Games endpoint doesn't require auth for viewing
+        const url = `${API_BASE_URL}/api/games?${params}`;
+        const response = await fetch(url);
+        return await response.json();
     }
 
     async joinGame(gameId) {

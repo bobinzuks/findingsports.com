@@ -5,18 +5,13 @@ let markers = [];
 // Auth state
 const authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+let isGuest = !authToken;
 
 // Load API
 if (!window.api) {
     const script = document.createElement('script');
     script.src = 'js/api.js';
     document.head.appendChild(script);
-}
-
-// Check authentication
-if (!authToken) {
-    // Redirect to login
-    window.location.href = '/login.html';
 }
 
 // Game data
@@ -98,12 +93,23 @@ const gamesData = {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    // Verify authentication
+    // Wait for API to load
+    await new Promise(resolve => {
+        const checkAPI = setInterval(() => {
+            if (window.api) {
+                clearInterval(checkAPI);
+                resolve();
+            }
+        }, 100);
+    });
+    
+    // Verify authentication if logged in
     if (authToken && window.api) {
         try {
             const { user } = await window.api.getCurrentUser();
             currentUser = user;
             localStorage.setItem('currentUser', JSON.stringify(user));
+            isGuest = false;
             
             // Check if onboarding is needed
             if (!user.onboarded) {
@@ -111,13 +117,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
         } catch (error) {
-            // Invalid token
+            // Invalid token - continue as guest
             localStorage.removeItem('authToken');
             localStorage.removeItem('currentUser');
-            window.location.href = '/login.html';
-            return;
+            currentUser = null;
+            isGuest = true;
         }
     }
+    
+    // Update UI for guest/logged in state
+    updateAuthUI();
     
     initializeMap();
     loadGamesFromAPI();
@@ -308,17 +317,41 @@ function showUpcomingGames() {
         '<h3 style="text-align: center; color: #b8bdd8;">Your upcoming games will appear here</h3>';
 }
 
-// Show game details (placeholder)
+// Show game details
 function showGameDetails(game) {
-    alert(`
-        ${game.title}
-        Location: ${game.location}
-        Attendees: ${game.attendees}
-        Host: ${game.host}
-        ${game.indoor ? 'Indoor facility' : 'Outdoor venue'}
+    if (isGuest) {
+        const join = confirm(`
+${game.title}
+Location: ${game.location}
+Attendees: ${game.attendees}
+Host: ${game.host}
+${game.indoor ? 'Indoor facility' : 'Outdoor venue'}
 
-        Click "Join Game" to participate!
-    `);
+Sign in to join this game?`);
+        
+        if (join) {
+            // Save game ID to join after login
+            sessionStorage.setItem('joinGameAfterLogin', game.id);
+            window.location.href = '/login-google.html';
+        }
+    } else {
+        // Logged in user can join
+        if (confirm(`Join "${game.title}"?`)) {
+            joinGame(game.id);
+        }
+    }
+}
+
+// Join a game
+async function joinGame(gameId) {
+    try {
+        await window.api.joinGame(gameId);
+        alert('Successfully joined the game!');
+        // Refresh games list
+        loadGamesFromAPI();
+    } catch (error) {
+        alert('Failed to join game. Please try again.');
+    }
 }
 
 // Update location
@@ -327,9 +360,46 @@ document.getElementById('locationSelect').addEventListener('change', async e => 
 });
 
 // Display user info
-if (currentUser) {
-    document.getElementById('userName').textContent =
-        `Welcome, ${currentUser.username || currentUser.email}!`;
+function updateAuthUI() {
+    const userNameEl = document.getElementById('userName');
+    const authSection = document.querySelector('.user-section') || document.querySelector('.header-right');
+    
+    if (isGuest) {
+        userNameEl.textContent = 'Welcome, Guest!';
+        
+        // Add login button for guests
+        if (!document.getElementById('guestLoginBtn')) {
+            const loginBtn = document.createElement('button');
+            loginBtn.id = 'guestLoginBtn';
+            loginBtn.className = 'guest-login-btn';
+            loginBtn.textContent = 'Sign In';
+            loginBtn.onclick = () => window.location.href = '/login-google.html';
+            
+            if (authSection) {
+                authSection.appendChild(loginBtn);
+            }
+        }
+        
+        // Hide logout button for guests
+        const logoutBtn = document.querySelector('button[onclick*="logout"]');
+        if (logoutBtn) {
+            logoutBtn.style.display = 'none';
+        }
+    } else if (currentUser) {
+        userNameEl.textContent = `Welcome, ${currentUser.name || currentUser.username || currentUser.email}!`;
+        
+        // Show logout button
+        const logoutBtn = document.querySelector('button[onclick*="logout"]');
+        if (logoutBtn) {
+            logoutBtn.style.display = 'block';
+        }
+        
+        // Remove guest login button if exists
+        const guestLoginBtn = document.getElementById('guestLoginBtn');
+        if (guestLoginBtn) {
+            guestLoginBtn.remove();
+        }
+    }
 }
 
 // Logout function
