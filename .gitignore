@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+target/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.production
+*.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+mcp-tools.log
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+
+# Sensitive data
+secrets/
+*.pem
+*.key
+*.cert
+
+# Local development
+.local/
+memory/
+.roomodes
+.roo/
+.claude/logs/
+
+# Docker volumes
+postgres_data/
+redis_data/

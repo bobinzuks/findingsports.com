@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding Sports - Find Sports Near You</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1 class="logo">Finding Sports</h1>
+                    <p class="tagline">Finding Sports near you—wherever, whenever.</p>
+                </div>
+                <div class="user-menu">
+                    <span class="user-name" id="userName">Welcome!</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <select class="location-select" id="locationSelect">
+                    <option value="vancouver">Vancouver</option>
+                    <option value="burnaby">Burnaby</option>
+                    <option value="richmond">Richmond</option>
+                    <option value="surrey">Surrey</option>
+                </select>
+                
+                <select class="sport-select" id="sportSelect">
+                    <option value="any">Any sport</option>
+                    <option value="basketball">Basketball</option>
+                    <option value="soccer">Soccer</option>
+                    <option value="volleyball">Volleyball</option>
+                    <option value="tennis">Tennis</option>
+                    <option value="hockey">Hockey</option>
+                </select>
+                
+                <button class="search-btn" onclick="searchGames()">Search</button>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" onclick="switchTab('social')">Social Feed</button>
+            <button class="tab" onclick="switchTab('upcoming')">Upcoming Games</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Games List -->
+                <section class="games-section">
+                    <h2 class="section-title">Games near <span id="locationName">Vancouver</span></h2>
+                    
+                    <div class="games-list" id="gamesList">
+                        <!-- Game Card 1 -->
+                        <div class="game-card">
+                            <div class="game-header">
+                                <span class="game-icon">🏀</span>
+                                <h3 class="game-title">Pick-up Basketball</h3>
+                            </div>
+                            <div class="game-location">
+                                <span class="location-dot">•</span>
+                                <span>North Vancouver</span>
+                            </div>
+                            <div class="game-info">
+                                <span class="attendees">6 signed up</span>
+                                <div class="host-info">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luke" alt="Luke" class="host-avatar">
+                                    <div class="host-details">
+                                        <span class="host-tag">Luke</span>
+                                        <span class="host-name">Luke</span>
+                                        <span class="host-status">Signed-up</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game Card 2 -->
+                        <div class="game-card">
+                            <div class="game-header">
+                                <span class="game-icon">🏀</span>
+                                <div>
+                                    <span class="game-type">Organized League</span>
+                                    <h3 class="game-title">Basketball Leog-ff!</h3>
+                                </div>
+                                <span class="game-meta">7 atenized</span>
+                            </div>
+                            <div class="game-location">
+                                <span class="location-dot">•</span>
+                                <span>1 attendees</span>
+                            </div>
+                            <div class="game-info">
+                                <div class="host-info">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Kristin" alt="Kristin" class="host-avatar">
+                                    <div class="host-details">
+                                        <span class="host-tag">Kristin</span>
+                                        <span class="host-name">Kristin</span>
+                                        <span class="host-status">invited 7</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game Card 3 -->
+                        <div class="game-card">
+                            <div class="game-header">
+                                <span class="game-icon">🏀</span>
+                                <h3 class="game-title">Pick-up Basketball</h3>
+                                <span class="game-indoor">Indoor</span>
+                            </div>
+                            <div class="game-location">
+                                <span class="location-dot">•</span>
+                                <span>Downtown</span>
+                            </div>
+                            <div class="game-info">
+                                <span class="attendees">4 attendees</span>
+                                <div class="host-info">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alana" alt="Alana" class="host-avatar">
+                                    <div class="host-details">
+                                        <span class="host-tag">Alana</span>
+                                        <span class="host-name">Alana</span>
+                                        <span class="host-status">AI tterdue</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Join Game Section -->
+                    <div class="join-game-section">
+                        <h3>Join Kristin's Game</h3>
+                        <div class="players-list">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=player1" alt="Player" class="player-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=player2" alt="Player" class="player-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=player3" alt="Player" class="player-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=player4" alt="Player" class="player-avatar">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Map Section -->
+                <section class="map-section">
+                    <div id="map" class="map-container"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
