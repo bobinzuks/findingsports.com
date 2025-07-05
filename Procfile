@@ -1,0 +1,1 @@
+web: cd mockup/backend && node server-static.js

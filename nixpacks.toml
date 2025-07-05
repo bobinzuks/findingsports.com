@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "python311"]
+
+[phases.install]
+cmds = ["cd mockup/backend && npm install"]
+
+[phases.build]
+cmds = ["echo 'No build step required'"]
+
+[start]
+cmd = "cd mockup/backend && node server.js"
