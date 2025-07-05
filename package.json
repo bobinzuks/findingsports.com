@@ -6,6 +6,8 @@
   "scripts": {
     "start": "./start-quick.sh",
     "start:auto": "./start-local-auto.sh",
+    "backend": "cd mockup/backend && npm install && npm start",
+    "dev": "npm run backend & npm run start:auto",
     "lint": "eslint mockup/**/*.js --fix",
     "lint:check": "eslint mockup/**/*.js",
     "format": "prettier --write \"mockup/**/*.{js,html,css}\"",

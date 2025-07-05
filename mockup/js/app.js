@@ -6,17 +6,17 @@ let markers = [];
 const authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
+// Load API
+if (!window.api) {
+    const script = document.createElement('script');
+    script.src = 'js/api.js';
+    document.head.appendChild(script);
+}
+
 // Check authentication
 if (!authToken) {
-    // For demo purposes, create a mock user
-    // console.log('No auth token found, using demo mode');
-    currentUser = {
-        id: 'demo-user',
-        username: 'demo_user',
-        email: 'demo@example.com'
-    };
-    // Comment out redirect for testing
-    // window.location.href = '/login.html';
+    // Redirect to login
+    window.location.href = '/login.html';
 }
 
 // Game data
@@ -97,9 +97,30 @@ const gamesData = {
 };
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verify authentication
+    if (authToken && window.api) {
+        try {
+            const { user } = await window.api.getCurrentUser();
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Check if onboarding is needed
+            if (!user.onboarded) {
+                window.location.href = '/onboarding/';
+                return;
+            }
+        } catch (error) {
+            // Invalid token
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+            return;
+        }
+    }
+    
     initializeMap();
-    displayGames('vancouver');
+    loadGamesFromAPI();
 });
 
 // Initialize Leaflet map
@@ -204,26 +225,26 @@ function getSportIcon(sport) {
 }
 
 // Search games
-window.searchGames = function searchGames() {
+window.searchGames = async function searchGames() {
     const location = document.getElementById('locationSelect').value;
     const sport = document.getElementById('sportSelect').value;
-
-    // Filter games based on sport if not "any"
-    let games = gamesData[location] || [];
-
-    if (sport !== 'any') {
-        games = games.filter(game => game.type === sport);
-    }
-
-    // Display filtered games
-    displayFilteredGames(location, games);
 
     // Add search animation
     const searchBtn = document.querySelector('.search-btn');
     searchBtn.classList.add('loading');
-    setTimeout(() => {
-        searchBtn.classList.remove('loading');
-    }, 500);
+
+    try {
+        await loadGamesFromAPI(location, sport);
+    } catch (error) {
+        // Fall back to demo data
+        let games = gamesData[location] || [];
+        if (sport !== 'any') {
+            games = games.filter(game => game.type === sport);
+        }
+        displayFilteredGames(location, games);
+    }
+
+    searchBtn.classList.remove('loading');
 };
 
 // Display filtered games
@@ -301,8 +322,8 @@ function showGameDetails(game) {
 }
 
 // Update location
-document.getElementById('locationSelect').addEventListener('change', e => {
-    displayGames(e.target.value);
+document.getElementById('locationSelect').addEventListener('change', async e => {
+    await loadGamesFromAPI(e.target.value);
 });
 
 // Display user info
@@ -312,9 +333,66 @@ if (currentUser) {
 }
 
 // Logout function
-window.logout = function logout() {
+window.logout = async function logout() {
+    if (window.api) {
+        try {
+            await window.api.logout();
+        } catch (error) {
+            // Ignore errors
+        }
+    }
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
     window.location.href = '/login.html';
 };
+
+// Load games from API
+async function loadGamesFromAPI(location = 'vancouver', sport = null) {
+    try {
+        const filters = { location };
+        if (sport && sport !== 'any') {
+            filters.sport = sport;
+        }
+        
+        const { games } = await window.api.getGames(filters);
+        displayGamesOnMap(games);
+    } catch (error) {
+        console.error('Failed to load games:', error);
+        // Fall back to demo data
+        displayGames(location);
+    }
+}
+
+// Display games from API on map and list
+function displayGamesOnMap(games) {
+    const gamesList = document.getElementById('gamesList');
+    const locationName = document.getElementById('locationName');
+
+    // Clear existing
+    gamesList.innerHTML = '';
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+
+    // Add games
+    games.forEach(game => {
+        // Create game card
+        const gameCard = createGameCard(game);
+        gamesList.appendChild(gameCard);
+
+        // Add marker to map
+        const marker = L.marker(game.coords).addTo(map).bindPopup(`
+            <strong>${game.title}</strong><br>
+            ${game.venue}<br>
+            ${game.attendees}/${game.maxAttendees} players
+        `);
+
+        markers.push(marker);
+    });
+
+    // Adjust map view
+    if (markers.length > 0) {
+        const group = new L.FeatureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+}
 

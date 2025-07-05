@@ -317,17 +317,21 @@ window.previousStep = function previousStep() {
 // Complete onboarding
 async function completeOnboarding() {
     try {
-        // Save preferences
-        const preferences = {
-            ...onboardingData,
-            userId: currentUser.id,
-            completedAt: new Date().toISOString()
-        };
+        // Load API if needed
+        if (!window.api) {
+            const script = document.createElement('script');
+            script.src = '/js/api.js';
+            document.head.appendChild(script);
+            await new Promise(resolve => {
+                script.onload = resolve;
+            });
+        }
 
-        // In a real app, this would be sent to the backend
-        localStorage.setItem('userPreferences', JSON.stringify(preferences));
+        // Save preferences to backend
+        await window.api.updatePreferences(onboardingData);
 
-        // Update user as onboarded
+        // Update local user data
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         currentUser.onboarded = true;
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 

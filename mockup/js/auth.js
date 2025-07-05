@@ -1,7 +1,9 @@
-// Auth configuration
-const API_URL = 'http://localhost:8080/graphql';
-let authToken = localStorage.getItem('authToken');
-let currentUser = null;
+// Load API
+if (!window.api) {
+    const script = document.createElement('script');
+    script.src = 'js/api.js';
+    document.head.appendChild(script);
+}
 
 // Switch between login and register tabs
 window.switchAuthTab = function switchAuthTab(tab) {
@@ -37,69 +39,41 @@ function clearMessage() {
     messageEl.textContent = '';
 }
 
-// GraphQL request helper
-async function graphqlRequest(query, variables = {}) {
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-
-    if (authToken) {
-        headers.Authorization = `Bearer ${authToken}`;
-    }
-
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ query, variables })
+// Wait for API to load
+function waitForAPI() {
+    return new Promise((resolve) => {
+        const checkAPI = () => {
+            if (window.api) {
+                resolve();
+            } else {
+                setTimeout(checkAPI, 100);
+            }
+        };
+        checkAPI();
     });
-
-    const data = await response.json();
-
-    if (data.errors) {
-        throw new Error(data.errors[0].message);
-    }
-
-    return data.data;
 }
 
 // Handle login
 document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
+    
+    await waitForAPI();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const query = `
-        mutation Login($input: LoginInput!) {
-            login(input: $input) {
-                token
-                user {
-                    id
-                    email
-                    username
-                    fullName
-                }
-            }
-        }
-    `;
-
     try {
-        const data = await graphqlRequest(query, {
-            input: { email, password }
-        });
-
-        authToken = data.login.token;
-        currentUser = data.login.user;
-
-        // Save token
-        localStorage.setItem('authToken', authToken);
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
+        const data = await window.api.login(email, password);
+        
         showMessage('Login successful! Redirecting...', 'success');
 
-        // Redirect to main app
+        // Redirect based on onboarding status
         setTimeout(() => {
-            window.location.href = '/';
+            if (!data.user.onboarded && data.user.provider === 'google') {
+                window.location.href = '/onboarding/';
+            } else {
+                window.location.href = '/';
+            }
         }, 1000);
     } catch (error) {
         showMessage(error.message || 'Login failed', 'error');
@@ -109,48 +83,27 @@ document.getElementById('loginForm').addEventListener('submit', async e => {
 // Handle registration
 document.getElementById('registerForm').addEventListener('submit', async e => {
     e.preventDefault();
+    
+    await waitForAPI();
 
     const email = document.getElementById('regEmail').value;
     const username = document.getElementById('regUsername').value;
-    const fullName = document.getElementById('regFullName').value;
+    const name = document.getElementById('regFullName').value;
     const password = document.getElementById('regPassword').value;
 
-    const query = `
-        mutation Register($input: RegisterInput!) {
-            register(input: $input) {
-                token
-                user {
-                    id
-                    email
-                    username
-                    fullName
-                }
-            }
-        }
-    `;
-
     try {
-        const data = await graphqlRequest(query, {
-            input: {
-                email,
-                username,
-                password,
-                fullName: fullName || null
-            }
+        const data = await window.api.register({
+            email,
+            username,
+            name: name || username,
+            password
         });
-
-        authToken = data.register.token;
-        currentUser = data.register.user;
-
-        // Save token
-        localStorage.setItem('authToken', authToken);
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
         showMessage('Registration successful! Redirecting...', 'success');
 
-        // Redirect to main app
+        // New users go to onboarding
         setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/onboarding/';
         }, 1000);
     } catch (error) {
         showMessage(error.message || 'Registration failed', 'error');
@@ -158,27 +111,19 @@ document.getElementById('registerForm').addEventListener('submit', async e => {
 });
 
 // Check if already logged in
-if (authToken) {
-    // Verify token is still valid
-    const query = `
-        query Me {
-            me {
-                id
-                email
-                username
-            }
-        }
-    `;
-
-    graphqlRequest(query)
-        .then(() => {
+(async function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        await waitForAPI();
+        
+        try {
+            await window.api.getCurrentUser();
             // Token is valid, redirect to main app
             window.location.href = '/';
-        })
-        .catch(() => {
+        } catch (error) {
             // Token is invalid, clear it
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('currentUser');
-        });
-}
+            window.api.clearToken();
+        }
+    }
+})();
 

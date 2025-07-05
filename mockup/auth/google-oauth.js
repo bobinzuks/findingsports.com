@@ -36,32 +36,26 @@ async function handleCredentialResponse(response) {
     const { credential } = response;
 
     try {
-        // Send the credential to your backend
-        const result = await fetch('/api/auth/google', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ credential })
-        });
+        // Load API if needed
+        if (!window.api) {
+            const script = document.createElement('script');
+            script.src = '/js/api.js';
+            document.head.appendChild(script);
+            await new Promise(resolve => {
+                script.onload = resolve;
+            });
+        }
 
-        if (result.ok) {
-            const data = await result.json();
+        // Use API to authenticate
+        const data = await window.api.googleLogin(credential);
 
-            // Store the auth token
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-
-            // Check if this is a new user
-            if (data.isNewUser) {
-                // Redirect to onboarding
-                window.location.href = '/onboarding';
-            } else {
-                // Redirect to main app
-                window.location.href = '/';
-            }
+        // Check if this is a new user or needs onboarding
+        if (data.isNewUser || !data.user.onboarded) {
+            // Redirect to onboarding
+            window.location.href = '/onboarding/';
         } else {
-            throw new Error('Authentication failed');
+            // Redirect to main app
+            window.location.href = '/';
         }
     } catch (error) {
         // console.error('Google authentication error:', error);
