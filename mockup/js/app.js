@@ -3,12 +3,20 @@ let map;
 let markers = [];
 
 // Auth state
-let authToken = localStorage.getItem('authToken');
+const authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
 // Check authentication
 if (!authToken) {
-    window.location.href = '/login.html';
+    // For demo purposes, create a mock user
+    // console.log('No auth token found, using demo mode');
+    currentUser = {
+        id: 'demo-user',
+        username: 'demo_user',
+        email: 'demo@example.com'
+    };
+    // Comment out redirect for testing
+    // window.location.href = '/login.html';
 }
 
 // Game data
@@ -19,7 +27,7 @@ const gamesData = {
             type: 'basketball',
             title: 'Pick-up Basketball',
             location: 'North Vancouver',
-            coords: [49.3200, -123.0724],
+            coords: [49.32, -123.0724],
             attendees: 6,
             host: 'Luke',
             status: 'Signed-up',
@@ -53,7 +61,7 @@ const gamesData = {
             type: 'soccer',
             title: 'Drop-in Soccer',
             location: 'UBC',
-            coords: [49.2606, -123.2460],
+            coords: [49.2606, -123.246],
             attendees: 12,
             host: 'Carlos',
             status: 'Hosting',
@@ -89,7 +97,7 @@ const gamesData = {
 };
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     initializeMap();
     displayGames('vancouver');
 });
@@ -97,12 +105,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Initialize Leaflet map
 function initializeMap() {
     map = L.map('map').setView([49.2827, -123.1207], 11);
-    
+
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-    
+
     // Add custom styles
     const mapContainer = document.getElementById('map');
     mapContainer.style.filter = 'hue-rotate(200deg) saturate(0.5) brightness(0.9)';
@@ -113,38 +121,36 @@ function displayGames(location) {
     const games = gamesData[location] || [];
     const gamesList = document.getElementById('gamesList');
     const locationName = document.getElementById('locationName');
-    
+
     // Update location name
     locationName.textContent = location.charAt(0).toUpperCase() + location.slice(1);
-    
+
     // Clear existing games
     gamesList.innerHTML = '';
-    
+
     // Clear existing markers
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-    
+
     // Add games to list and map
     games.forEach(game => {
         // Create game card
         const gameCard = createGameCard(game);
         gamesList.appendChild(gameCard);
-        
+
         // Add marker to map
-        const marker = L.marker(game.coords)
-            .addTo(map)
-            .bindPopup(`
+        const marker = L.marker(game.coords).addTo(map).bindPopup(`
                 <strong>${game.title}</strong><br>
                 ${game.location}<br>
                 ${game.attendees} attendees
             `);
-        
+
         markers.push(marker);
     });
-    
+
     // Adjust map view to show all markers
     if (markers.length > 0) {
-        const group = new L.featureGroup(markers);
+        const group = new L.FeatureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
     }
 }
@@ -154,9 +160,9 @@ function createGameCard(game) {
     const card = document.createElement('div');
     card.className = 'game-card';
     card.onclick = () => showGameDetails(game);
-    
+
     const sportIcon = getSportIcon(game.type);
-    
+
     card.innerHTML = `
         <div class="game-header">
             <span class="game-icon">${sportIcon}</span>
@@ -180,7 +186,7 @@ function createGameCard(game) {
             </div>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -198,72 +204,71 @@ function getSportIcon(sport) {
 }
 
 // Search games
-function searchGames() {
+window.searchGames = function searchGames() {
     const location = document.getElementById('locationSelect').value;
     const sport = document.getElementById('sportSelect').value;
-    
+
     // Filter games based on sport if not "any"
     let games = gamesData[location] || [];
-    
+
     if (sport !== 'any') {
         games = games.filter(game => game.type === sport);
     }
-    
+
     // Display filtered games
     displayFilteredGames(location, games);
-    
+
     // Add search animation
     const searchBtn = document.querySelector('.search-btn');
     searchBtn.classList.add('loading');
     setTimeout(() => {
         searchBtn.classList.remove('loading');
     }, 500);
-}
+};
 
 // Display filtered games
 function displayFilteredGames(location, games) {
     const gamesList = document.getElementById('gamesList');
     const locationName = document.getElementById('locationName');
-    
+
     locationName.textContent = location.charAt(0).toUpperCase() + location.slice(1);
     gamesList.innerHTML = '';
-    
+
     // Clear markers
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-    
+
     if (games.length === 0) {
-        gamesList.innerHTML = '<p style="text-align: center; color: #b8bdd8;">No games found for your search criteria.</p>';
+        gamesList.innerHTML =
+            '<p style="text-align: center; color: #b8bdd8;">No games found for your search criteria.</p>';
         return;
     }
-    
+
     games.forEach(game => {
         const gameCard = createGameCard(game);
         gamesList.appendChild(gameCard);
-        
-        const marker = L.marker(game.coords)
-            .addTo(map)
-            .bindPopup(`
+
+        const marker = L.marker(game.coords).addTo(map).bindPopup(`
                 <strong>${game.title}</strong><br>
                 ${game.location}<br>
                 ${game.attendees} attendees
             `);
-        
+
         markers.push(marker);
     });
-    
+
     // Adjust map view
     if (markers.length > 0) {
-        const group = new L.featureGroup(markers);
+        const group = new L.FeatureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
     }
 }
 
 // Switch tabs
-function switchTab(tab) {
+window.switchTab = function switchTab(tab) {
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(t => t.classList.remove('active'));
-    
+
     if (tab === 'social') {
         tabs[0].classList.add('active');
         // Show social feed content
@@ -273,12 +278,13 @@ function switchTab(tab) {
         // Show upcoming games
         showUpcomingGames();
     }
-}
+};
 
 // Show upcoming games
 function showUpcomingGames() {
     const gamesList = document.getElementById('gamesList');
-    gamesList.innerHTML = '<h3 style="text-align: center; color: #b8bdd8;">Your upcoming games will appear here</h3>';
+    gamesList.innerHTML =
+        '<h3 style="text-align: center; color: #b8bdd8;">Your upcoming games will appear here</h3>';
 }
 
 // Show game details (placeholder)
@@ -289,24 +295,26 @@ function showGameDetails(game) {
         Attendees: ${game.attendees}
         Host: ${game.host}
         ${game.indoor ? 'Indoor facility' : 'Outdoor venue'}
-        
+
         Click "Join Game" to participate!
     `);
 }
 
 // Update location
-document.getElementById('locationSelect').addEventListener('change', function(e) {
+document.getElementById('locationSelect').addEventListener('change', e => {
     displayGames(e.target.value);
 });
 
 // Display user info
 if (currentUser) {
-    document.getElementById('userName').textContent = `Welcome, ${currentUser.username || currentUser.email}!`;
+    document.getElementById('userName').textContent =
+        `Welcome, ${currentUser.username || currentUser.email}!`;
 }
 
 // Logout function
-function logout() {
+window.logout = function logout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
     window.location.href = '/login.html';
-}
+};
+

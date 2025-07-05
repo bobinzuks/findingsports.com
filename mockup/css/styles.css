@@ -6,7 +6,13 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
     background-color: #1a1f3a;
     color: #ffffff;
     line-height: 1.6;
@@ -350,7 +356,7 @@ body {
     .content-wrapper {
         grid-template-columns: 1fr;
     }
-    
+
     .map-container {
         height: 400px;
     }
@@ -360,31 +366,31 @@ body {
     .logo {
         font-size: 2.5rem;
     }
-    
+
     .search-container {
         flex-direction: column;
     }
-    
+
     .location-select,
     .sport-select,
     .search-btn {
         width: 100%;
     }
-    
+
     .tabs {
         gap: 1rem;
     }
-    
+
     .tab {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-    
+
     .games-section,
     .map-section {
         padding: 1rem;
     }
-    
+
     .game-card {
         padding: 1rem;
     }

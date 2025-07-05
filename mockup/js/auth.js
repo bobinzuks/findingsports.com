@@ -4,13 +4,13 @@ let authToken = localStorage.getItem('authToken');
 let currentUser = null;
 
 // Switch between login and register tabs
-function switchAuthTab(tab) {
+window.switchAuthTab = function switchAuthTab(tab) {
     const tabs = document.querySelectorAll('.auth-tab');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    
+
     tabs.forEach(t => t.classList.remove('active'));
-    
+
     if (tab === 'login') {
         tabs[0].classList.add('active');
         loginForm.style.display = 'block';
@@ -20,9 +20,9 @@ function switchAuthTab(tab) {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
     }
-    
+
     clearMessage();
-}
+};
 
 // Show message
 function showMessage(message, type) {
@@ -40,40 +40,35 @@ function clearMessage() {
 // GraphQL request helper
 async function graphqlRequest(query, variables = {}) {
     const headers = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
     };
-    
+
     if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers.Authorization = `Bearer ${authToken}`;
     }
-    
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ query, variables }),
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            throw new Error(data.errors[0].message);
-        }
-        
-        return data.data;
-    } catch (error) {
-        console.error('GraphQL Error:', error);
-        throw error;
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ query, variables })
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+        throw new Error(data.errors[0].message);
     }
+
+    return data.data;
 }
 
 // Handle login
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
+document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     const query = `
         mutation Login($input: LoginInput!) {
             login(input: $input) {
@@ -87,40 +82,39 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             }
         }
     `;
-    
+
     try {
         const data = await graphqlRequest(query, {
             input: { email, password }
         });
-        
+
         authToken = data.login.token;
         currentUser = data.login.user;
-        
+
         // Save token
         localStorage.setItem('authToken', authToken);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
+
         showMessage('Login successful! Redirecting...', 'success');
-        
+
         // Redirect to main app
         setTimeout(() => {
             window.location.href = '/';
         }, 1000);
-        
     } catch (error) {
         showMessage(error.message || 'Login failed', 'error');
     }
 });
 
 // Handle registration
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+document.getElementById('registerForm').addEventListener('submit', async e => {
     e.preventDefault();
-    
+
     const email = document.getElementById('regEmail').value;
     const username = document.getElementById('regUsername').value;
     const fullName = document.getElementById('regFullName').value;
     const password = document.getElementById('regPassword').value;
-    
+
     const query = `
         mutation Register($input: RegisterInput!) {
             register(input: $input) {
@@ -134,7 +128,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             }
         }
     `;
-    
+
     try {
         const data = await graphqlRequest(query, {
             input: {
@@ -144,21 +138,20 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
                 fullName: fullName || null
             }
         });
-        
+
         authToken = data.register.token;
         currentUser = data.register.user;
-        
+
         // Save token
         localStorage.setItem('authToken', authToken);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
+
         showMessage('Registration successful! Redirecting...', 'success');
-        
+
         // Redirect to main app
         setTimeout(() => {
             window.location.href = '/';
         }, 1000);
-        
     } catch (error) {
         showMessage(error.message || 'Registration failed', 'error');
     }
@@ -176,9 +169,9 @@ if (authToken) {
             }
         }
     `;
-    
+
     graphqlRequest(query)
-        .then(data => {
+        .then(() => {
             // Token is valid, redirect to main app
             window.location.href = '/';
         })
@@ -188,3 +181,4 @@ if (authToken) {
             localStorage.removeItem('currentUser');
         });
 }
+

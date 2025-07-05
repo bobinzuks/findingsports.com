@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Finding Sports - Login</title>
+        <link rel="stylesheet" href="styles.css" />
+        <style>
+            /* Enhanced login styles for Google OAuth */
+            .social-auth {
+                margin: 20px 0;
+            }
+
+            .social-auth button {
+                width: 100%;
+                padding: 12px;
+                margin: 8px 0;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                font-size: 16px;
+                font-weight: 500;
+                transition: all 0.2s;
+            }
+
+            .social-auth button:hover {
+                background: #f8f9fa;
+                border-color: #4285f4;
+            }
+
+            .google-signin {
+                color: #3c4043;
+            }
+
+            .google-signin img {
+                width: 20px;
+                height: 20px;
+            }
+
+            .facebook-signin {
+                background: #1877f2;
+                color: white;
+                border-color: #1877f2;
+            }
+
+            .facebook-signin:hover {
+                background: #166fe5;
+            }
+
+            .divider {
+                text-align: center;
+                margin: 20px 0;
+                position: relative;
+            }
+
+            .divider::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: #ddd;
+            }
+
+            .divider span {
+                background: #14151a;
+                padding: 0 16px;
+                position: relative;
+                color: #6c757d;
+                font-size: 14px;
+            }
+
+            #googleSignInButton {
+                margin: 20px 0;
+            }
+
+            .auth-error {
+                background: #ff4444;
+                color: white;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                display: none;
+            }
+
+            .signup-prompt {
+                text-align: center;
+                margin-top: 20px;
+                color: #b8bdd8;
+            }
+
+            .signup-prompt a {
+                color: #5e9eff;
+                text-decoration: none;
+            }
+
+            .signup-prompt a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="login-box">
+                <h1 class="logo">Finding Sports</h1>
+                <p class="tagline">Find your next game</p>
+
+                <!-- Error message display -->
+                <div id="authError" class="auth-error"></div>
+
+                <!-- Social Auth Section -->
+                <div class="social-auth">
+                    <!-- Google Sign-In Button (rendered by Google) -->
+                    <div id="googleSignInButton"></div>
+
+                    <!-- Alternative custom Google button -->
+                    <button class="google-signin" onclick="GoogleAuth.signIn()">
+                        <svg width="20" height="20" viewBox="0 0 48 48">
+                            <path
+                                fill="#EA4335"
+                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                            />
+                            <path
+                                fill="#4285F4"
+                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                            />
+                            <path
+                                fill="#FBBC05"
+                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                            />
+                            <path
+                                fill="#34A853"
+                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                            />
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <!-- Facebook Sign-In (placeholder) -->
+                    <button class="facebook-signin" onclick="alert('Facebook login coming soon!')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path
+                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                            />
+                        </svg>
+                        <span>Continue with Facebook</span>
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Traditional Login Form -->
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="Enter your email"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+
+                <p class="signup-prompt">
+                    New to Finding Sports?
+                    <a href="#" onclick="showSignup()">Create an account</a>
+                </p>
+
+                <div class="demo-info">
+                    <p>Demo Account:</p>
+                    <p>Email: demo@example.com</p>
+                    <p>Password: demo123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Google OAuth script -->
+        <script src="auth/google-oauth.js"></script>
+
+        <!-- Existing login script -->
+        <script src="js/auth.js"></script>
+
+        <!-- Initialize Google Auth -->
+        <script>
+            // Initialize Google OAuth when page loads
+            window.addEventListener('load', () => {
+                GoogleAuth.initialize();
+            });
+
+            // Show signup form (placeholder)
+            function showSignup() {
+                alert('Signup form will open here. For now, use Google Sign-In!');
+            }
+        </script>
+    </body>
+</html>
+

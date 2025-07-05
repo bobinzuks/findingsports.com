@@ -1,0 +1,35 @@
+{
+  "name": "finding-sports",
+  "version": "1.0.0",
+  "description": "Find your next game - A platform for discovering drop-in sports games",
+  "main": "index.js",
+  "scripts": {
+    "start": "./start-quick.sh",
+    "start:auto": "./start-local-auto.sh",
+    "lint": "eslint mockup/**/*.js --fix",
+    "lint:check": "eslint mockup/**/*.js",
+    "format": "prettier --write \"mockup/**/*.{js,html,css}\"",
+    "format:check": "prettier --check \"mockup/**/*.{js,html,css}\"",
+    "debug": "npm run lint:check && npm run format:check",
+    "fix": "npm run lint && npm run format",
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "build": "echo \"No build step required for static site\" && exit 0"
+  },
+  "keywords": [
+    "sports",
+    "games",
+    "basketball",
+    "soccer",
+    "drop-in",
+    "recreation"
+  ],
+  "author": "Finding Sports Team",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
