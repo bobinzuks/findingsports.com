@@ -1,0 +1,31 @@
+# Code Owners for Finding Sports
+
+# Default owners for everything
+* @bobinzuks
+
+# Backend (Rust)
+/mockup/finding-sports-backend/ @bobinzuks
+*.rs @bobinzuks
+Cargo.toml @bobinzuks
+
+# Frontend
+/mockup/*.html @bobinzuks
+/mockup/css/ @bobinzuks
+/mockup/js/ @bobinzuks
+
+# Database
+/mockup/finding-sports-backend/migrations/ @bobinzuks
+
+# DevOps & Infrastructure
+/.github/ @bobinzuks
+/deploy-*.sh @bobinzuks
+/docker-compose.yml @bobinzuks
+Dockerfile @bobinzuks
+
+# Documentation
+*.md @bobinzuks
+/docs/ @bobinzuks
+
+# Security
+/security-audit.sh @bobinzuks
+/.env.example @bobinzuks
