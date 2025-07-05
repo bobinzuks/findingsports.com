@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Submit Drop-in Game - Finding Sports</title>
+        <link rel="stylesheet" href="css/styles.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            .submit-form-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 2rem;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 16px;
+                margin-top: 2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: #1a1f3a;
+                font-weight: 500;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                padding: 0.75rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 1rem;
+                transition: border-color 0.3s;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #ff6b35;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .submit-btn {
+                width: 100%;
+                padding: 1rem;
+                background: #ff6b35;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .submit-btn:hover {
+                background: #ff5722;
+            }
+
+            .drop-in-notice {
+                background: #e3f2fd;
+                border: 2px solid #2196f3;
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .drop-in-notice h4 {
+                color: #1976d2;
+                margin-bottom: 0.5rem;
+            }
+
+            .drop-in-notice ul {
+                margin: 0;
+                padding-left: 1.5rem;
+                color: #424242;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="logo">Finding Sports</h1>
+                        <p class="tagline">Submit a Drop-in Game</p>
+                    </div>
+                    <div class="user-menu">
+                        <a href="/" style="color: white; text-decoration: none">← Back to Games</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Form -->
+            <div class="submit-form-container">
+                <div class="drop-in-notice">
+                    <h4>🏃 Drop-in Games Only</h4>
+                    <p>Please only submit games that are:</p>
+                    <ul>
+                        <li>Open to the public (no membership required)</li>
+                        <li>Drop-in style (no pre-registration needed)</li>
+                        <li>First-come, first-served</li>
+                        <li>NOT league games or closed groups</li>
+                    </ul>
+                </div>
+
+                <form id="submitGameForm">
+                    <div class="form-group">
+                        <label for="gameTitle">Game Title*</label>
+                        <input
+                            type="text"
+                            id="gameTitle"
+                            name="title"
+                            placeholder="e.g., Friendly Basketball Pickup"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sportSelect">Sport*</label>
+                        <select id="sportSelect" name="sport" required>
+                            <option value="">Select a sport</option>
+                            <option value="basketball">Basketball</option>
+                            <option value="soccer">Soccer</option>
+                            <option value="volleyball">Volleyball</option>
+                            <option value="badminton">Badminton</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="hockey">Hockey</option>
+                            <option value="pickleball">Pickleball</option>
+                            <option value="ultimate">Ultimate Frisbee</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="venueSelect">Venue*</label>
+                        <select id="venueSelect" name="venue" required>
+                            <option value="">Select a venue</option>
+                            <optgroup label="Community Centers">
+                                <option value="hillcrest">Hillcrest Centre</option>
+                                <option value="kerrisdale">Kerrisdale Community Centre</option>
+                                <option value="killarney">Killarney Community Centre</option>
+                                <option value="trout-lake">Trout Lake Community Centre</option>
+                                <option value="mount-pleasant">Mount Pleasant Community Centre</option>
+                                <option value="sunset">Sunset Community Centre</option>
+                            </optgroup>
+                            <optgroup label="Universities">
+                                <option value="ubc">UBC Recreation</option>
+                                <option value="sfu">SFU Recreation</option>
+                                <option value="langara">Langara College</option>
+                                <option value="bcit">BCIT</option>
+                            </optgroup>
+                            <optgroup label="Sports Facilities">
+                                <option value="richmond-oval">Richmond Olympic Oval</option>
+                                <option value="vancouver-volleyball">Vancouver Volleyball</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gameDate">Date*</label>
+                            <input type="date" id="gameDate" name="date" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="gameTime">Start Time*</label>
+                            <input type="time" id="gameTime" name="time" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="minPlayers">Min Players</label>
+                            <input type="number" id="minPlayers" name="minPlayers" min="2" value="2" />
+                        </div>
+                        <div class="form-group">
+                            <label for="maxPlayers">Max Players</label>
+                            <input
+                                type="number"
+                                id="maxPlayers"
+                                name="maxPlayers"
+                                min="2"
+                                placeholder="Leave empty for unlimited"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="skillLevel">Skill Level</label>
+                        <select id="skillLevel" name="skillLevel">
+                            <option value="all">All Levels Welcome</option>
+                            <option value="beginner">Beginner Friendly</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cost">Cost (CAD)</label>
+                        <input
+                            type="number"
+                            id="cost"
+                            name="cost"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                            placeholder="0 for free"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="3"
+                            placeholder="Any additional details about the game..."
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="recurring" name="recurring" />
+                            This is a recurring weekly game
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Drop-in Game</button>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <script src="js/api.js"></script>
+        <script src="js/venue-search.js"></script>
+        <script>
+            // Initialize venue search
+            document.addEventListener('DOMContentLoaded', () => {
+                const venueSelect = document.getElementById('venueSelect');
+                window.venueSearch.initializeSelect(venueSelect);
+
+                // Set minimum date to today
+                const dateInput = document.getElementById('gameDate');
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.min = today;
+                dateInput.value = today;
+            });
+
+            // Handle form submission
+            document.getElementById('submitGameForm').addEventListener('submit', async e => {
+                e.preventDefault();
+
+                // Check if user is logged in
+                if (!window.api || !localStorage.getItem('authToken')) {
+                    alert('Please sign in to submit a game');
+                    window.location.href = '/login-google.html';
+                    return;
+                }
+
+                const formData = new FormData(e.target);
+                const venueData = window.venueSearch.getSelectedVenue();
+
+                // Build game data
+                const gameData = {
+                    title: formData.get('title'),
+                    sport: formData.get('sport'),
+                    venue: venueData || {
+                        name: document.getElementById('venueSelect').selectedOptions[0].text,
+                        id: formData.get('venue')
+                    },
+                    startTime: new Date(`${formData.get('date')}T${formData.get('time')}`),
+                    minPlayers: parseInt(formData.get('minPlayers')) || 2,
+                    maxPlayers: formData.get('maxPlayers') ? parseInt(formData.get('maxPlayers')) : null,
+                    skillLevel: formData.get('skillLevel'),
+                    cost: parseFloat(formData.get('cost')) || 0,
+                    description: formData.get('description'),
+                    recurring: {
+                        enabled: formData.get('recurring') === 'on',
+                        pattern: 'weekly'
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/user-games/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                        },
+                        body: JSON.stringify(gameData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Game submitted successfully!');
+                        window.location.href = '/';
+                    } else {
+                        alert('Failed to submit game: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Submit error:', error);
+                    alert('Failed to submit game. Please try again.');
+                }
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+backend/node_modules/
+dist/
+build/
+coverage/
+*.min.js
+.env
+logs/
+finding-sports-backend/

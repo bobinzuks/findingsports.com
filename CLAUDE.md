@@ -548,6 +548,57 @@ Agent Activity:
 └── 🟢 coordinator: Monitoring progress...
 ```
 
+## 🏗️ Build Commands
+
+### Essential Commands for Development
+
+```bash
+# Lint all JavaScript files (fixes automatically)
+npm run lint
+
+# Run linter without fixing (check mode)
+npm run lint:check
+
+# Format all files with Prettier
+npm run format
+
+# Check formatting without fixing
+npm run format:check
+
+# Run TypeScript type checking
+npm run typecheck
+
+# Fix all issues (lint + format)
+npm run fix
+
+# Run all checks (lint:check + format:check)
+npm run debug
+```
+
+### Backend-specific commands
+```bash
+cd mockup/backend
+
+# Run backend linter
+npm run lint
+
+# Fix backend lint issues
+npm run lint:fix
+
+# Format backend code
+npm run format
+
+# Check backend formatting
+npm run format:check
+```
+
+### Important Notes:
+- **ALWAYS** run `npm run lint` and `npm run typecheck` before committing
+- ESLint is configured with rules for both frontend (browser) and backend (Node.js)
+- Prettier ensures consistent code formatting across the project
+- The project uses 4-space indentation and single quotes
+- Maximum line length is set to 120 characters
+
 ## Support
 
 - Documentation: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm

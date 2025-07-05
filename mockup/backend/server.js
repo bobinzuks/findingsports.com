@@ -4,16 +4,40 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { OAuth2Client } = require('google-auth-library');
 const path = require('path');
+const http = require('http');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 8080;
 
+// Initialize WebSocket service
+const webSocketService = require('./services/websocket');
+webSocketService.initialize(server, process.env.CORS_ORIGIN);
+
+// Initialize data aggregation pipeline
+const { getInstance: getDataPipeline } = require('./services/data-aggregation-pipeline');
+const dataPipeline = getDataPipeline();
+// Start data aggregation in development
+if (process.env.NODE_ENV !== 'production') {
+    // Use in-memory queue for development
+    setTimeout(() => {
+        console.log('Starting data aggregation pipeline...');
+        dataPipeline.start();
+    }, 2000);
+}
+
+// Initialize location agent service
+const locationAgentService = require('./services/location-agent-service');
+locationAgentService.setWebSocketService(webSocketService);
+
 // Middleware
-app.use(cors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
-    credentials: true
-}));
+app.use(
+    cors({
+        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+        credentials: true
+    })
+);
 app.use(express.json());
 
 // IMPORTANT: Serve static files from mockup directory
@@ -22,6 +46,9 @@ app.use(express.static(path.join(__dirname, '..')));
 // In-memory database (replace with real database in production)
 const users = new Map();
 const sessions = new Map();
+
+// Make users available globally for auth middleware
+global.users = users;
 
 // Create demo user
 (async () => {
@@ -51,11 +78,7 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Helper functions
 function generateToken(user) {
-    return jwt.sign(
-        { id: user.id, email: user.email },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-    );
+    return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 function verifyToken(token) {
@@ -66,25 +89,16 @@ function verifyToken(token) {
     }
 }
 
-// Auth middleware
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.sendStatus(401);
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-        return res.sendStatus(403);
-    }
-
-    req.user = users.get(decoded.id);
-    next();
-}
+// Import auth middleware
+const { authenticateToken, authenticateAdmin } = require('./middleware/auth');
 
 // Routes
+
+// User-submitted games routes
+app.use('/api/user-games', require('./routes/user-games'));
+
+// Venue request routes
+app.use('/api/venue-requests', require('./routes/venue-requests'));
 
 // Health check
 app.get('/health', (req, res) => {
@@ -241,7 +255,6 @@ app.post('/api/auth/google', async (req, res) => {
             },
             isNewUser
         });
-
     } catch (error) {
         console.error('Google auth error:', error);
         res.status(401).json({ error: 'Authentication failed' });
@@ -297,11 +310,29 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
     res.json({ success: true });
 });
 
-// Games API (demo data) - PUBLIC ACCESS FOR VIEWING
-app.get('/api/games', (req, res) => {
-    const { location, sport } = req.query;
-    
-    // Demo games data
+// Games API - PUBLIC ACCESS FOR VIEWING
+app.get('/api/games', async (req, res) => {
+    const { location, sport, lat, lng, radius, date } = req.query;
+
+    // Try to get aggregated data first
+    try {
+        const aggregatedGames = await dataPipeline.searchGames({
+            sport,
+            location,
+            lat: lat ? parseFloat(lat) : undefined,
+            lng: lng ? parseFloat(lng) : undefined,
+            radius: radius ? parseInt(radius, 10) : undefined,
+            date
+        });
+
+        if (aggregatedGames.length > 0) {
+            return res.json({ games: aggregatedGames, source: 'aggregated' });
+        }
+    } catch (error) {
+        console.error('Error fetching aggregated games:', error);
+    }
+
+    // Fall back to demo data
     const games = [
         {
             id: 1,
@@ -309,7 +340,7 @@ app.get('/api/games', (req, res) => {
             title: 'Pick-up Basketball',
             location: 'North Vancouver',
             venue: 'Hillcrest Centre',
-            coords: [49.3200, -123.0724],
+            coords: [49.32, -123.0724],
             attendees: 6,
             maxAttendees: 10,
             host: { name: 'Luke', id: 'user_luke' },
@@ -322,7 +353,7 @@ app.get('/api/games', (req, res) => {
             title: 'Drop-in Soccer',
             location: 'Vancouver',
             venue: 'UBC Fields',
-            coords: [49.2606, -123.2460],
+            coords: [49.2606, -123.246],
             attendees: 12,
             maxAttendees: 22,
             host: { name: 'Carlos', id: 'user_carlos' },
@@ -386,9 +417,7 @@ app.get('/api/games', (req, res) => {
     // Filter by location and sport if provided
     let filteredGames = games;
     if (location) {
-        filteredGames = filteredGames.filter(g => 
-            g.location.toLowerCase().includes(location.toLowerCase())
-        );
+        filteredGames = filteredGames.filter(g => g.location.toLowerCase().includes(location.toLowerCase()));
     }
     if (sport && sport !== 'any') {
         filteredGames = filteredGames.filter(g => g.type === sport);
@@ -400,8 +429,14 @@ app.get('/api/games', (req, res) => {
 // Join game - REQUIRES AUTH
 app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
     const { gameId } = req.params;
-    
+
     // In a real app, this would update the database
+    // Notify other users in real-time
+    webSocketService.notifyGameJoin(gameId, {
+        id: req.user.id,
+        name: req.user.name || req.user.username
+    });
+
     res.json({
         success: true,
         gameId,
@@ -412,7 +447,7 @@ app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
 // Create game - REQUIRES AUTH
 app.post('/api/games', authenticateToken, (req, res) => {
     const gameData = req.body;
-    
+
     const newGame = {
         id: Date.now(),
         ...gameData,
@@ -423,6 +458,11 @@ app.post('/api/games', authenticateToken, (req, res) => {
         attendees: 1,
         createdAt: new Date().toISOString()
     };
+
+    // Notify users in this location about new game
+    if (gameData.location) {
+        webSocketService.notifyNewGame(gameData.location.toLowerCase(), newGame);
+    }
 
     res.json({
         success: true,
@@ -436,7 +476,7 @@ app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'Not found' });
     }
-    
+
     // Serve the appropriate HTML file
     if (req.path.includes('login')) {
         res.sendFile(path.join(__dirname, '..', 'login-google.html'));
@@ -447,14 +487,48 @@ app.get('*', (req, res) => {
     }
 });
 
+// WebSocket stats endpoint
+app.get('/api/ws/stats', (req, res) => {
+    res.json(webSocketService.getStats());
+});
+
+// Data aggregation stats endpoint
+app.get('/api/data/stats', (req, res) => {
+    res.json(dataPipeline.getStats());
+});
+
+// Get available facilities
+app.get('/api/facilities', async (req, res) => {
+    try {
+        const facilities = Array.from(dataPipeline.facilitiesDatabase.values());
+        res.json({ facilities });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch facilities' });
+    }
+});
+
+// Location-based agent search endpoints
+app.post('/api/location/check', (req, res) => {
+    locationAgentService.checkLocation(req, res);
+});
+
+app.get('/api/location/search/:searchId', (req, res) => {
+    const search = locationAgentService.getSearchStatus(req.params.searchId);
+    if (!search) {
+        return res.status(404).json({ error: 'Search not found' });
+    }
+    res.json({ search });
+});
+
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Finding Sports backend running on http://0.0.0.0:${PORT}`);
+    console.log('WebSocket server enabled');
     console.log('Environment:', {
         port: PORT,
         nodeEnv: process.env.NODE_ENV,
-        hasJwtSecret: !!process.env.JWT_SECRET,
-        hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+        hasJwtSecret: Boolean(process.env.JWT_SECRET),
+        hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
         corsOrigin: process.env.CORS_ORIGIN || 'all'
     });
 });

@@ -23,25 +23,25 @@ window.switchAuthTab = function switchAuthTab(tab) {
         registerForm.style.display = 'block';
     }
 
-    clearMessage();
+    window.clearMessage();
 };
 
 // Show message
-function showMessage(message, type) {
+window.showMessage = function (message, type) {
     const messageEl = document.getElementById('authMessage');
     messageEl.textContent = message;
     messageEl.className = `auth-message ${type}`;
-}
+};
 
-function clearMessage() {
+window.clearMessage = function () {
     const messageEl = document.getElementById('authMessage');
     messageEl.className = 'auth-message';
     messageEl.textContent = '';
-}
+};
 
 // Wait for API to load
-function waitForAPI() {
-    return new Promise((resolve) => {
+window.waitForAPI = function () {
+    return new Promise(resolve => {
         const checkAPI = () => {
             if (window.api) {
                 resolve();
@@ -51,21 +51,21 @@ function waitForAPI() {
         };
         checkAPI();
     });
-}
+};
 
 // Handle login
 document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    
-    await waitForAPI();
+
+    await window.waitForAPI();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     try {
         const data = await window.api.login(email, password);
-        
-        showMessage('Login successful! Redirecting...', 'success');
+
+        window.showMessage('Login successful! Redirecting...', 'success');
 
         // Redirect based on onboarding status
         setTimeout(() => {
@@ -76,15 +76,15 @@ document.getElementById('loginForm').addEventListener('submit', async e => {
             }
         }, 1000);
     } catch (error) {
-        showMessage(error.message || 'Login failed', 'error');
+        window.showMessage(error.message || 'Login failed', 'error');
     }
 });
 
 // Handle registration
 document.getElementById('registerForm').addEventListener('submit', async e => {
     e.preventDefault();
-    
-    await waitForAPI();
+
+    await window.waitForAPI();
 
     const email = document.getElementById('regEmail').value;
     const username = document.getElementById('regUsername').value;
@@ -99,14 +99,14 @@ document.getElementById('registerForm').addEventListener('submit', async e => {
             password
         });
 
-        showMessage('Registration successful! Redirecting...', 'success');
+        window.showMessage('Registration successful! Redirecting...', 'success');
 
         // New users go to onboarding
         setTimeout(() => {
             window.location.href = '/onboarding/';
         }, 1000);
     } catch (error) {
-        showMessage(error.message || 'Registration failed', 'error');
+        window.showMessage(error.message || 'Registration failed', 'error');
     }
 });
 
@@ -114,8 +114,8 @@ document.getElementById('registerForm').addEventListener('submit', async e => {
 (async function checkAuth() {
     const token = localStorage.getItem('authToken');
     if (token) {
-        await waitForAPI();
-        
+        await window.waitForAPI();
+
         try {
             await window.api.getCurrentUser();
             // Token is valid, redirect to main app
@@ -126,4 +126,3 @@ document.getElementById('registerForm').addEventListener('submit', async e => {
         }
     }
 })();
-

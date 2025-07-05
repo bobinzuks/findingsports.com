@@ -433,7 +433,7 @@ body {
 
 /* Guest UI */
 .guest-login-btn {
-    background: #5E9EFF;
+    background: #5e9eff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -446,13 +446,13 @@ body {
 }
 
 .guest-login-btn:hover {
-    background: #4A8AEB;
+    background: #4a8aeb;
     transform: translateY(-1px);
 }
 
 .guest-banner {
-    background: #2A2B35;
-    border: 1px solid #5E9EFF;
+    background: #2a2b35;
+    border: 1px solid #5e9eff;
     border-radius: 8px;
     padding: 12px 20px;
     margin: 16px 0;
@@ -462,12 +462,12 @@ body {
 }
 
 .guest-banner-text {
-    color: #E8E9F0;
+    color: #e8e9f0;
     font-size: 14px;
 }
 
 .guest-banner-btn {
-    background: #5E9EFF;
+    background: #5e9eff;
     color: white;
     border: none;
     border-radius: 6px;
@@ -475,4 +475,537 @@ body {
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
+}
+
+/* Real-time updates */
+.game-card.updated {
+    animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 20px 5px rgba(255, 107, 53, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
+    }
+}
+
+/* In-app notifications */
+.in-app-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #ff6b35;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+.in-app-notification.show {
+    transform: translateX(0);
+}
+
+/* WebSocket connection indicator */
+.connection-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 999;
+}
+
+.connection-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4caf50;
+}
+
+.connection-status.disconnected .dot {
+    background: #f44336;
+}
+
+/* Venue Search Styles */
+.venue-search-wrapper {
+    position: relative;
+}
+
+.venue-search-container {
+    margin-top: 10px;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.venue-search-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.venue-search-input:focus {
+    outline: none;
+    border-color: #ff6b35;
+}
+
+.venue-search-results {
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    display: none;
+}
+
+.venue-search-result {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.venue-search-result:hover {
+    background-color: #f5f5f5;
+}
+
+.venue-search-result:last-child {
+    border-bottom: none;
+}
+
+.venue-name {
+    font-weight: 600;
+    color: #1a1f3a;
+}
+
+.venue-address {
+    font-size: 14px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.venue-features {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.venue-search-loading {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
+.venue-not-found {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.venue-not-found p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.venue-request-form input,
+.venue-request-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.venue-request-form textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.venue-request-btn {
+    background: #ff6b35;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.venue-request-btn:hover {
+    background: #ff5722;
+}
+
+.venue-request-note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.venue-request-success {
+    text-align: center;
+    padding: 20px;
+}
+
+.venue-request-success h4 {
+    color: #4caf50;
+    margin-bottom: 10px;
+}
+
+.venue-request-success button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #5e9eff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Location Search UI */
+.location-prompt-modal,
+.search-progress-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.location-prompt {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.location-prompt h2 {
+    color: #1a1f3a;
+    margin-bottom: 0.5rem;
+}
+
+.location-prompt p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.location-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.location-form input,
+.location-form select {
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.location-form button {
+    padding: 0.75rem;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.popular-locations p {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.location-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.location-buttons button {
+    padding: 0.5rem;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.location-buttons button:hover {
+    background: #ff6b35;
+    color: white;
+    border-color: #ff6b35;
+}
+
+/* Search Progress UI */
+.search-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.search-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.search-header h2 {
+    color: #1a1f3a;
+    margin-bottom: 0.5rem;
+}
+
+.search-header h3 {
+    color: #ff6b35;
+    font-weight: 500;
+}
+
+.ai-agents-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 120px;
+    margin-bottom: 2rem;
+}
+
+.agent-icon {
+    position: absolute;
+    font-size: 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.agent-1 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.agent-2 {
+    bottom: 20px;
+    left: 20%;
+}
+
+.agent-3 {
+    bottom: 20px;
+    right: 20%;
+}
+
+.central-hub {
+    font-size: 3rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.search-message {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.progress-stages {
+    margin-bottom: 2rem;
+}
+
+.stage {
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.stage.active {
+    opacity: 1;
+}
+
+.stage.completed {
+    opacity: 1;
+}
+
+.stage-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stage-icon {
+    font-size: 1.5rem;
+}
+
+.stage-name {
+    flex: 1;
+    color: #333;
+    font-weight: 500;
+}
+
+.stage-status {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.stage.completed .stage-status {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.stage-progress-bar {
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stage-progress-fill {
+    height: 100%;
+    background: #ff6b35;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 0;
+}
+
+.stage.completed .stage-progress-fill {
+    background: #4caf50;
+}
+
+.overall-progress {
+    margin-bottom: 2rem;
+}
+
+.overall-progress-bar {
+    height: 12px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.overall-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b35, #ff8f65);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.venues-found {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.venues-found h4 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.venue-count {
+    color: #ff6b35;
+    font-weight: 600;
+}
+
+.venue-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.search-tips {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.search-complete {
+    text-align: center;
+    padding: 2rem;
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.search-complete h2 {
+    color: #4caf50;
+    margin-bottom: 0.5rem;
+}
+
+.search-complete h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.search-complete button {
+    padding: 0.75rem 2rem;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
 }

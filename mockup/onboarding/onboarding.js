@@ -60,10 +60,12 @@ const stepTemplates = {
 
     3: () => `
         <h2 class="step-title">Where should we look for games?</h2>
-        <p class="step-description">Enable data sources for ${onboardingData.location || 'your area'}. These MCP servers collect game information from various sources.</p>
+        <p class="step-description">Enable data sources for ${onboardingData.location || 'your area'}. 
+           These MCP servers collect game information from various sources.</p>
         
         <div class="mcp-servers" id="mcpServers">
-            ${getMCPServersForLocation()
+            ${window
+        .getMCPServersForLocation()
         .map(
             server => `
                 <div class="mcp-server-card" data-server="${server.id}">
@@ -112,7 +114,7 @@ const stepTemplates = {
 };
 
 // Get MCP servers based on location
-function getMCPServersForLocation() {
+window.getMCPServersForLocation = function () {
     const servers = [
         {
             id: 'mcp-vancouver-rec',
@@ -169,10 +171,10 @@ function getMCPServersForLocation() {
     }
 
     return servers;
-}
+};
 
 // Initialize step
-function initializeStep() {
+window.initializeStep = function () {
     const stepContent = document.getElementById('stepContent');
     stepContent.innerHTML = stepTemplates[currentStep]();
 
@@ -180,17 +182,17 @@ function initializeStep() {
     switch (currentStep) {
     case 1:
         document.querySelectorAll('.location-card').forEach(card => {
-            card.addEventListener('click', () => selectLocation(card));
+            card.addEventListener('click', () => window.selectLocation(card));
         });
         break;
     case 2:
         document.querySelectorAll('.sport-card').forEach(card => {
-            card.addEventListener('click', () => toggleSport(card));
+            card.addEventListener('click', () => window.toggleSport(card));
         });
         break;
     case 3:
         document.querySelectorAll('.mcp-server-card').forEach(card => {
-            card.addEventListener('click', () => toggleMCPServer(card));
+            card.addEventListener('click', () => window.toggleMCPServer(card));
         });
         // Pre-select recommended servers
         document.querySelectorAll('.mcp-server-card').forEach((card, index) => {
@@ -198,11 +200,11 @@ function initializeStep() {
                 card.classList.add('selected');
             }
         });
-        updateNextButton();
+        window.updateNextButton();
         break;
     case 4:
         document.querySelectorAll('.time-slot').forEach(slot => {
-            slot.addEventListener('click', () => toggleTimeSlot(slot));
+            slot.addEventListener('click', () => window.toggleTimeSlot(slot));
         });
         break;
     }
@@ -213,8 +215,7 @@ function initializeStep() {
 
     // Update navigation buttons
     document.getElementById('backBtn').disabled = currentStep === 1;
-    document.getElementById('nextBtn').textContent =
-        currentStep === totalSteps ? 'Complete' : 'Next';
+    document.getElementById('nextBtn').textContent = currentStep === totalSteps ? 'Complete' : 'Next';
 
     // Add welcome message on first step
     if (currentStep === 1 && currentUser.name) {
@@ -231,17 +232,17 @@ function initializeStep() {
         `;
         stepDiv.insertBefore(welcomeDiv, stepDiv.firstChild);
     }
-}
+};
 
 // Selection handlers
-function selectLocation(card) {
+window.selectLocation = function (card) {
     document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     onboardingData.location = card.querySelector('.city-name').textContent;
-    updateNextButton();
-}
+    window.updateNextButton();
+};
 
-function toggleSport(card) {
+window.toggleSport = function (card) {
     card.classList.toggle('selected');
     const { sport } = card.dataset;
     if (card.classList.contains('selected')) {
@@ -249,10 +250,10 @@ function toggleSport(card) {
     } else {
         onboardingData.sports = onboardingData.sports.filter(s => s !== sport);
     }
-    updateNextButton();
-}
+    window.updateNextButton();
+};
 
-function toggleMCPServer(card) {
+window.toggleMCPServer = function (card) {
     card.classList.toggle('selected');
     const serverId = card.dataset.server;
     if (card.classList.contains('selected')) {
@@ -260,10 +261,10 @@ function toggleMCPServer(card) {
     } else {
         onboardingData.mcpServers = onboardingData.mcpServers.filter(s => s !== serverId);
     }
-    updateNextButton();
-}
+    window.updateNextButton();
+};
 
-function toggleTimeSlot(slot) {
+window.toggleTimeSlot = function (slot) {
     slot.classList.toggle('selected');
     const timeId = slot.dataset.time;
     if (slot.classList.contains('selected')) {
@@ -271,11 +272,11 @@ function toggleTimeSlot(slot) {
     } else {
         onboardingData.timePreferences = onboardingData.timePreferences.filter(t => t !== timeId);
     }
-    updateNextButton();
-}
+    window.updateNextButton();
+};
 
 // Update next button state
-function updateNextButton() {
+window.updateNextButton = function () {
     const nextBtn = document.getElementById('nextBtn');
     let canProceed = false;
 
@@ -295,27 +296,27 @@ function updateNextButton() {
     }
 
     nextBtn.disabled = !canProceed;
-}
+};
 
 // Navigation
 window.nextStep = function nextStep() {
     if (currentStep < totalSteps) {
         currentStep++;
-        initializeStep();
+        window.initializeStep();
     } else {
-        completeOnboarding();
+        window.completeOnboarding();
     }
 };
 
 window.previousStep = function previousStep() {
     if (currentStep > 1) {
         currentStep--;
-        initializeStep();
+        window.initializeStep();
     }
 };
 
 // Complete onboarding
-async function completeOnboarding() {
+window.completeOnboarding = async function () {
     try {
         // Load API if needed
         if (!window.api) {
@@ -359,10 +360,9 @@ async function completeOnboarding() {
         // console.error('Failed to complete onboarding:', error);
         alert('Failed to save preferences. Please try again.');
     }
-}
+};
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
-    initializeStep();
+    window.initializeStep();
 });
-

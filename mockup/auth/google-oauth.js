@@ -3,7 +3,7 @@ const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 const REDIRECT_URI = `${window.location.origin}/auth/google/callback`;
 
 // Initialize Google Sign-In
-function initializeGoogleAuth() {
+window.initializeGoogleAuth = function () {
     // Load the Google API client library
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
@@ -14,7 +14,7 @@ function initializeGoogleAuth() {
     script.onload = () => {
         google.accounts.id.initialize({
             clientId: GOOGLE_CLIENT_ID,
-            callback: handleCredentialResponse,
+            callback: window.handleCredentialResponse,
             autoSelect: false,
             cancelOnTapOutside: true
         });
@@ -29,10 +29,10 @@ function initializeGoogleAuth() {
             logoAlignment: 'left'
         });
     };
-}
+};
 
 // Handle the credential response from Google
-async function handleCredentialResponse(response) {
+window.handleCredentialResponse = async function (response) {
     const { credential } = response;
 
     try {
@@ -59,12 +59,12 @@ async function handleCredentialResponse(response) {
         }
     } catch (error) {
         // console.error('Google authentication error:', error);
-        showError('Failed to sign in with Google. Please try again.');
+        window.showError('Failed to sign in with Google. Please try again.');
     }
-}
+};
 
 // Alternative OAuth flow for more control
-function signInWithGoogleOAuth() {
+window.signInWithGoogleOAuth = function () {
     const authUrl =
         'https://accounts.google.com/o/oauth2/v2/auth?' +
         `client_id=${GOOGLE_CLIENT_ID}&` +
@@ -75,17 +75,17 @@ function signInWithGoogleOAuth() {
         'prompt=consent';
 
     window.location.href = authUrl;
-}
+};
 
 // Handle OAuth callback
-async function handleOAuthCallback() {
+window.handleOAuthCallback = async function () {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
 
     if (error) {
         // console.error('OAuth error:', error);
-        showError('Authentication was cancelled or failed.');
+        window.showError('Authentication was cancelled or failed.');
         return;
     }
 
@@ -119,18 +119,18 @@ async function handleOAuthCallback() {
             }
         } catch (oauthError) {
             // console.error('OAuth callback error:', oauthError);
-            showError('Failed to complete authentication. Please try again.');
+            window.showError('Failed to complete authentication. Please try again.');
         }
     }
-}
+};
 
 // Check if we're on the callback page
 if (window.location.pathname === '/auth/google/callback') {
-    handleOAuthCallback();
+    window.handleOAuthCallback();
 }
 
 // Utility function to show errors
-function showError(message) {
+window.showError = function (message) {
     const errorDiv = document.getElementById('authError');
     if (errorDiv) {
         errorDiv.textContent = message;
@@ -138,12 +138,11 @@ function showError(message) {
     } else {
         alert(message);
     }
-}
+};
 
 // Export functions for use in other modules
 window.GoogleAuth = {
-    initialize: initializeGoogleAuth,
-    signIn: signInWithGoogleOAuth,
-    handleCallback: handleOAuthCallback
+    initialize: window.initializeGoogleAuth,
+    signIn: window.signInWithGoogleOAuth,
+    handleCallback: window.handleOAuthCallback
 };
-
