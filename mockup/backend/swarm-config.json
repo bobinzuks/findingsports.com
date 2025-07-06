@@ -1,0 +1,192 @@
+{
+  "swarm_name": "Sports Game Scraping Architecture Swarm",
+  "mission": "Design and implement a robust, scalable system to scrape all local drop-in sports games from multiple websites and sources",
+  "agents": [
+    {
+      "id": "architect",
+      "role": "System Architect",
+      "specialization": "Overall system design and data flow architecture",
+      "responsibilities": [
+        "Design scalable scraping infrastructure",
+        "Plan data normalization and storage strategy",
+        "Define API contracts and service interfaces",
+        "Create fault-tolerant system architecture"
+      ]
+    },
+    {
+      "id": "web_scraper_specialist",
+      "role": "Web Scraping Specialist", 
+      "specialization": "Advanced web scraping techniques and anti-bot circumvention",
+      "responsibilities": [
+        "Implement rotating proxies and user agents",
+        "Handle JavaScript-heavy sites with headless browsers",
+        "Bypass rate limiting and CAPTCHA systems",
+        "Create resilient scraping patterns"
+      ]
+    },
+    {
+      "id": "data_engineer",
+      "role": "Data Engineering Lead",
+      "specialization": "Data processing, cleaning, and normalization",
+      "responsibilities": [
+        "Design ETL pipelines for game data",
+        "Implement data deduplication algorithms",
+        "Create data quality validation systems",
+        "Optimize database schemas and indexing"
+      ]
+    },
+    {
+      "id": "sports_domain_expert",
+      "role": "Sports Domain Expert",
+      "specialization": "Understanding sports scheduling and venue systems",
+      "responsibilities": [
+        "Identify all relevant sports websites and APIs",
+        "Map sports terminology across different platforms",
+        "Understand scheduling patterns and recurring events",
+        "Define sports-specific data validation rules"
+      ]
+    },
+    {
+      "id": "location_specialist",
+      "role": "Location & Geocoding Specialist",
+      "specialization": "Geographic data processing and location matching",
+      "responsibilities": [
+        "Implement accurate geocoding for venues",
+        "Handle address normalization and matching",
+        "Create proximity search algorithms",
+        "Manage location-based data quality"
+      ]
+    },
+    {
+      "id": "performance_engineer",
+      "role": "Performance Engineer",
+      "specialization": "High-performance concurrent processing",
+      "responsibilities": [
+        "Design concurrent scraping with worker pools",
+        "Implement caching strategies for fast retrieval",
+        "Optimize database queries and indexing",
+        "Create real-time data streaming pipelines"
+      ]
+    },
+    {
+      "id": "monitoring_specialist",
+      "role": "Monitoring & Reliability Specialist",
+      "specialization": "System monitoring, alerting, and failure recovery",
+      "responsibilities": [
+        "Implement comprehensive health monitoring",
+        "Create automated failure detection and recovery",
+        "Design alerting systems for data freshness",
+        "Build scraping success rate tracking"
+      ]
+    },
+    {
+      "id": "integration_engineer",
+      "role": "Integration Engineer",
+      "specialization": "API integrations and third-party services",
+      "responsibilities": [
+        "Integrate official sports organization APIs",
+        "Connect with recreation center booking systems",
+        "Implement social media sports event detection",
+        "Create webhook systems for real-time updates"
+      ]
+    },
+    {
+      "id": "ml_engineer",
+      "role": "ML/AI Engineer",
+      "specialization": "Intelligent data extraction and prediction",
+      "responsibilities": [
+        "Build ML models for schedule pattern recognition",
+        "Implement intelligent text extraction from images/PDFs",
+        "Create game cancellation prediction systems",
+        "Design automated venue categorization"
+      ]
+    },
+    {
+      "id": "security_specialist",
+      "role": "Security Specialist",
+      "specialization": "Ethical scraping and legal compliance",
+      "responsibilities": [
+        "Ensure robots.txt compliance",
+        "Implement respectful rate limiting",
+        "Design legal data collection practices",
+        "Create terms of service compliance monitoring"
+      ]
+    }
+  ],
+  "target_sources": [
+    {
+      "category": "Recreation Centers",
+      "sources": [
+        "Vancouver Parks and Recreation",
+        "Richmond Community Services", 
+        "Burnaby Parks and Recreation",
+        "Surrey Recreation",
+        "Coquitlam Recreation",
+        "North Vancouver Recreation",
+        "West Vancouver Community Services",
+        "Delta Recreation",
+        "Langley Recreation",
+        "Maple Ridge Recreation"
+      ]
+    },
+    {
+      "category": "Community Centers",
+      "sources": [
+        "Community Centre Booking Systems",
+        "Neighbourhood House Schedules",
+        "Cultural Centre Athletics",
+        "Youth Centre Sports Programs"
+      ]
+    },
+    {
+      "category": "Private Facilities",
+      "sources": [
+        "Fitness Club Drop-ins",
+        "Sports Club Guest Passes",
+        "Indoor Sports Facilities",
+        "Court Rental Availability"
+      ]
+    },
+    {
+      "category": "Educational Institutions",
+      "sources": [
+        "University Recreation Centers",
+        "College Athletics Programs",
+        "School District Community Use",
+        "Student Recreation Schedules"
+      ]
+    },
+    {
+      "category": "Sports Organizations",
+      "sources": [
+        "Basketball BC",
+        "Soccer BC", 
+        "Volleyball BC",
+        "Tennis BC",
+        "Badminton BC",
+        "Local Sports Leagues"
+      ]
+    },
+    {
+      "category": "Social Platforms",
+      "sources": [
+        "Meetup.com Sports Groups",
+        "Facebook Events",
+        "Eventbrite Sports Events",
+        "Discord Community Servers",
+        "Reddit Local Sports Subreddits"
+      ]
+    },
+    {
+      "category": "Specialized Apps",
+      "sources": [
+        "TeamSnap Public Games",
+        "Playfinder Listings",
+        "Sportinglife Drop-ins",
+        "Local Sports Apps"
+      ]
+    }
+  ],
+  "coordination_strategy": "parallel_with_synchronization",
+  "output_format": "comprehensive_implementation_plan"
+}

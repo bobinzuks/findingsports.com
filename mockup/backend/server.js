@@ -18,12 +18,28 @@ webSocketService.initialize(server, process.env.CORS_ORIGIN);
 // Initialize data aggregation pipeline
 const { getInstance: getDataPipeline } = require('./services/data-aggregation-pipeline');
 const dataPipeline = getDataPipeline();
+
+// Initialize the 10-agent sports scraping swarm
+const { initializeSwarmIntegration, getSwarmStatus, shutdownSwarm } = require('./integrate-swarm');
+
 // Start data aggregation in development
 if (process.env.NODE_ENV !== 'production') {
     // Use in-memory queue for development
     setTimeout(() => {
         console.log('Starting data aggregation pipeline...');
         dataPipeline.start();
+        
+        // Initialize swarm after pipeline starts
+        setTimeout(async () => {
+            try {
+                console.log('🏀 Initializing 10-Agent Sports Scraping Swarm...');
+                await initializeSwarmIntegration(app);
+                console.log('✅ Swarm integration complete');
+            } catch (error) {
+                console.error('❌ Swarm initialization failed:', error.message);
+                console.log('⚠️ Continuing without swarm - using standard scraping only');
+            }
+        }, 5000);
     }, 2000);
 }
 
