@@ -1,5 +1,5 @@
 const { exec } = require('child_process');
-const geoip = require('geoip-lite');
+// const geoip = require('geoip-lite'); // Commented out - not essential for MVP
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
@@ -84,20 +84,20 @@ class LocationAgentService {
             };
         }
 
-        // Try IP geolocation
-        const ip = req.ip || req.connection.remoteAddress;
-        const geo = geoip.lookup(ip);
-
-        if (geo) {
-            return {
-                city: geo.city,
-                region: geo.region,
-                country: geo.country,
-                lat: geo.ll[0],
-                lng: geo.ll[1],
-                id: `${geo.city}-${geo.region}-${geo.country}`.toLowerCase().replace(/\s+/g, '-')
-            };
-        }
+        // Try IP geolocation - commented out for now
+        // const ip = req.ip || req.connection.remoteAddress;
+        // const geo = geoip.lookup(ip);
+        //
+        // if (geo) {
+        //     return {
+        //         city: geo.city,
+        //         region: geo.region,
+        //         country: geo.country,
+        //         lat: geo.ll[0],
+        //         lng: geo.ll[1],
+        //         id: `${geo.city}-${geo.region}-${geo.country}`.toLowerCase().replace(/\s+/g, '-')
+        //     };
+        // }
 
         // Default to Vancouver
         return {
@@ -112,7 +112,7 @@ class LocationAgentService {
 
     async checkLocationData(location) {
         // Check main data pipeline
-        const { getInstance: getDataPipeline } = require('../data-aggregation-pipeline');
+        const { getInstance: getDataPipeline } = require('./data-aggregation-pipeline');
         const pipeline = getDataPipeline();
 
         const games = await pipeline.searchGames({
@@ -354,7 +354,7 @@ class LocationAgentService {
 
     async storeResults(games, location) {
         // Store in data pipeline
-        const { getInstance: getDataPipeline } = require('../data-aggregation-pipeline');
+        const { getInstance: getDataPipeline } = require('./data-aggregation-pipeline');
         const pipeline = getDataPipeline();
 
         await pipeline.processGames(games);

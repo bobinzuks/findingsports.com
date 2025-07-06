@@ -132,22 +132,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update UI for guest/logged in state
     window.updateAuthUI();
 
-    window.initializeMap();
+    // Initialize location detection
+    const locationResult = await window.initializeLocationDetection();
+
+    // Initialize map with detected location
+    const mapCenter = locationResult?.userLocation ?
+        [locationResult.userLocation.lat, locationResult.userLocation.lng] :
+        null;
+    window.initializeMap(mapCenter);
+
     window.loadGamesFromAPI();
 });
 
 // Initialize Leaflet map
-window.initializeMap = function () {
-    map = L.map('map').setView([49.2827, -123.1207], 11);
+window.initializeMap = function (userLocation) {
+    try {
+        // Check if map element exists
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error('Map element not found');
+            return;
+        }
 
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+        // Use detected location or default to Vancouver
+        const defaultCenter = userLocation || [49.2827, -123.1207];
+        const defaultZoom = userLocation ? 12 : 11;
 
-    // Add custom styles
-    const mapContainer = document.getElementById('map');
-    mapContainer.style.filter = 'hue-rotate(200deg) saturate(0.5) brightness(0.9)';
+        // Initialize map centered on user's location
+        map = L.map('map', {
+            center: defaultCenter,
+            zoom: defaultZoom,
+            zoomControl: true,
+            scrollWheelZoom: true
+        });
+
+        // Add tile layer with better contrast
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add user location marker if available
+        if (userLocation && window.locationService?.userLocation) {
+            const userMarker = L.marker(userLocation, {
+                icon: L.divIcon({
+                    className: 'user-location-marker',
+                    html: '<div style="background-color: #2196F3; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(33, 150, 243, 0.5); border: 3px solid white;">📍</div>',
+                    iconSize: [22, 22],
+                    iconAnchor: [11, 11]
+                })
+            }).addTo(map);
+
+            userMarker.bindPopup(`
+                <div style="padding: 0.5rem; text-align: center;">
+                    <strong>📍 Your Location</strong><br>
+                    ${window.locationService.userLocation.city || 'Current position'}
+                </div>
+            `);
+        }
+
+        // Force a resize after a short delay to ensure proper rendering
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        console.log('Map initialized successfully');
+    } catch (error) {
+        console.error('Error initializing map:', error);
+    }
 };
 
 // Display games based on location
@@ -196,28 +249,46 @@ window.createGameCard = function (game) {
     card.dataset.gameId = game.id;
     card.onclick = () => window.showGameDetails(game);
 
-    const sportIcon = window.getSportIcon(game.type);
+    const sportIcon = window.getSportIcon(game.type || game.sport);
+    const venueName = game.venue?.name || game.venue || game.location || 'Unknown venue';
+    const hostName = game.host?.name || game.organizer?.name || 'Community';
+    const attendees = game.attendees || game.capacity?.current || 0;
+    const maxAttendees = game.maxAttendees || game.capacity?.max;
+
+    // Format time
+    let timeStr = '';
+    if (game.startTime) {
+        const date = new Date(game.startTime);
+        timeStr = date.toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    } else if (game.date) {
+        timeStr = new Date(game.date).toLocaleDateString();
+    }
 
     card.innerHTML = `
         <div class="game-header">
             <span class="game-icon">${sportIcon}</span>
-            ${game.organized ? '<span class="game-type">Organized League</span>' : ''}
             <h3 class="game-title">${game.title}</h3>
-            ${game.indoor ? '<span class="game-indoor">Indoor</span>' : ''}
+            ${game.isIndoor ? '<span class="game-indoor">Indoor</span>' : ''}
         </div>
         <div class="game-location">
             <span class="location-dot">•</span>
-            <span>${game.location}</span>
+            <span>${venueName}</span>
         </div>
+        ${timeStr ? `<div class="game-time" style="color: #8892b0; font-size: 0.875rem; margin: 0.5rem 0;">${timeStr}</div>` : ''}
         <div class="game-info">
-            <span class="attendees">${game.attendees} ${game.attendees === 1 ? 'attendee' : 'attendees'}</span>
+            <span class="attendees">${attendees}${maxAttendees ? `/${maxAttendees}` : ''} players</span>
             <div class="host-info">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${game.host}" 
-                     alt="${game.host}" class="host-avatar">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${hostName}" 
+                     alt="${hostName}" class="host-avatar">
                 <div class="host-details">
-                    <span class="host-tag">${game.host}</span>
-                    <span class="host-name">${game.host}</span>
-                    <span class="host-status">${game.status}</span>
+                    <span class="host-name">${hostName}</span>
+                    ${game.source?.name ? `<span class="host-status" style="font-size: 0.75rem; opacity: 0.8;">${game.source.name}</span>` : ''}
                 </div>
             </div>
         </div>
@@ -380,46 +451,508 @@ document.getElementById('locationSelect').addEventListener('change', async e => 
     await window.loadGamesFromAPI(newLocation);
 });
 
-// Display user info
-window.updateAuthUI = function () {
-    const userNameEl = document.getElementById('userName');
-    const authSection = document.querySelector('.user-section') || document.querySelector('.header-right');
+// Initialize location detection
+window.initializeLocationDetection = async function () {
+    // Wait for location service to load
+    await new Promise(resolve => {
+        const checkLocationService = setInterval(() => {
+            if (window.locationService) {
+                clearInterval(checkLocationService);
+                resolve();
+            }
+        }, 100);
+    });
 
-    if (isGuest) {
-        userNameEl.textContent = 'Welcome, Guest!';
+    // Wait for play now service to load
+    await new Promise(resolve => {
+        const checkPlayNowService = setInterval(() => {
+            if (window.playNowService) {
+                clearInterval(checkPlayNowService);
+                resolve();
+            }
+        }, 100);
+    });
 
-        // Add login button for guests
-        if (!document.getElementById('guestLoginBtn')) {
-            const loginBtn = document.createElement('button');
-            loginBtn.id = 'guestLoginBtn';
-            loginBtn.className = 'guest-login-btn';
-            loginBtn.textContent = 'Sign In';
-            loginBtn.onclick = () => (window.location.href = '/login-google.html');
+    try {
+        // Initialize location detection
+        const locationResult = await window.locationService.initializeLocation();
 
-            if (authSection) {
-                authSection.appendChild(loginBtn);
+        // Set user location for play now service
+        if (locationResult.userLocation) {
+            window.playNowService.setUserLocation(locationResult.userLocation.lat, locationResult.userLocation.lng);
+        }
+
+        // Update location dropdown with nearby cities
+        window.updateLocationDropdown(locationResult);
+
+        // Don't show location detection feedback on page load
+        // It will be shown when "Find Games Now" is clicked
+
+        console.log('Location detection initialized:', locationResult);
+        return locationResult;
+    } catch (error) {
+        console.error('Failed to initialize location detection:', error);
+        return null;
+    }
+};
+
+// Update location dropdown based on user location
+window.updateLocationDropdown = function (locationResult) {
+    const locationSelect = document.getElementById('locationSelect');
+    if (!locationSelect) {
+        return;
+    }
+
+    // Clear existing options
+    locationSelect.innerHTML = '';
+
+    // Add current city first
+    if (locationResult.currentCity) {
+        const currentOption = document.createElement('option');
+        currentOption.value = locationResult.currentCity.key;
+        currentOption.textContent = `📍 ${locationResult.currentCity.name} (Current)`;
+        currentOption.selected = true;
+        locationSelect.appendChild(currentOption);
+    }
+
+    // Add nearby cities
+    if (locationResult.nearbyCities && locationResult.nearbyCities.length > 0) {
+        locationResult.nearbyCities.forEach(city => {
+            // Skip if it's the same as current city
+            if (city.key === locationResult.currentCity?.key) {
+                return;
+            }
+
+            const option = document.createElement('option');
+            option.value = city.key;
+            option.textContent = `${city.name} (${city.distance}km)`;
+            locationSelect.appendChild(option);
+        });
+    }
+
+    // Add separator and other BC cities
+    const separator = document.createElement('option');
+    separator.disabled = true;
+    separator.textContent = '─────────────────';
+    locationSelect.appendChild(separator);
+
+    // Add other BC cities not in nearby list
+    const nearbyKeys = new Set(locationResult.nearbyCities?.map(c => c.key) || []);
+    nearbyKeys.add(locationResult.currentCity?.key);
+
+    const otherCities = window.locationService
+        .getAllCities()
+        .filter(city => !nearbyKeys.has(city.key))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    otherCities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city.key;
+        option.textContent = city.name;
+        locationSelect.appendChild(option);
+    });
+};
+
+// Show location detection feedback
+window.showLocationFeedback = function (currentCity, isFallback, detectedLocationInfo) {
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.className = 'location-feedback';
+    feedbackDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${isFallback ? '#ff6b35' : '#4CAF50'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        max-width: 300px;
+    `;
+
+    let message;
+    if (isFallback) {
+        message = `📍 Location detection failed - showing ${currentCity.name}, BC`;
+    } else {
+        message = `📍 Location detected: ${currentCity.name}, BC`;
+
+        // Add detected city info if available and different
+        if (detectedLocationInfo && detectedLocationInfo.detectedCity) {
+            const { detectedCity } = detectedLocationInfo;
+            if (detectedCity.toLowerCase() !== currentCity.name.toLowerCase()) {
+                message += `\n🌐 Your location: ${detectedCity}`;
+                if (detectedLocationInfo.detectedRegion) {
+                    message += `, ${detectedLocationInfo.detectedRegion}`;
+                }
+                message += `\n🎯 Nearest sports hub: ${currentCity.name}`;
             }
         }
+    }
 
-        // Hide logout button for guests
-        const logoutBtn = document.querySelector('button[onclick*="logout"]');
-        if (logoutBtn) {
-            logoutBtn.style.display = 'none';
+    feedbackDiv.style.whiteSpace = 'pre-line';
+    feedbackDiv.textContent = message;
+    document.body.appendChild(feedbackDiv);
+
+    // Animate in
+    setTimeout(() => {
+        feedbackDiv.style.opacity = '1';
+    }, 100);
+
+    // Remove after 6 seconds (longer for more detailed info)
+    setTimeout(() => {
+        feedbackDiv.style.opacity = '0';
+        setTimeout(() => {
+            if (document.body.contains(feedbackDiv)) {
+                document.body.removeChild(feedbackDiv);
+            }
+        }, 300);
+    }, 6000);
+};
+
+// Play Now functionality
+window.playNow = async function () {
+    const playNowBtn = document.querySelector('.play-now-btn');
+    const gamesList = document.getElementById('gamesList');
+
+    // Add loading state
+    playNowBtn.classList.add('loading');
+    playNowBtn.textContent = 'Finding games...';
+
+    // Show location detection feedback when button is clicked
+    if (window.locationService) {
+        const locationResult = window.locationService.getLocationInfo();
+        if (locationResult && locationResult.currentCity) {
+            window.showLocationFeedback(
+                locationResult.currentCity,
+                locationResult.fallback,
+                locationResult.detectedLocationInfo
+            );
         }
+    }
+
+    try {
+        // Get current location for search
+        const currentLocation = document.getElementById('locationSelect').value || 'salmon-arm';
+
+        // Fetch games from current location and nearby areas
+        const { games } = await window.api.getGames({ location: currentLocation });
+
+        if (games.length === 0) {
+            window.showPlayNowResults([], 'No games found in your area');
+            return;
+        }
+
+        // Get Play Now recommendations
+        const recommendations = await window.playNowService.getRecommendations(games);
+
+        if (recommendations.playNow.length === 0) {
+            window.showPlayNowResults(
+                [],
+                'No immediate games available. Try searching for games later today or this week.'
+            );
+            return;
+        }
+
+        // Show Play Now results
+        window.showPlayNowResults(recommendations.playNow, null, recommendations);
+    } catch (error) {
+        console.error('Play Now failed:', error);
+        window.showPlayNowResults([], 'Failed to find games. Please try again.');
+    } finally {
+        // Remove loading state
+        playNowBtn.classList.remove('loading');
+        playNowBtn.textContent = '🚀 Play Now!';
+    }
+};
+
+// Show Play Now results
+window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendations) {
+    const gamesList = document.getElementById('gamesList');
+    const locationName = document.getElementById('locationName');
+
+    // Clear existing games
+    gamesList.innerHTML = '';
+
+    // Clear map markers
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+
+    if (errorMessage) {
+        gamesList.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #b8bdd8;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <h3 style="margin-bottom: 1rem;">No Immediate Games</h3>
+                <p>${errorMessage}</p>
+                <button onclick="searchGames()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #ff6b35; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    View All Games
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    // Update section title
+    locationName.textContent = 'Ready to Play';
+
+    // Create Play Now header
+    const playNowHeader = document.createElement('div');
+    playNowHeader.style.cssText = `
+        background: linear-gradient(135deg, #ff6b35, #ff8a65);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    `;
+    playNowHeader.innerHTML = `
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">🚀 Best Games Right Now</h3>
+        <p style="margin: 0; opacity: 0.9;">Games ranked by proximity and start time</p>
+    `;
+    gamesList.appendChild(playNowHeader);
+
+    // Add Play Now games
+    playNowGames.forEach((game, index) => {
+        const gameCard = window.createPlayNowCard(game, index + 1);
+        gamesList.appendChild(gameCard);
+
+        // Add marker to map
+        window.addGameMarker(game, '🏃‍♂️');
+    });
+
+    // Add recommendations section if available
+    if (allRecommendations) {
+        window.addRecommendationsSections(allRecommendations, gamesList);
+    }
+
+    // Adjust map view for Play Now games
+    if (markers.length > 0) {
+        const group = new L.FeatureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+};
+
+// Create Play Now game card
+window.createPlayNowCard = function (game, rank) {
+    const card = document.createElement('div');
+    card.className = 'game-card play-now-card';
+    card.style.cssText = `
+        position: relative;
+        border-left: 4px solid #ff6b35;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 138, 101, 0.05));
+    `;
+
+    const sportIcon = window.getSportIcon(game.type || game.sport);
+    const venueName = game.venue?.name || game.venue || game.location || 'Unknown venue';
+    const timeText = window.playNowService.formatTimeUntilStart(game.timeUntilStart);
+    const distanceText = window.playNowService.formatDistance(game.distance);
+    const urgency = window.playNowService.getUrgencyLevel(game.timeUntilStart);
+
+    // Format time with better display
+    let startTimeText = '';
+    if (game.startTime) {
+        const date = new Date(game.startTime);
+        startTimeText = date.toLocaleString('en-US', {
+            weekday: 'short',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+
+    card.innerHTML = `
+        <div style="position: absolute; top: 1rem; right: 1rem; background: #ff6b35; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+            #${rank}
+        </div>
+        
+        <div class="game-header">
+            <span class="game-icon" style="font-size: 1.5rem;">${sportIcon}</span>
+            <div>
+                <h3 class="game-title">${game.title}</h3>
+                <div style="color: #ff6b35; font-weight: 600; font-size: 0.9rem;">
+                    ${startTimeText} • ${timeText} away • ${distanceText}
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-location">
+            <span class="location-dot">•</span>
+            <span>${venueName}</span>
+        </div>
+        
+        <div class="game-info" style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="attendees">${game.attendees || game.capacity?.current || 0}/${game.maxAttendees || game.capacity?.max || 20} players</span>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span style="background: ${window.getUrgencyColor(urgency)}; color: white; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.8rem;">
+                        ${window.getUrgencyText(urgency)}
+                    </span>
+                    <button onclick="window.showGameDetails(${JSON.stringify(game).replace(/"/g, '&quot;')})" 
+                            style="background: #ff6b35; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        ${isGuest ? 'View Details' : 'Join Game'}
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(255, 107, 53, 0.1); border-radius: 8px; font-size: 0.8rem; color: #666;">
+            Score: ${Math.round(game.playNowScore)}/100 • 
+            ${window.playNowService.generateRecommendation(game)}
+        </div>
+    `;
+
+    return card;
+};
+
+// Add game marker to map
+window.addGameMarker = function (game, iconOverride) {
+    let coords = null;
+
+    if (game.coords && Array.isArray(game.coords)) {
+        coords = game.coords;
+    } else if (game.venue?.coordinates) {
+        coords = [game.venue.coordinates.lat, game.venue.coordinates.lng];
+    }
+
+    if (!coords || !map) {
+        return;
+    }
+
+    const icon = iconOverride || window.getSportIcon(game.type || game.sport);
+
+    const markerIcon = L.divIcon({
+        className: 'game-marker',
+        html: `<div style="background-color: #ff6b35; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.3); font-size: 1.1rem;">${icon}</div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    const marker = L.marker(coords, { icon: markerIcon }).addTo(map);
+
+    const timeText = game.timeUntilStart ? window.playNowService.formatTimeUntilStart(game.timeUntilStart) : '';
+    const distanceText = game.distance ? window.playNowService.formatDistance(game.distance) : '';
+
+    const popupContent = `
+        <div style="padding: 0.5rem; min-width: 200px;">
+            <strong>${game.title}</strong><br>
+            ${game.venue?.name || game.venue || game.location}<br>
+            ${game.attendees || 0}${game.maxAttendees ? `/${game.maxAttendees}` : ''} players<br>
+            ${timeText ? `⏰ ${timeText}` : ''}
+            ${distanceText ? ` • 📍 ${distanceText}` : ''}
+        </div>
+    `;
+
+    marker.bindPopup(popupContent);
+    markers.push(marker);
+};
+
+// Add recommendations sections
+window.addRecommendationsSections = function (recommendations, gamesList) {
+    // Add separator
+    const separator = document.createElement('div');
+    separator.style.cssText = 'height: 2rem;';
+    gamesList.appendChild(separator);
+
+    // Other recommendations
+    if (recommendations.soonestGames.length > 0) {
+        window.addRecommendationSection(gamesList, 'Soonest Games', recommendations.soonestGames.slice(0, 3), '⏰');
+    }
+
+    if (recommendations.nearestGames.length > 0) {
+        window.addRecommendationSection(gamesList, 'Nearest Games', recommendations.nearestGames.slice(0, 3), '📍');
+    }
+
+    if (recommendations.todayGames.length > 0) {
+        window.addRecommendationSection(gamesList, 'Today\'s Games', recommendations.todayGames.slice(0, 3), '📅');
+    }
+};
+
+// Add recommendation section
+window.addRecommendationSection = function (gamesList, title, games, icon) {
+    const sectionHeader = document.createElement('div');
+    sectionHeader.style.cssText = `
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0 0.5rem 0;
+        border-left: 3px solid #ff6b35;
+    `;
+    sectionHeader.innerHTML = `<h4 style="margin: 0; color: #ff6b35;">${icon} ${title}</h4>`;
+    gamesList.appendChild(sectionHeader);
+
+    games.forEach(game => {
+        const gameCard = window.createGameCard(game);
+        gameCard.style.marginLeft = '1rem';
+        gameCard.style.background = 'rgba(255, 255, 255, 0.05)';
+        gamesList.appendChild(gameCard);
+    });
+};
+
+// Display user info
+window.updateAuthUI = function () {
+    const userMenu = document.querySelector('.user-menu');
+
+    if (!userMenu) {
+        return;
+    }
+
+    // Clear existing content
+    userMenu.innerHTML = '';
+
+    if (isGuest) {
+        // Guest UI
+        const guestSpan = document.createElement('span');
+        guestSpan.className = 'user-name';
+        guestSpan.textContent = 'Guest';
+        userMenu.appendChild(guestSpan);
+
+        const loginBtn = document.createElement('button');
+        loginBtn.className = 'guest-login-btn';
+        loginBtn.textContent = 'Sign In';
+        loginBtn.onclick = () => (window.location.href = '/login-google.html');
+        userMenu.appendChild(loginBtn);
     } else if (currentUser) {
-        userNameEl.textContent = `Welcome, ${currentUser.name || currentUser.username || currentUser.email}!`;
+        // Logged in user UI
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-name';
 
-        // Show logout button
-        const logoutBtn = document.querySelector('button[onclick*="logout"]');
-        if (logoutBtn) {
-            logoutBtn.style.display = 'block';
+        // Create avatar with initials
+        const avatar = document.createElement('div');
+        avatar.className = 'user-avatar';
+        const name = currentUser.name || currentUser.username || currentUser.email;
+        const initials = name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+        avatar.textContent = initials;
+
+        // If user has picture, use it
+        if (currentUser.picture) {
+            const img = document.createElement('img');
+            img.src = currentUser.picture;
+            img.className = 'user-avatar';
+            img.style.objectFit = 'cover';
+            userInfo.appendChild(img);
+        } else {
+            userInfo.appendChild(avatar);
         }
 
-        // Remove guest login button if exists
-        const guestLoginBtn = document.getElementById('guestLoginBtn');
-        if (guestLoginBtn) {
-            guestLoginBtn.remove();
-        }
+        // Add name
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = name.split(' ')[0]; // First name only
+        userInfo.appendChild(nameSpan);
+
+        userMenu.appendChild(userInfo);
+
+        // Add logout button
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'auth-button';
+        logoutBtn.textContent = 'Sign Out';
+        logoutBtn.onclick = window.logout;
+        userMenu.appendChild(logoutBtn);
     }
 };
 
@@ -434,7 +967,8 @@ window.logout = async function logout() {
     }
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
-    window.location.href = '/login.html';
+    // Reload the page instead of redirecting to login
+    window.location.reload();
 };
 
 // Load games from API
@@ -464,26 +998,73 @@ window.displayGamesOnMap = function (games) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
+    if (games.length === 0) {
+        gamesList.innerHTML =
+            '<p style="text-align: center; color: #b8bdd8; padding: 2rem;">No games found. Check back later or try a different search.</p>';
+        return;
+    }
+
     // Add games
     games.forEach(game => {
+        // Ensure game has proper coordinates
+        let coords = null;
+        if (game.coords && Array.isArray(game.coords)) {
+            coords = game.coords;
+        } else if (game.venue?.coordinates) {
+            coords = [game.venue.coordinates.lat, game.venue.coordinates.lng];
+        }
+
         // Create game card
         const gameCard = window.createGameCard(game);
         gamesList.appendChild(gameCard);
 
-        // Add marker to map
-        const marker = L.marker(game.coords).addTo(map).bindPopup(`
-            <strong>${game.title}</strong><br>
-            ${game.venue}<br>
-            ${game.attendees}/${game.maxAttendees} players
-        `);
+        // Add marker to map if coordinates exist
+        if (coords && map) {
+            try {
+                const markerIcon = L.divIcon({
+                    className: 'game-marker',
+                    html: `<div style="background-color: #ff6b35; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${window.getSportIcon(game.type || game.sport)}</div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
 
-        markers.push(marker);
+                const marker = L.marker(coords, { icon: markerIcon }).addTo(map);
+
+                const popupContent = `
+                    <div style="padding: 0.5rem;">
+                        <strong>${game.title}</strong><br>
+                        ${game.venue?.name || game.venue || game.location}<br>
+                        ${game.attendees || 0}${game.maxAttendees ? `/${game.maxAttendees}` : ''} players<br>
+                        ${
+    game.startTime ?
+        new Date(game.startTime).toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        }) :
+        ''
+}
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+            } catch (error) {
+                console.error('Error adding marker for game:', game, error);
+            }
+        }
     });
 
     // Adjust map view
-    if (markers.length > 0) {
-        const group = new L.FeatureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+    if (markers.length > 0 && map) {
+        try {
+            const group = new L.FeatureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        } catch (error) {
+            console.error('Error adjusting map bounds:', error);
+        }
     }
 };
 
@@ -549,4 +1130,25 @@ window.updateConnectionStatus = function (connected) {
             indicator.style.display = 'flex';
         }
     }
+};
+
+// Helper functions for urgency display
+window.getUrgencyColor = function (urgency) {
+    if (urgency === 'urgent') {
+        return '#ff4444';
+    }
+    if (urgency === 'soon') {
+        return '#ff6b35';
+    }
+    return '#4CAF50';
+};
+
+window.getUrgencyText = function (urgency) {
+    if (urgency === 'urgent') {
+        return '🔥 Urgent';
+    }
+    if (urgency === 'soon') {
+        return '⏰ Soon';
+    }
+    return '✅ Good timing';
 };

@@ -31,6 +31,9 @@ if (process.env.NODE_ENV !== 'production') {
 const locationAgentService = require('./services/location-agent-service');
 locationAgentService.setWebSocketService(webSocketService);
 
+// Initialize BC location service
+const bcLocationService = require('./services/bc-locations');
+
 // Middleware
 app.use(
     cors({
@@ -91,6 +94,28 @@ function verifyToken(token) {
 
 // Import auth middleware
 const { authenticateToken, authenticateAdmin } = require('./middleware/auth');
+
+// Helper function to handle location search parameters
+function handleLocationSearch(location, searchParams) {
+    const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
+    if (!normalizedLocation) {
+        searchParams.location = location;
+        return;
+    }
+
+    // Get coordinates for the location
+    const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
+    if (locationCoords && (!searchParams.lat || !searchParams.lng)) {
+        searchParams.lat = locationCoords.lat;
+        searchParams.lng = locationCoords.lng;
+        searchParams.radius = searchParams.radius || 50; // Default 50km radius
+    }
+
+    // Expand search to include nearby BC locations
+    const expandedLocations = bcLocationService.expandLocationSearch(normalizedLocation, 100);
+    searchParams.locations = expandedLocations;
+    searchParams.location = location;
+}
 
 // Routes
 
@@ -314,116 +339,49 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
 app.get('/api/games', async (req, res) => {
     const { location, sport, lat, lng, radius, date } = req.query;
 
-    // Try to get aggregated data first
     try {
-        const aggregatedGames = await dataPipeline.searchGames({
+        const searchParams = {
             sport,
-            location,
             lat: lat ? parseFloat(lat) : undefined,
             lng: lng ? parseFloat(lng) : undefined,
             radius: radius ? parseInt(radius, 10) : undefined,
             date
-        });
+        };
 
-        if (aggregatedGames.length > 0) {
-            return res.json({ games: aggregatedGames, source: 'aggregated' });
+        // Handle BC location expansion
+        if (location) {
+            handleLocationSearch(location, searchParams);
         }
+
+        // Get aggregated games
+        const aggregatedGames = await dataPipeline.searchGames(searchParams);
+
+        // Filter games by BC location if needed
+        let filteredGames = aggregatedGames;
+        if (location && !lat && !lng) {
+            const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
+            if (normalizedLocation) {
+                filteredGames = aggregatedGames.filter(game =>
+                    bcLocationService.isGameNearLocation(game, normalizedLocation, 75)
+                );
+            }
+        }
+
+        // Always return aggregated data (even if empty)
+        return res.json({
+            games: filteredGames,
+            source: 'aggregated',
+            searchInfo: {
+                originalLocation: location,
+                normalizedLocation: bcLocationService.normalizeLocationQuery(location),
+                expandedSearch: searchParams.locations?.length > 1
+            }
+        });
     } catch (error) {
         console.error('Error fetching aggregated games:', error);
+        // Return empty array on error instead of demo data
+        return res.json({ games: [], source: 'error' });
     }
-
-    // Fall back to demo data
-    const games = [
-        {
-            id: 1,
-            type: 'basketball',
-            title: 'Pick-up Basketball',
-            location: 'North Vancouver',
-            venue: 'Hillcrest Centre',
-            coords: [49.32, -123.0724],
-            attendees: 6,
-            maxAttendees: 10,
-            host: { name: 'Luke', id: 'user_luke' },
-            date: '2025-01-06T18:00:00Z',
-            indoor: true
-        },
-        {
-            id: 2,
-            type: 'soccer',
-            title: 'Drop-in Soccer',
-            location: 'Vancouver',
-            venue: 'UBC Fields',
-            coords: [49.2606, -123.246],
-            attendees: 12,
-            maxAttendees: 22,
-            host: { name: 'Carlos', id: 'user_carlos' },
-            date: '2025-01-07T16:00:00Z',
-            indoor: false
-        },
-        {
-            id: 3,
-            type: 'volleyball',
-            title: 'Beach Volleyball',
-            location: 'Vancouver',
-            venue: 'English Bay Beach',
-            coords: [49.2863, -123.1437],
-            attendees: 8,
-            maxAttendees: 12,
-            host: { name: 'Sarah', id: 'user_sarah' },
-            date: '2025-01-06T16:00:00Z',
-            indoor: false
-        },
-        {
-            id: 4,
-            type: 'basketball',
-            title: 'Competitive 5v5',
-            location: 'Richmond',
-            venue: 'Richmond Olympic Oval',
-            coords: [49.1747, -123.1503],
-            attendees: 7,
-            maxAttendees: 10,
-            host: { name: 'Mike', id: 'user_mike' },
-            date: '2025-01-07T19:00:00Z',
-            indoor: true
-        },
-        {
-            id: 5,
-            type: 'tennis',
-            title: 'Tennis Doubles',
-            location: 'Burnaby',
-            venue: 'Central Park Tennis Courts',
-            coords: [49.2276, -122.9989],
-            attendees: 3,
-            maxAttendees: 4,
-            host: { name: 'Emma', id: 'user_emma' },
-            date: '2025-01-06T10:00:00Z',
-            indoor: false
-        },
-        {
-            id: 6,
-            type: 'soccer',
-            title: 'Sunday League Practice',
-            location: 'Surrey',
-            venue: 'Newton Athletic Park',
-            coords: [49.1322, -122.8907],
-            attendees: 15,
-            maxAttendees: 20,
-            host: { name: 'Diego', id: 'user_diego' },
-            date: '2025-01-07T14:00:00Z',
-            indoor: false
-        }
-    ];
-
-    // Filter by location and sport if provided
-    let filteredGames = games;
-    if (location) {
-        filteredGames = filteredGames.filter(g => g.location.toLowerCase().includes(location.toLowerCase()));
-    }
-    if (sport && sport !== 'any') {
-        filteredGames = filteredGames.filter(g => g.type === sport);
-    }
-
-    res.json({ games: filteredGames });
 });
 
 // Join game - REQUIRES AUTH
@@ -494,7 +452,11 @@ app.get('/api/ws/stats', (req, res) => {
 
 // Data aggregation stats endpoint
 app.get('/api/data/stats', (req, res) => {
-    res.json(dataPipeline.getStats());
+    try {
+        res.json(dataPipeline.getStats());
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get stats' });
+    }
 });
 
 // Get available facilities
@@ -504,6 +466,45 @@ app.get('/api/facilities', async (req, res) => {
         res.json({ facilities });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch facilities' });
+    }
+});
+
+// BC location endpoints
+app.get('/api/locations/bc', (req, res) => {
+    const locations = bcLocationService.getAllLocations();
+    res.json({ locations });
+});
+
+app.get('/api/locations/suggestions', (req, res) => {
+    const { q } = req.query;
+    const suggestions = bcLocationService.getLocationSuggestions(q);
+    res.json({ suggestions });
+});
+
+app.get('/api/locations/nearby/:location', (req, res) => {
+    const { location } = req.params;
+    const { radius } = req.query;
+    const nearby = bcLocationService.getNearbyLocations(location, radius ? parseInt(radius, 10) : 100);
+    res.json({ nearby });
+});
+
+// Field status endpoint
+app.get('/api/fields/status', async (req, res) => {
+    try {
+        const fields = Array.from(dataPipeline.facilitiesDatabase.values())
+            .filter(facility => facility.type && facility.type.includes('field'));
+
+        res.json({
+            success: true,
+            fields,
+            lastUpdated: new Date()
+        });
+    } catch (error) {
+        console.error('Error fetching field status:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch field status'
+        });
     }
 });
 

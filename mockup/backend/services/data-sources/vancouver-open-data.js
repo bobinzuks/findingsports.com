@@ -64,7 +64,7 @@ class VancouverOpenDataSource extends BaseDataSource {
     }
 
     async fetchDataset(dataset) {
-        const url = `${this.baseUrl}/catalog/datasets/${dataset}/records?limit=1000`;
+        const url = `${this.baseUrl}/catalog/datasets/${dataset}/records?limit=100`;
 
         try {
             const response = await fetch(url);

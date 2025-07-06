@@ -127,6 +127,13 @@ class FindingSportsAPI {
             body: JSON.stringify(gameData)
         });
     }
+
+    // Field status methods
+    async getFieldStatus() {
+        const url = `${API_BASE_URL}/api/fields/status`;
+        const response = await fetch(url);
+        return await response.json();
+    }
 }
 
 // Create global API instance

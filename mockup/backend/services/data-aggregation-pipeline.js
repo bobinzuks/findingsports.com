@@ -1,23 +1,74 @@
-const Bull = require('bull');
 const cron = require('node-cron');
 const VancouverOpenDataSource = require('./data-sources/vancouver-open-data');
 const CommunityCenterScraper = require('./data-sources/community-center-scraper');
+
+// Simple in-memory queue implementation
+class InMemoryQueue {
+    constructor() {
+        this.jobs = [];
+        this.processors = {};
+        this.processing = false;
+        this.listeners = { failed: [], completed: [] };
+    }
+
+    async add(name, data) {
+        const job = {
+            id: Date.now() + Math.random(),
+            name,
+            data,
+            createdAt: new Date()
+        };
+        this.jobs.push(job);
+        setImmediate(() => this.processNext());
+        return job;
+    }
+
+    process(name, handler) {
+        this.processors[name] = handler;
+    }
+
+    on(event, handler) {
+        if (this.listeners[event]) {
+            this.listeners[event].push(handler);
+        }
+    }
+
+    async processNext() {
+        if (this.processing || this.jobs.length === 0) {
+            return;
+        }
+
+        this.processing = true;
+        const job = this.jobs.shift();
+
+        try {
+            const processor = this.processors[job.name];
+            if (processor) {
+                const result = await processor(job);
+                this.listeners.completed.forEach(handler => handler(job, result));
+            }
+        } catch (error) {
+            this.listeners.failed.forEach(handler => handler(job, error));
+        } finally {
+            this.processing = false;
+            if (this.jobs.length > 0) {
+                setImmediate(() => this.processNext());
+            }
+        }
+    }
+}
 
 class DataAggregationPipeline {
     constructor() {
         // Initialize data sources
         this.sources = {
             vancouverOpenData: new VancouverOpenDataSource(),
-            communityCenter: new CommunityCenterScraper()
+            communityCenter: new CommunityCenterScraper(),
+            nvrcGymnasiums: new (require('./data-sources/nvrc-gymnasium-scraper'))()
         };
 
-        // Initialize job queue
-        this.queue = new Bull('data-aggregation', {
-            redis: {
-                port: process.env.REDIS_PORT || 6379,
-                host: process.env.REDIS_HOST || 'localhost'
-            }
-        });
+        // Initialize in-memory job queue
+        this.queue = new InMemoryQueue();
 
         // In-memory storage for demo (replace with database)
         this.gamesDatabase = new Map();
@@ -48,6 +99,16 @@ class DataAggregationPipeline {
             this.queue.add('community-centers', {});
         });
 
+        // NVRC Gymnasiums - Every 4 hours (more frequent for drop-in schedules)
+        cron.schedule('0 */4 * * *', () => {
+            this.queue.add('nvrc-gymnasiums', {});
+        });
+
+        // NVRC Fields - Every 2 hours (field availability changes frequently)
+        cron.schedule('0 */2 * * *', () => {
+            this.queue.add('nvrc-fields', {});
+        });
+
         // Data cleanup - Daily at 2 AM
         cron.schedule('0 2 * * *', () => {
             this.queue.add('cleanup-old-data', {});
@@ -62,6 +123,8 @@ class DataAggregationPipeline {
         // Queue immediate jobs
         await this.queue.add('vancouver-facilities', {});
         await this.queue.add('community-centers', {});
+        await this.queue.add('nvrc-gymnasiums', {});
+        await this.queue.add('nvrc-fields', {});
     }
 
     setupQueueProcessors() {
@@ -101,6 +164,50 @@ class DataAggregationPipeline {
                 console.error('Error processing community centers:', error);
                 throw error;
             }
+        });
+
+        // Process NVRC gymnasium schedules
+        this.queue.process('nvrc-gymnasiums', async job => {
+            console.log('Processing NVRC gymnasium schedules...');
+            const { schedules, dropInGames } = await this.sources.nvrcGymnasiums.scrapeGymnasiumSchedules();
+
+            // Store drop-in games
+            let processed = 0;
+            for (const game of dropInGames) {
+                const gameId = this.generateGameId(game);
+                const gameData = {
+                    id: gameId,
+                    ...game,
+                    type: 'drop-in',
+                    isDropIn: true,
+                    source: 'NVRC Gymnasiums',
+                    lastUpdated: new Date(),
+                    recurring: {
+                        enabled: true,
+                        frequency: 'weekly',
+                        days: game.day ? [game.day] : []
+                    }
+                };
+                this.gamesDatabase.set(gameId, gameData);
+                processed++;
+            }
+
+            console.log(`Processed ${processed} NVRC drop-in activities`);
+            return { processed, schedules: schedules.length };
+        });
+
+        // Process field availability
+        this.queue.process('nvrc-fields', async job => {
+            console.log('Checking NVRC field availability...');
+            const fields = await this.sources.nvrcGymnasiums.scrapeFieldAvailability();
+
+            // Store field status
+            for (const field of fields) {
+                this.facilitiesDatabase.set(field.name, field);
+            }
+
+            console.log(`Updated ${fields.length} field statuses`);
+            return { fields: fields.length };
         });
 
         // Clean up old data
@@ -297,7 +404,7 @@ class DataAggregationPipeline {
         const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
         const a =
-            Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            (Math.sin(Δφ / 2) * Math.sin(Δφ / 2)) + (Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2));
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c;
