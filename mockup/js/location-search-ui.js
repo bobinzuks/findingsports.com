@@ -393,12 +393,12 @@ class LocationSearchUI {
 // Create global instance
 window.locationSearchUI = new LocationSearchUI();
 
-// Auto-check on page load
-document.addEventListener('DOMContentLoaded', () => {
-    // Only check for new locations if on main page
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        setTimeout(() => {
-            locationSearchUI.checkUserLocation();
-        }, 1000);
-    }
-});
+// Auto-check on page load - DISABLED to prevent popup on page load
+// document.addEventListener('DOMContentLoaded', () => {
+//     // Only check for new locations if on main page
+//     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+//         setTimeout(() => {
+//             locationSearchUI.checkUserLocation();
+//         }, 1000);
+//     }
+// });

@@ -3,21 +3,74 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Finding Sports - Login</title>
-        <link rel="stylesheet" href="styles.css" />
+        <title>Finding Sports - Sign In</title>
+        <!-- Font imports -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="css/auth.css" />
         <style>
-            /* Enhanced login styles for Google OAuth */
+            /* Override and enhance styles for dark theme consistency */
+            body {
+                background-color: #000000;
+                background-image: url('images/background.png');
+                background-repeat: repeat;
+                background-size: auto;
+                background-position: top left;
+                color: #f5f3ed;
+            }
+
+            .container {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 0.8) 100%);
+            }
+
+            .login-box {
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(244, 197, 66, 0.3);
+                border-radius: 24px;
+                padding: 3rem;
+                width: 100%;
+                max-width: 450px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+
+            .logo {
+                font-family: 'Bebas Neue', 'Oswald', sans-serif;
+                font-size: 3rem;
+                color: #f4c542;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                text-shadow: 0 2px 8px rgba(244, 197, 66, 0.3);
+            }
+
+            .tagline {
+                text-align: center;
+                margin-bottom: 2rem;
+                color: rgba(245, 243, 237, 0.8);
+                font-size: 1.1rem;
+            }
+
+            /* Social Auth Buttons - Dark Theme */
             .social-auth {
                 margin: 20px 0;
             }
 
             .social-auth button {
                 width: 100%;
-                padding: 12px;
-                margin: 8px 0;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background: white;
+                padding: 14px;
+                margin: 10px 0;
+                border: 2px solid rgba(244, 197, 66, 0.3);
+                border-radius: 12px;
+                background: rgba(128, 128, 128, 0.3);
+                color: #f5f3ed;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
@@ -25,36 +78,39 @@
                 gap: 12px;
                 font-size: 16px;
                 font-weight: 500;
-                transition: all 0.2s;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 0 0 rgba(244, 197, 66, 0);
             }
 
             .social-auth button:hover {
-                background: #f8f9fa;
-                border-color: #4285f4;
+                background-color: rgba(244, 197, 66, 0.9);
+                color: #000000;
+                border-color: #f4c542;
+                transform: translateY(-2px);
+                box-shadow: 0 0 15px 3px rgba(244, 197, 66, 0.6);
             }
 
             .google-signin {
-                color: #3c4043;
-            }
-
-            .google-signin img {
-                width: 20px;
-                height: 20px;
+                position: relative;
             }
 
             .facebook-signin {
-                background: #1877f2;
-                color: white;
-                border-color: #1877f2;
+                background: rgba(24, 119, 242, 0.2);
+                border-color: rgba(24, 119, 242, 0.5);
             }
 
             .facebook-signin:hover {
-                background: #166fe5;
+                background: #1877f2;
+                color: white;
+                border-color: #1877f2;
+                box-shadow: 0 0 15px 3px rgba(24, 119, 242, 0.6);
             }
 
+            /* Divider styling */
             .divider {
                 text-align: center;
-                margin: 20px 0;
+                margin: 25px 0;
                 position: relative;
             }
 
@@ -65,43 +121,152 @@
                 left: 0;
                 right: 0;
                 height: 1px;
-                background: #ddd;
+                background: rgba(244, 197, 66, 0.3);
             }
 
             .divider span {
-                background: #14151a;
-                padding: 0 16px;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 0 20px;
                 position: relative;
-                color: #6c757d;
+                color: rgba(245, 243, 237, 0.6);
                 font-size: 14px;
+                font-weight: 500;
             }
 
-            #googleSignInButton {
-                margin: 20px 0;
+            /* Form styling */
+            .form-group {
+                margin-bottom: 1.5rem;
             }
 
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: rgba(245, 243, 237, 0.9);
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 0.875rem 1rem;
+                background-color: rgba(128, 128, 128, 0.3);
+                border: 2px solid rgba(244, 197, 66, 0.3);
+                border-radius: 8px;
+                color: #f5f3ed;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+
+            .form-group input::placeholder {
+                color: rgba(245, 243, 237, 0.4);
+            }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: #f4c542;
+                background-color: rgba(244, 197, 66, 0.1);
+                box-shadow: 0 0 8px 2px rgba(244, 197, 66, 0.4);
+            }
+
+            .login-btn {
+                width: 100%;
+                padding: 1rem;
+                background-color: rgba(128, 128, 128, 0.8);
+                color: #f5f3ed;
+                border: none;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-top: 0.5rem;
+                font-family: 'Oswald', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 0 0 0 rgba(244, 197, 66, 0);
+            }
+
+            .login-btn:hover {
+                background-color: #f4c542;
+                color: #000000;
+                transform: translateY(-2px);
+                box-shadow: 0 0 15px 3px rgba(244, 197, 66, 0.8);
+            }
+
+            .login-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            /* Error message styling */
             .auth-error {
-                background: #ff4444;
-                color: white;
+                background: rgba(244, 67, 54, 0.2);
+                border: 1px solid rgba(244, 67, 54, 0.4);
+                color: #ff6b6b;
                 padding: 12px;
                 border-radius: 8px;
                 margin-bottom: 16px;
                 display: none;
+                font-size: 0.9rem;
             }
 
+            /* Signup prompt */
             .signup-prompt {
                 text-align: center;
                 margin-top: 20px;
-                color: #b8bdd8;
+                color: rgba(245, 243, 237, 0.7);
+                font-size: 0.9rem;
             }
 
             .signup-prompt a {
-                color: #5e9eff;
+                color: #f4c542;
                 text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
             }
 
             .signup-prompt a:hover {
+                color: #ffd700;
                 text-decoration: underline;
+            }
+
+            /* Demo info box */
+            .demo-info {
+                margin-top: 2rem;
+                padding: 1rem;
+                background-color: rgba(244, 197, 66, 0.1);
+                border: 1px solid rgba(244, 197, 66, 0.3);
+                border-radius: 8px;
+            }
+
+            .demo-info p {
+                margin: 0.25rem 0;
+                font-size: 0.875rem;
+                color: rgba(245, 243, 237, 0.8);
+                text-align: center;
+            }
+
+            .demo-info p:first-child {
+                font-weight: 600;
+                color: #f4c542;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Google Sign-In Button container */
+            #googleSignInButton {
+                margin: 20px 0;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 480px) {
+                .login-box {
+                    padding: 2rem 1.5rem;
+                }
+
+                .logo {
+                    font-size: 2.5rem;
+                }
             }
         </style>
     </head>
