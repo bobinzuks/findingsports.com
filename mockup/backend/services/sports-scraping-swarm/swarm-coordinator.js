@@ -73,16 +73,25 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     async phase1_ArchitectureDiscovery() {
         console.log('📋 Phase 1: Architecture & Source Discovery');
 
-        // Agent 4: Sports Domain Expert - Initialize source discovery
-        this.agents.sportsExpert.initializeSources();
-        const allSources = this.agents.sportsExpert.getAllSources();
-        console.log(`🎯 Discovered ${allSources.length} potential sources`);
+        try {
+            // Agent 4: Sports Domain Expert - Initialize source discovery
+            this.agents.sportsExpert.initializeSources();
+            const allSources = this.agents.sportsExpert.getAllSources();
+            console.log(`🎯 Discovered ${allSources.length} potential sources`);
 
-        // Agent 1: System Architect - Plan data flow
-        this.planDataArchitecture(allSources);
+            // Agent 1: System Architect - Plan data flow
+            this.planDataArchitecture(allSources);
 
-        this.metrics.totalSources = allSources.length;
-        console.log('✅ Phase 1 complete');
+            this.metrics.totalSources = allSources.length;
+            console.log('✅ Phase 1 complete');
+        } catch (error) {
+            console.error('❌ Phase 1 failed:', error.message);
+            console.log('⚠️ Continuing with fallback configuration...');
+            
+            // Fallback configuration
+            this.metrics.totalSources = 0;
+            this.planDataArchitecture([]);
+        }
     }
 
     // Phase 2: Infrastructure Setup

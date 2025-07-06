@@ -18,6 +18,47 @@ class SportsSourceDiscovery {
         this.addGovernmentSources();
     }
 
+    addCommunityFacilities() {
+        // This method was missing - add community facilities to sources
+        const communityFacilities = [
+            // North Vancouver Community Facilities
+            {
+                name: 'North Vancouver Recreation Commission',
+                url: 'https://www.nvrc.ca/',
+                type: 'recreation_center',
+                region: 'north-vancouver',
+                specialties: ['basketball', 'volleyball', 'badminton', 'swimming'],
+                endpoints: {
+                    gymnasiums: 'https://www.nvrc.ca/facilities-fields/locations-hours/gymnasiums',
+                    programs: 'https://nvrc.perfectmind.com/23734/Clients/BookMe4'
+                }
+            },
+            {
+                name: 'Delbrook Community Recreation Centre',
+                url: 'https://www.nvrc.ca/facilities-fields/delbrook-community-recreation-centre',
+                type: 'community_center',
+                region: 'north-vancouver',
+                specialties: ['basketball', 'volleyball', 'fitness']
+            },
+            {
+                name: 'John Braithwaite Community Centre',
+                url: 'https://www.nvrc.ca/facilities-fields/john-braithwaite-community-centre',
+                type: 'community_center',
+                region: 'north-vancouver',
+                specialties: ['basketball', 'badminton', 'fitness']
+            },
+            {
+                name: 'Lions Gate Community Recreation Centre',
+                url: 'https://www.nvrc.ca/facilities-fields/lions-gate-community-recreation-centre',
+                type: 'community_center',
+                region: 'north-vancouver',
+                specialties: ['swimming', 'fitness', 'basketball']
+            }
+        ];
+
+        communityFacilities.forEach(facility => this.sources.set(facility.name, facility));
+    }
+
     addRecreationCenters() {
         const recreationCenters = [
             // Vancouver

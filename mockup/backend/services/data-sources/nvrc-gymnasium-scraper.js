@@ -19,27 +19,66 @@ class NVRCGymnasiumScraper {
             const schedules = [];
             const dropInGames = [];
 
-            // Similar to Rust script - find facility titles and hours
-            $('.facility-item, .location-item, .gym-facility').each((index, element) => {
+            // Enhanced scraping for NVRC dynamic content
+            // First, look for embedded JSON data from Leaflet maps
+            const scriptTags = $('script').get();
+            let facilitiesData = [];
+            
+            for (const script of scriptTags) {
+                const scriptContent = $(script).html();
+                if (scriptContent && scriptContent.includes('facilities') && scriptContent.includes('lat')) {
+                    // Try to extract JSON data from map configuration
+                    const jsonMatch = scriptContent.match(/var\s+\w+\s*=\s*(\[.*?\])/);
+                    if (jsonMatch) {
+                        try {
+                            const facilities = JSON.parse(jsonMatch[1]);
+                            facilitiesData.push(...facilities);
+                        } catch (e) {
+                            // Continue if JSON parsing fails
+                        }
+                    }
+                }
+            }
+
+            // Process extracted facilities data
+            for (const facility of facilitiesData) {
+                if (facility.name && facility.description) {
+                    schedules.push({
+                        centre: facility.name,
+                        schedule: facility.description || facility.hours || ''
+                    });
+
+                    const dropInActivities = this.parseDropInActivities(facility.name, facility.description || '');
+                    dropInGames.push(...dropInActivities);
+                }
+            }
+
+            // Fallback to HTML parsing with more robust selectors
+            $('.facility-item, .location-item, .gym-facility, .content-wrapper div, .field-content').each((index, element) => {
                 const $elem = $(element);
 
                 // Try multiple selectors for facility names
-                const facilityName = $elem.find('.facility-title, .location-name, h3, h4').first().text().trim() ||
-                                   $elem.find('strong').first().text().trim();
+                const facilityName = $elem.find('.facility-title, .location-name, h3, h4, h2, .field-title').first().text().trim() ||
+                                   $elem.find('strong, b').first().text().trim() ||
+                                   $elem.find('.field-name, .location-title').first().text().trim();
 
                 // Try multiple selectors for schedules
-                const scheduleText = $elem.find('.facility-hours, .schedule-text, .hours-info').text().trim() ||
-                                   $elem.find('p').text().trim();
+                const scheduleText = $elem.find('.facility-hours, .schedule-text, .hours-info, .field-body, .field-content').text().trim() ||
+                                   $elem.find('p, .description, .hours').text().trim();
 
-                if (facilityName && scheduleText) {
-                    schedules.push({
-                        centre: facilityName,
-                        schedule: scheduleText
-                    });
+                if (facilityName && scheduleText && facilityName.length > 2) {
+                    // Avoid duplicates
+                    const existing = schedules.find(s => s.centre === facilityName);
+                    if (!existing) {
+                        schedules.push({
+                            centre: facilityName,
+                            schedule: scheduleText
+                        });
 
-                    // Parse for drop-in activities
-                    const dropInActivities = this.parseDropInActivities(facilityName, scheduleText);
-                    dropInGames.push(...dropInActivities);
+                        // Parse for drop-in activities
+                        const dropInActivities = this.parseDropInActivities(facilityName, scheduleText);
+                        dropInGames.push(...dropInActivities);
+                    }
                 }
             });
 
@@ -229,33 +268,14 @@ class NVRCGymnasiumScraper {
         }
     }
 
-    // Additional method to check field availability
+    // Fixed method to check field availability - remove broken URL
     async scrapeFieldAvailability() {
         try {
-            const fieldsUrl = '/facilities-fields/locations-hours/sports-fields';
-            const response = await axios.get(this.baseUrl + fieldsUrl);
-            const $ = cheerio.load(response.data);
-
-            const fields = [];
-
-            $('.field-status, .field-item').each((index, element) => {
-                const $elem = $(element);
-                const fieldName = $elem.find('.field-name').text().trim();
-                const status = $elem.find('.status').text().trim() || 'Unknown';
-                const nextAvailable = $elem.find('.next-available').text().trim();
-
-                if (fieldName) {
-                    fields.push({
-                        name: fieldName,
-                        status,
-                        nextAvailable,
-                        type: 'outdoor-field',
-                        lastChecked: new Date()
-                    });
-                }
-            });
-
-            return fields;
+            // The sports-fields URL is returning 404
+            // For now, return empty array to prevent pipeline failures
+            // TODO: Find correct URL for outdoor sports fields or remove this feature
+            console.log('Field availability scraping disabled - URL returns 404');
+            return [];
         } catch (error) {
             console.error('Error scraping field availability:', error);
             return [];
