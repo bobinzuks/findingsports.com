@@ -68,7 +68,6 @@ class SwarmAPIEndpoint {
                         coverage: `${radius}km radius`
                     }
                 });
-
             } catch (error) {
                 console.error('❌ Mega search failed:', error);
                 res.status(500).json({
@@ -96,14 +95,14 @@ class SwarmAPIEndpoint {
                 // Quick search uses only high-priority sources
                 const sports = sport ? [sport] : [];
                 const result = await this.deployment.scrapeForUser(
-                    parseFloat(lat), 
-                    parseFloat(lng), 
-                    sports, 
+                    parseFloat(lat),
+                    parseFloat(lng),
+                    sports,
                     'urgent'
                 );
 
                 // Limit results for quick response
-                const limitedGames = result.games.slice(0, parseInt(limit));
+                const limitedGames = result.games.slice(0, parseInt(limit, 10));
 
                 res.json({
                     success: true,
@@ -113,7 +112,6 @@ class SwarmAPIEndpoint {
                     responseTime: result.duration,
                     quickSearch: true
                 });
-
             } catch (error) {
                 console.error('❌ Quick search failed:', error);
                 res.status(500).json({
@@ -127,7 +125,7 @@ class SwarmAPIEndpoint {
         router.get('/status', async (req, res) => {
             try {
                 const deploymentStatus = this.deployment.getDeploymentStatus();
-                
+
                 res.json({
                     swarm: {
                         deployed: deploymentStatus.deployed,
@@ -139,7 +137,6 @@ class SwarmAPIEndpoint {
                     capabilities: deploymentStatus.swarmStatus?.capabilities || {},
                     recentLogs: deploymentStatus.deploymentLog || []
                 });
-
             } catch (error) {
                 res.status(500).json({
                     error: 'Failed to get swarm status',
@@ -163,7 +160,7 @@ class SwarmAPIEndpoint {
                 await this.initializeSwarm();
 
                 // Set up real-time updates
-                const updateHandler = (data) => {
+                const updateHandler = data => {
                     if (this.isLocationRelevant(data.location, parseFloat(lat), parseFloat(lng))) {
                         res.write(`data: ${JSON.stringify(data)}\n\n`);
                     }
@@ -174,8 +171,8 @@ class SwarmAPIEndpoint {
 
                 // Send initial data
                 const initialResult = await this.deployment.scrapeForUser(
-                    parseFloat(lat), 
-                    parseFloat(lng), 
+                    parseFloat(lat),
+                    parseFloat(lng),
                     sports ? sports.split(',') : []
                 );
 
@@ -190,7 +187,6 @@ class SwarmAPIEndpoint {
                     this.deployment.swarm.off('scrapingComplete', updateHandler);
                     this.deployment.swarm.off('realTimeUpdate', updateHandler);
                 });
-
             } catch (error) {
                 console.error('❌ Live games failed:', error);
                 res.status(500).json({
@@ -204,7 +200,7 @@ class SwarmAPIEndpoint {
         router.get('/sources', async (req, res) => {
             try {
                 await this.initializeSwarm();
-                
+
                 const sources = this.deployment.swarm.agents.sportsExpert.getAllSources();
                 const integrations = this.deployment.swarm.agents.integrationEngineer.getIntegrationStatus();
 
@@ -218,7 +214,6 @@ class SwarmAPIEndpoint {
                         sports: [...new Set(sources.flatMap(s => s.specialties || []))]
                     }
                 });
-
             } catch (error) {
                 res.status(500).json({
                     error: 'Failed to get sources',
@@ -238,14 +233,13 @@ class SwarmAPIEndpoint {
                 }
 
                 const health = this.deployment.swarm.performHealthCheck();
-                
+
                 res.json({
                     status: 'healthy',
                     swarm: health.swarm,
                     agents: health.webScraper ? 'active' : 'inactive',
                     timestamp: health.timestamp
                 });
-
             } catch (error) {
                 res.status(503).json({
                     status: 'unhealthy',
@@ -273,10 +267,10 @@ class SwarmAPIEndpoint {
             const venue = game.venue?.name || 'Unknown Venue';
             breakdown[venue] = (breakdown[venue] || 0) + 1;
         });
-        
+
         // Return top 10 venues
         return Object.entries(breakdown)
-            .sort(([,a], [,b]) => b - a)
+            .sort(([, a], [, b]) => b - a)
             .slice(0, 10)
             .reduce((obj, [venue, count]) => {
                 obj[venue] = count;
@@ -294,13 +288,13 @@ class SwarmAPIEndpoint {
     }
 
     isLocationRelevant(updateLocation, userLat, userLng, radiusKm = 25) {
-        if (!updateLocation) return true;
-        
+        if (!updateLocation) { return true; }
+
         const distance = this.calculateDistance(
             userLat, userLng,
             updateLocation.lat, updateLocation.lng
         );
-        
+
         return distance <= radiusKm;
     }
 
@@ -308,10 +302,10 @@ class SwarmAPIEndpoint {
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
 

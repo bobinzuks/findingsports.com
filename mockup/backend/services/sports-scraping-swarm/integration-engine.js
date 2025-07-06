@@ -9,7 +9,7 @@ class SportsIntegrationEngine extends EventEmitter {
         this.integrations = new Map();
         this.webhooks = new Map();
         this.rateLimiters = new Map();
-        
+
         this.initializeIntegrations();
     }
 
@@ -215,25 +215,24 @@ class SportsIntegrationEngine extends EventEmitter {
     // Fetch data from Vancouver Parks API
     async fetchVancouverParksData() {
         const integration = this.integrations.get('vancouver_parks_api');
-        
+
         try {
             await this.checkRateLimit('vancouver_parks_api');
-            
+
             // Fetch facilities
             const facilitiesResponse = await axios.get(
                 `${integration.baseUrl}?${integration.endpoints.facilities}&rows=1000`
             );
-            
+
             // Fetch programs
             const programsResponse = await axios.get(
                 `${integration.baseUrl}?${integration.endpoints.programs}&rows=1000`
             );
-            
+
             return {
                 facilities: this.processVancouverFacilities(facilitiesResponse.data),
                 programs: this.processVancouverPrograms(programsResponse.data)
             };
-            
         } catch (error) {
             console.error('Error fetching Vancouver Parks data:', error.message);
             return { facilities: [], programs: [] };
@@ -242,10 +241,10 @@ class SportsIntegrationEngine extends EventEmitter {
 
     // Process Vancouver facilities data
     processVancouverFacilities(data) {
-        if (!data.records) return [];
-        
+        if (!data.records) { return []; }
+
         return data.records.map(record => {
-            const fields = record.fields;
+            const { fields } = record;
             return {
                 name: fields.name,
                 type: fields.facilitytype,
@@ -264,15 +263,15 @@ class SportsIntegrationEngine extends EventEmitter {
 
     // Process Vancouver programs data
     processVancouverPrograms(data) {
-        if (!data.records) return [];
-        
+        if (!data.records) { return []; }
+
         return data.records
             .filter(record => this.isSportsProgram(record.fields))
             .map(record => {
-                const fields = record.fields;
+                const { fields } = record;
                 return {
                     title: fields.program_name,
-                    sport: this.identifySport(fields.program_name + ' ' + (fields.description || '')),
+                    sport: this.identifySport(`${fields.program_name} ${fields.description || ''}`),
                     venue: fields.facility_name,
                     startDate: fields.start_date,
                     endDate: fields.end_date,
@@ -294,12 +293,12 @@ class SportsIntegrationEngine extends EventEmitter {
             console.warn('Meetup API key not configured');
             return [];
         }
-        
+
         try {
             await this.checkRateLimit('meetup_api');
-            
+
             const events = [];
-            
+
             for (const searchTerm of integration.searchTerms) {
                 const response = await axios.get(`${integration.baseUrl}${integration.endpoints.events}`, {
                     params: {
@@ -312,20 +311,19 @@ class SportsIntegrationEngine extends EventEmitter {
                         page: 20
                     },
                     headers: {
-                        'Authorization': `Bearer ${this.apiKeys.get('meetup')}`
+                        Authorization: `Bearer ${this.apiKeys.get('meetup')}`
                     }
                 });
-                
+
                 if (response.data.events) {
                     events.push(...response.data.events);
                 }
-                
+
                 // Rate limiting between requests
                 await this.delay(100);
             }
-            
+
             return this.processMeetupEvents(events);
-            
         } catch (error) {
             console.error('Error fetching Meetup data:', error.message);
             return [];
@@ -336,7 +334,7 @@ class SportsIntegrationEngine extends EventEmitter {
     processMeetupEvents(events) {
         return events.map(event => ({
             title: event.name,
-            sport: this.identifySport(event.name + ' ' + (event.description || '')),
+            sport: this.identifySport(`${event.name} ${event.description || ''}`),
             venue: {
                 name: event.venue ? event.venue.name : 'TBD',
                 address: event.venue ? event.venue.address_1 : null,
@@ -368,27 +366,26 @@ class SportsIntegrationEngine extends EventEmitter {
             console.warn('Eventbrite API key not configured');
             return [];
         }
-        
+
         try {
             await this.checkRateLimit('eventbrite_api');
-            
+
             const response = await axios.get(`${integration.baseUrl}${integration.endpoints.events}`, {
                 params: {
                     'location.latitude': lat,
                     'location.longitude': lng,
                     'location.within': `${radius}km`,
-                    'categories': integration.categories.join(','),
+                    categories: integration.categories.join(','),
                     'start_date.range_start': new Date().toISOString(),
-                    'expand': 'venue,organizer',
-                    'page_size': 50
+                    expand: 'venue,organizer',
+                    page_size: 50
                 },
                 headers: {
-                    'Authorization': `Bearer ${this.apiKeys.get('eventbrite')}`
+                    Authorization: `Bearer ${this.apiKeys.get('eventbrite')}`
                 }
             });
-            
+
             return this.processEventbriteEvents(response.data.events || []);
-            
         } catch (error) {
             console.error('Error fetching Eventbrite data:', error.message);
             return [];
@@ -401,10 +398,10 @@ class SportsIntegrationEngine extends EventEmitter {
             .filter(event => this.isSportsEvent(event))
             .map(event => ({
                 title: event.name.text,
-                sport: this.identifySport(event.name.text + ' ' + (event.description.text || '')),
+                sport: this.identifySport(`${event.name.text} ${event.description.text || ''}`),
                 venue: event.venue ? {
                     name: event.venue.name,
-                    address: event.venue.address ? 
+                    address: event.venue.address ?
                         `${event.venue.address.address_1}, ${event.venue.address.city}` : null,
                     coordinates: event.venue.latitude ? {
                         lat: parseFloat(event.venue.latitude),
@@ -413,7 +410,7 @@ class SportsIntegrationEngine extends EventEmitter {
                 } : null,
                 startTime: new Date(event.start.utc),
                 endTime: new Date(event.end.utc),
-                price: event.ticket_availability ? 
+                price: event.ticket_availability ?
                     event.ticket_availability.minimum_ticket_price?.major_value || 0 : 0,
                 capacity: event.capacity,
                 description: event.description.text,
@@ -432,27 +429,26 @@ class SportsIntegrationEngine extends EventEmitter {
     async fetchPerfectMindData() {
         const integration = this.integrations.get('perfectmind_integration');
         const allPrograms = [];
-        
+
         for (const instance of integration.instances) {
             try {
                 await this.checkRateLimit('perfectmind_integration');
-                
+
                 const response = await axios.get(`${instance}${integration.endpoints.programs}`, {
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (compatible; FindingSports/1.0)',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
                     },
                     timeout: 15000
                 });
-                
+
                 const programs = this.parsePerfectMindPrograms(response.data, instance);
                 allPrograms.push(...programs);
-                
             } catch (error) {
                 console.error(`Error fetching PerfectMind data from ${instance}:`, error.message);
             }
         }
-        
+
         return allPrograms;
     }
 
@@ -470,7 +466,7 @@ class SportsIntegrationEngine extends EventEmitter {
                 console.error('Error parsing PerfectMind JSON:', error);
             }
         }
-        
+
         // Fallback to HTML parsing
         return this.parsePerfectMindHTML(html, instance);
     }
@@ -483,7 +479,7 @@ class SportsIntegrationEngine extends EventEmitter {
             sources: ['vancouver_parks', 'richmond_recreation'],
             handler: this.handleRecreationUpdate.bind(this)
         });
-        
+
         // Webhook for social media events
         this.webhooks.set('social_events', {
             endpoint: '/webhooks/social-events',
@@ -495,7 +491,7 @@ class SportsIntegrationEngine extends EventEmitter {
     // Handle recreation center update webhook
     async handleRecreationUpdate(data) {
         console.log('Received recreation update:', data);
-        
+
         // Process and emit the update
         const processedData = await this.processWebhookData(data);
         this.emit('realTimeUpdate', {
@@ -507,7 +503,7 @@ class SportsIntegrationEngine extends EventEmitter {
     // Handle social media event update
     async handleSocialEventUpdate(data) {
         console.log('Received social event update:', data);
-        
+
         const processedData = await this.processWebhookData(data);
         this.emit('realTimeUpdate', {
             type: 'social_event_update',
@@ -519,19 +515,19 @@ class SportsIntegrationEngine extends EventEmitter {
     async checkRateLimit(integrationKey) {
         const integration = this.integrations.get(integrationKey);
         const limiter = this.rateLimiters.get(integrationKey) || { requests: [], limit: integration.rateLimit };
-        
+
         const now = Date.now();
         const windowStart = now - 60000; // 1 minute window
-        
+
         // Remove old requests
         limiter.requests = limiter.requests.filter(time => time > windowStart);
-        
+
         // Check if we're at the limit
         if (limiter.requests.length >= limiter.limit) {
             const waitTime = 60000 - (now - limiter.requests[0]);
             await this.delay(waitTime);
         }
-        
+
         // Add current request
         limiter.requests.push(now);
         this.rateLimiters.set(integrationKey, limiter);
@@ -545,20 +541,20 @@ class SportsIntegrationEngine extends EventEmitter {
     isSportsProgram(program) {
         const text = (program.program_name || program.name || '').toLowerCase();
         const description = (program.description || '').toLowerCase();
-        const combined = text + ' ' + description;
-        
+        const combined = `${text} ${description}`;
+
         const sportsKeywords = [
             'basketball', 'soccer', 'volleyball', 'tennis', 'badminton',
             'hockey', 'swimming', 'fitness', 'sport', 'athletic', 'gym'
         ];
-        
+
         return sportsKeywords.some(keyword => combined.includes(keyword));
     }
 
     isDropInProgram(program) {
-        const text = ((program.program_name || program.name || '') + ' ' + 
-                     (program.description || '')).toLowerCase();
-        
+        const text = (`${program.program_name || program.name || ''} ${
+            program.description || ''}`).toLowerCase();
+
         const dropInKeywords = ['drop-in', 'drop in', 'dropin', 'walk-in', 'public'];
         return dropInKeywords.some(keyword => text.includes(keyword));
     }
@@ -583,13 +579,13 @@ class SportsIntegrationEngine extends EventEmitter {
             swimming: ['swim', 'pool', 'aqua'],
             fitness: ['fitness', 'gym', 'workout']
         };
-        
+
         for (const [sport, keywords] of Object.entries(sports)) {
             if (keywords.some(keyword => lowerText.includes(keyword))) {
                 return sport;
             }
         }
-        
+
         return 'general';
     }
 
@@ -601,7 +597,7 @@ class SportsIntegrationEngine extends EventEmitter {
     // Get integration status
     getIntegrationStatus() {
         const status = {};
-        
+
         for (const [key, integration] of this.integrations) {
             status[key] = {
                 name: integration.name,
@@ -612,7 +608,7 @@ class SportsIntegrationEngine extends EventEmitter {
                 status: integration.status || 'active'
             };
         }
-        
+
         return status;
     }
 }

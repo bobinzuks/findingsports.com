@@ -17,7 +17,7 @@ class AdvancedScraper {
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0'
         ];
-        
+
         this.proxies = [];
         this.browser = null;
         this.requestCount = new Map();
@@ -49,7 +49,7 @@ class AdvancedScraper {
     // Enhanced HTTP scraper with anti-detection
     async scrapeWithAxios(url, options = {}) {
         const domain = new URL(url).hostname;
-        
+
         // Check circuit breaker
         if (this.isCircuitOpen(domain)) {
             throw new Error(`Circuit breaker open for ${domain}`);
@@ -64,10 +64,10 @@ class AdvancedScraper {
                 method: options.method || 'GET',
                 headers: {
                     'User-Agent': this.getRandomUserAgent(),
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                     'Accept-Language': 'en-US,en;q=0.5',
                     'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
+                    Connection: 'keep-alive',
                     'Upgrade-Insecure-Requests': '1',
                     'Sec-Fetch-Dest': 'document',
                     'Sec-Fetch-Mode': 'navigate',
@@ -77,22 +77,21 @@ class AdvancedScraper {
                 },
                 timeout: options.timeout || 30000,
                 maxRedirects: 5,
-                validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+                validateStatus: status => status < 500, // Don't throw on 4xx errors
                 ...options.config
             };
 
             const response = await axios(config);
-            
+
             // Update success metrics
             this.recordSuccess(domain);
-            
+
             return {
                 data: response.data,
                 status: response.status,
                 headers: response.headers,
                 url: response.config.url
             };
-
         } catch (error) {
             this.recordFailure(domain, error);
             throw error;
@@ -106,7 +105,7 @@ class AdvancedScraper {
         }
 
         const page = await this.browser.newPage();
-        
+
         try {
             // Set viewport and user agent
             await page.setViewport({ width: 1366, height: 768 });
@@ -114,7 +113,7 @@ class AdvancedScraper {
 
             // Block unnecessary resources for faster loading
             await page.setRequestInterception(true);
-            page.on('request', (req) => {
+            page.on('request', req => {
                 const resourceType = req.resourceType();
                 if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
                     req.abort();
@@ -141,13 +140,12 @@ class AdvancedScraper {
 
             // Get page content
             const content = await page.content();
-            
+
             return {
                 data: content,
                 status: response.status(),
                 url: page.url()
             };
-
         } finally {
             await page.close();
         }
@@ -165,11 +163,9 @@ class AdvancedScraper {
             } else if (typeof selector === 'object') {
                 // Complex selector with options
                 const elements = $(selector.selector);
-                
+
                 if (selector.multiple) {
-                    results[key] = elements.map((i, el) => {
-                        return this.extractElementData($(el), selector);
-                    }).get();
+                    results[key] = elements.map((i, el) => this.extractElementData($(el), selector)).get();
                 } else {
                     results[key] = this.extractElementData(elements.first(), selector);
                 }
@@ -182,49 +178,49 @@ class AdvancedScraper {
     // Extract data from element based on configuration
     extractElementData($element, config) {
         const data = {};
-        
+
         if (config.text) {
             data.text = $element.text().trim();
         }
-        
+
         if (config.html) {
             data.html = $element.html();
         }
-        
+
         if (config.attributes) {
             config.attributes.forEach(attr => {
                 data[attr] = $element.attr(attr);
             });
         }
-        
+
         if (config.children) {
             for (const [key, childSelector] of Object.entries(config.children)) {
                 data[key] = $element.find(childSelector).text().trim();
             }
         }
-        
+
         return Object.keys(data).length === 1 && data.text ? data.text : data;
     }
 
     // Sports-specific content extraction
     extractSportsData(html, type = 'schedule') {
         const $ = cheerio.load(html);
-        
+
         switch (type) {
-            case 'schedule':
-                return this.extractScheduleData($);
-            case 'facility':
-                return this.extractFacilityData($);
-            case 'event':
-                return this.extractEventData($);
-            default:
-                return this.extractGenericSportsData($);
+        case 'schedule':
+            return this.extractScheduleData($);
+        case 'facility':
+            return this.extractFacilityData($);
+        case 'event':
+            return this.extractEventData($);
+        default:
+            return this.extractGenericSportsData($);
         }
     }
 
     extractScheduleData($) {
         const schedules = [];
-        
+
         // Common schedule patterns
         const scheduleSelectors = [
             'table tr', '.schedule-item', '.program-item', '.class-item',
@@ -250,7 +246,7 @@ class AdvancedScraper {
 
     extractScheduleItem($item) {
         const text = $item.text().toLowerCase();
-        
+
         // Skip if not sports-related
         if (!this.isSportsRelated(text)) {
             return null;
@@ -262,12 +258,12 @@ class AdvancedScraper {
 
         // Extract sport type
         const sport = this.identifySport(text);
-        
+
         // Extract venue/location
         const venue = this.extractVenue($item);
 
         return {
-            title: $item.find('h1, h2, h3, h4, .title, .name').first().text().trim() || 
+            title: $item.find('h1, h2, h3, h4, .title, .name').first().text().trim() ||
                    $item.text().split('\n')[0].trim(),
             sport,
             venue,
@@ -318,7 +314,7 @@ class AdvancedScraper {
     // Check if activity is sports-related
     isSportsRelated(text) {
         const sportsKeywords = [
-            'basketball', 'soccer', 'volleyball', 'tennis', 'badminton', 
+            'basketball', 'soccer', 'volleyball', 'tennis', 'badminton',
             'hockey', 'swimming', 'fitness', 'baseball', 'running',
             'sport', 'athletic', 'gym', 'court', 'field', 'pool',
             'drop-in', 'pickup', 'recreational', 'game'
@@ -341,18 +337,18 @@ class AdvancedScraper {
     async applyRateLimit(domain) {
         const now = Date.now();
         const requests = this.requestCount.get(domain) || [];
-        
+
         // Remove requests older than 1 minute
         const recentRequests = requests.filter(time => now - time < 60000);
-        
+
         const limit = this.rateLimits.get(domain) || 30; // Default 30 requests per minute
-        
+
         if (recentRequests.length >= limit) {
             const oldestRequest = Math.min(...recentRequests);
             const waitTime = 60000 - (now - oldestRequest);
             await setTimeout(waitTime);
         }
-        
+
         recentRequests.push(now);
         this.requestCount.set(domain, recentRequests);
     }
@@ -369,11 +365,11 @@ class AdvancedScraper {
         const breaker = this.circuitBreakers.get(domain) || { failures: 0, lastFailure: 0, state: 'CLOSED' };
         breaker.failures++;
         breaker.lastFailure = Date.now();
-        
+
         if (breaker.failures >= 5) {
             breaker.state = 'OPEN';
         }
-        
+
         this.circuitBreakers.set(domain, breaker);
     }
 
@@ -382,14 +378,14 @@ class AdvancedScraper {
         if (!breaker || breaker.state === 'CLOSED') {
             return false;
         }
-        
+
         // Reset after 5 minutes
         if (Date.now() - breaker.lastFailure > 300000) {
             breaker.state = 'HALF_OPEN';
             breaker.failures = 0;
             return false;
         }
-        
+
         return breaker.state === 'OPEN';
     }
 
@@ -399,13 +395,13 @@ class AdvancedScraper {
             /\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Boulevard|Blvd)/gi,
             /[A-Za-z\s,]+,\s*[A-Z]{2}\s*\d{5}/g
         ];
-        
+
         const text = $element.text();
         for (const pattern of addressPatterns) {
             const match = text.match(pattern);
-            if (match) return match[0];
+            if (match) { return match[0]; }
         }
-        
+
         return null;
     }
 
@@ -424,19 +420,19 @@ class AdvancedScraper {
     extractVenue($item) {
         // Look for venue information in various places
         const venueSelectors = ['.venue', '.location', '.facility', '.centre', '.center'];
-        
+
         for (const selector of venueSelectors) {
             const venue = $item.find(selector).text().trim();
-            if (venue) return venue;
+            if (venue) { return venue; }
         }
-        
+
         // Extract from parent elements
         const parent = $item.parent();
         const headerText = parent.find('h1, h2, h3').first().text().trim();
         if (headerText && headerText.length < 100) {
             return headerText;
         }
-        
+
         return null;
     }
 

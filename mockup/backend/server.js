@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
     setTimeout(() => {
         console.log('Starting data aggregation pipeline...');
         dataPipeline.start();
-        
+
         // Initialize swarm after pipeline starts
         setTimeout(async () => {
             try {
@@ -444,22 +444,7 @@ app.post('/api/games', authenticateToken, (req, res) => {
     });
 });
 
-// IMPORTANT: Catch-all route - serve index.html for client-side routing
-app.get('*', (req, res) => {
-    // Don't serve index for API routes
-    if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'Not found' });
-    }
-
-    // Serve the appropriate HTML file
-    if (req.path.includes('login')) {
-        res.sendFile(path.join(__dirname, '..', 'login-google.html'));
-    } else if (req.path.includes('onboarding')) {
-        res.sendFile(path.join(__dirname, '..', 'onboarding', 'index.html'));
-    } else {
-        res.sendFile(path.join(__dirname, '..', 'index.html'));
-    }
-});
+// Note: Catch-all route moved to after swarm initialization
 
 // WebSocket stats endpoint
 app.get('/api/ws/stats', (req, res) => {

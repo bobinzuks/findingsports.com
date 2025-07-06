@@ -53,7 +53,7 @@ class SportsSourceDiscovery {
                 region: 'vancouver',
                 specialties: ['volleyball', 'basketball', 'fitness']
             },
-            
+
             // Richmond
             {
                 name: 'Richmond Community Services',
@@ -72,7 +72,7 @@ class SportsSourceDiscovery {
                 region: 'richmond',
                 specialties: ['basketball', 'volleyball', 'badminton', 'fitness', 'running']
             },
-            
+
             // Burnaby
             {
                 name: 'Burnaby Parks and Recreation',
@@ -90,7 +90,7 @@ class SportsSourceDiscovery {
                 region: 'burnaby',
                 specialties: ['soccer', 'track_and_field']
             },
-            
+
             // Surrey
             {
                 name: 'Surrey Recreation',
@@ -101,7 +101,7 @@ class SportsSourceDiscovery {
                     programs: 'https://www.surrey.ca/culture-recreation/recreation/programs-activities'
                 }
             },
-            
+
             // Coquitlam
             {
                 name: 'Coquitlam Recreation',
@@ -109,7 +109,7 @@ class SportsSourceDiscovery {
                 type: 'recreation_center',
                 region: 'coquitlam'
             },
-            
+
             // North Vancouver
             {
                 name: 'North Vancouver Recreation',
@@ -117,7 +117,7 @@ class SportsSourceDiscovery {
                 type: 'recreation_center',
                 region: 'north-vancouver'
             },
-            
+
             // West Vancouver
             {
                 name: 'West Vancouver Community Services',
@@ -292,7 +292,7 @@ class SportsSourceDiscovery {
                 api_available: true,
                 search_terms: [
                     'basketball vancouver',
-                    'soccer vancouver', 
+                    'soccer vancouver',
                     'volleyball vancouver',
                     'drop-in sports vancouver',
                     'pickup basketball',
@@ -323,7 +323,7 @@ class SportsSourceDiscovery {
                 type: 'social_platform',
                 subreddits: [
                     'r/vancouver',
-                    'r/vancouversports', 
+                    'r/vancouversports',
                     'r/pickup_basketball',
                     'r/vancouverfc'
                 ]
@@ -393,16 +393,14 @@ class SportsSourceDiscovery {
     // Generate scraping targets based on user location
     getSourcesForLocation(lat, lng, radius = 25) {
         const relevantSources = [];
-        
+
         for (const [name, source] of this.sources) {
             if (this.isSourceRelevant(source, lat, lng, radius)) {
                 relevantSources.push(source);
             }
         }
 
-        return relevantSources.sort((a, b) => {
-            return this.calculatePriority(b) - this.calculatePriority(a);
-        });
+        return relevantSources.sort((a, b) => this.calculatePriority(b) - this.calculatePriority(a));
     }
 
     isSourceRelevant(source, lat, lng, radius) {
@@ -418,21 +416,21 @@ class SportsSourceDiscovery {
 
     calculatePriority(source) {
         let priority = 0;
-        
+
         // API availability increases priority
-        if (source.api_available) priority += 50;
-        if (source.endpoints) priority += 30;
-        
+        if (source.api_available) { priority += 50; }
+        if (source.endpoints) { priority += 30; }
+
         // Public access increases priority
-        if (source.public_access !== false) priority += 20;
-        
+        if (source.public_access !== false) { priority += 20; }
+
         // Real-time data sources get higher priority
-        if (source.type === 'social_platform') priority += 40;
-        if (source.type === 'sports_app') priority += 35;
-        
+        if (source.type === 'social_platform') { priority += 40; }
+        if (source.type === 'sports_app') { priority += 35; }
+
         // Government sources are reliable
-        if (source.type === 'government' || source.type === 'recreation_center') priority += 25;
-        
+        if (source.type === 'government' || source.type === 'recreation_center') { priority += 25; }
+
         return priority;
     }
 
@@ -465,20 +463,20 @@ class SportsSourceDiscovery {
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
 
     isWithinMetroArea(sourceRegion, userCity) {
         const metroVancouver = [
-            'vancouver', 'burnaby', 'richmond', 'surrey', 
-            'coquitlam', 'north-vancouver', 'west-vancouver', 
+            'vancouver', 'burnaby', 'richmond', 'surrey',
+            'coquitlam', 'north-vancouver', 'west-vancouver',
             'delta', 'langley', 'maple-ridge'
         ];
-        
+
         return metroVancouver.includes(sourceRegion) && metroVancouver.includes(userCity);
     }
 
@@ -507,12 +505,12 @@ class SportsSourceDiscovery {
 
     getUpdateFrequencies() {
         return {
-            'social_platform': '5 minutes',
-            'sports_app': '10 minutes', 
-            'recreation_center': '30 minutes',
-            'university_recreation': '60 minutes',
-            'government': '4 hours',
-            'sports_organization': '12 hours'
+            social_platform: '5 minutes',
+            sports_app: '10 minutes',
+            recreation_center: '30 minutes',
+            university_recreation: '60 minutes',
+            government: '4 hours',
+            sports_organization: '12 hours'
         };
     }
 
@@ -528,7 +526,7 @@ class SportsSourceDiscovery {
 
     // Get sources by region
     getSourcesByRegion(region) {
-        return Array.from(this.sources.values()).filter(source => 
+        return Array.from(this.sources.values()).filter(source =>
             source.region === region || source.region === 'multiple' || source.region === 'bc'
         );
     }

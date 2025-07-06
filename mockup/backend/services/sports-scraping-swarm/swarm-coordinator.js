@@ -7,7 +7,7 @@ const SportsSourceDiscovery = require('./source-discovery');
 class SportsScrapingSwarmCoordinator extends EventEmitter {
     constructor() {
         super();
-        
+
         // Initialize all 10 agents
         this.agents = {
             architect: this, // System architecture coordination
@@ -31,38 +31,37 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
             averageResponseTime: 0,
             successRate: 0
         };
-        
+
         this.activeRegions = new Set();
         this.userRequests = new Map();
-        
+
         console.log('🏀 Sports Scraping Swarm Coordinator initialized');
     }
 
     // Initialize the entire swarm
     async initializeSwarm() {
         console.log('🚀 Initializing 10-Agent Sports Scraping Swarm...');
-        
+
         try {
             // Phase 1: Architecture & Discovery (Agents 1, 4, 10)
             await this.phase1_ArchitectureDiscovery();
-            
+
             // Phase 2: Infrastructure (Agents 2, 3, 6)
             await this.phase2_Infrastructure();
-            
+
             // Phase 3: Integration (Agents 5, 8, 9)
             await this.phase3_Integration();
-            
+
             // Phase 4: Monitoring & Security (Agent 7, 10)
             await this.phase4_MonitoringSecurity();
-            
+
             // Phase 5: Full Deployment
             await this.phase5_Deployment();
-            
+
             this.swarmStatus = 'active';
             console.log('✅ Sports Scraping Swarm fully deployed and active!');
-            
+
             return this.getSwarmStatus();
-            
         } catch (error) {
             console.error('❌ Swarm initialization failed:', error);
             this.swarmStatus = 'failed';
@@ -73,15 +72,15 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Phase 1: Architecture and Source Discovery
     async phase1_ArchitectureDiscovery() {
         console.log('📋 Phase 1: Architecture & Source Discovery');
-        
+
         // Agent 4: Sports Domain Expert - Initialize source discovery
         this.agents.sportsExpert.initializeSources();
         const allSources = this.agents.sportsExpert.getAllSources();
         console.log(`🎯 Discovered ${allSources.length} potential sources`);
-        
+
         // Agent 1: System Architect - Plan data flow
         this.planDataArchitecture(allSources);
-        
+
         this.metrics.totalSources = allSources.length;
         console.log('✅ Phase 1 complete');
     }
@@ -89,55 +88,55 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Phase 2: Infrastructure Setup
     async phase2_Infrastructure() {
         console.log('🏗️ Phase 2: Infrastructure Setup');
-        
+
         // Agent 2 & 6: Initialize mega scraper orchestrator
         await this.agents.webScraper.initialize();
-        
+
         // Agent 3: Data Engineer - Setup data processing pipeline
         this.setupDataProcessingPipeline();
-        
+
         console.log('✅ Phase 2 complete');
     }
 
     // Phase 3: Integration Setup
     async phase3_Integration() {
         console.log('🔗 Phase 3: Integration Setup');
-        
+
         // Agent 8: Integration Engineer - Initialize API integrations
         this.agents.integrationEngineer.initializeIntegrations();
-        
+
         // Agent 5: Location Specialist - Setup geocoding
         this.setupLocationServices();
-        
+
         // Agent 9: ML Engineer - Initialize intelligent extraction
         this.setupMLProcessing();
-        
+
         console.log('✅ Phase 3 complete');
     }
 
     // Phase 4: Monitoring and Security
     async phase4_MonitoringSecurity() {
         console.log('🛡️ Phase 4: Monitoring & Security');
-        
+
         // Agent 7: Monitoring Specialist
         this.setupMonitoring();
-        
+
         // Agent 10: Security Specialist
         this.setupSecurityCompliance();
-        
+
         console.log('✅ Phase 4 complete');
     }
 
     // Phase 5: Full Deployment
     async phase5_Deployment() {
         console.log('🚀 Phase 5: Full Deployment');
-        
+
         // Start coordination between all agents
         this.startAgentCoordination();
-        
+
         // Begin initial data collection
         await this.performInitialDataCollection();
-        
+
         console.log('✅ Phase 5 complete - Swarm is fully operational');
     }
 
@@ -171,7 +170,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Setup data processing pipeline (Agent 3: Data Engineer)
     setupDataProcessingPipeline() {
         console.log('⚙️ Setting up data processing pipeline...');
-        
+
         // Initialize data quality checks
         this.dataQuality = {
             deduplication: true,
@@ -194,7 +193,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Setup location services (Agent 5: Location Specialist)
     setupLocationServices() {
         console.log('📍 Setting up location services...');
-        
+
         this.locationServices = {
             geocoding: 'enabled',
             reverseGeocoding: 'enabled',
@@ -208,7 +207,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Setup ML processing (Agent 9: ML/AI Engineer)
     setupMLProcessing() {
         console.log('🤖 Setting up ML processing...');
-        
+
         this.mlCapabilities = {
             sportClassification: 'enabled',
             scheduleExtraction: 'enabled',
@@ -223,7 +222,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Setup monitoring (Agent 7: Monitoring Specialist)
     setupMonitoring() {
         console.log('📊 Setting up monitoring...');
-        
+
         this.monitoring = {
             healthChecks: setInterval(() => this.performHealthCheck(), 60000),
             metrics: setInterval(() => this.updateMetrics(), 30000),
@@ -236,7 +235,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Setup security compliance (Agent 10: Security Specialist)
     setupSecurityCompliance() {
         console.log('🔒 Setting up security compliance...');
-        
+
         this.securityPolicies = {
             rateLimiting: 'enforced',
             robotsTxt: 'respected',
@@ -251,13 +250,13 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Start coordination between agents
     startAgentCoordination() {
         console.log('🤝 Starting agent coordination...');
-        
+
         // Setup event listeners between agents
-        this.agents.webScraper.on('taskComplete', (data) => {
+        this.agents.webScraper.on('taskComplete', data => {
             this.handleScrapingComplete(data);
         });
 
-        this.agents.integrationEngineer.on('realTimeUpdate', (data) => {
+        this.agents.integrationEngineer.on('realTimeUpdate', data => {
             this.handleRealTimeUpdate(data);
         });
 
@@ -267,7 +266,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Perform initial data collection
     async performInitialDataCollection() {
         console.log('📥 Starting initial data collection...');
-        
+
         // Start with major metro areas
         const majorLocations = [
             { name: 'Vancouver', lat: 49.2827, lng: -123.1207 },
@@ -287,9 +286,9 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Main entry point: Comprehensively scrape all sources for a location
     async scrapeLocationComprehensively(lat, lng, userSports = [], urgency = 'normal') {
         console.log(`🎯 Starting comprehensive scraping for location: ${lat}, ${lng}`);
-        
+
         const startTime = Date.now();
-        
+
         try {
             // Phase 1: Get relevant sources (Agent 4: Sports Expert)
             const sources = this.agents.sportsExpert.getSourcesForLocation(lat, lng, 25);
@@ -340,10 +339,9 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
                 duration,
                 metrics: this.metrics
             };
-
         } catch (error) {
             console.error('❌ Comprehensive scraping failed:', error);
-            
+
             this.emit('scrapingFailed', {
                 location: { lat, lng },
                 error: error.message,
@@ -357,7 +355,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Combine and process results from all sources
     async combineAndProcessResults(apiResults, scrapingResults, lat, lng) {
         console.log('🔄 Combining and processing results...');
-        
+
         const allGames = [];
 
         // Process API results
@@ -419,9 +417,9 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
 
     // Validate game data
     isValidGame(game) {
-        return game && 
-               game.title && 
-               game.sport && 
+        return game &&
+               game.title &&
+               game.sport &&
                (game.venue || game.location) &&
                (game.startTime || game.date);
     }
@@ -481,14 +479,14 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Filter games by proximity to user
     filterByProximity(games, lat, lng, radiusKm) {
         return games.filter(game => {
-            if (!game.venue.coordinates) return true; // Include games without coordinates
-            
+            if (!game.venue.coordinates) { return true; } // Include games without coordinates
+
             const distance = this.calculateDistance(
-                lat, lng, 
-                game.venue.coordinates.lat, 
+                lat, lng,
+                game.venue.coordinates.lat,
                 game.venue.coordinates.lng
             );
-            
+
             return distance <= radiusKm;
         });
     }
@@ -506,27 +504,27 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Calculate relevance score for sorting
     calculateRelevanceScore(game, lat, lng) {
         let score = 0;
-        
+
         // Distance factor (closer is better)
         if (game.venue.coordinates) {
             const distance = this.calculateDistance(lat, lng, game.venue.coordinates.lat, game.venue.coordinates.lng);
             score += Math.max(0, 50 - distance); // Max 50 points for distance
         }
-        
+
         // Time factor (sooner is better, but not too soon)
         if (game.startTime) {
             const now = new Date();
             const gameTime = new Date(game.startTime);
             const hoursUntil = (gameTime - now) / (1000 * 60 * 60);
-            
+
             if (hoursUntil > 0 && hoursUntil < 168) { // Within a week
                 score += Math.max(0, 30 - Math.abs(hoursUntil - 24)); // Optimal at 24 hours
             }
         }
-        
+
         // Source reliability
         score += (game.reliability || 0.5) * 20;
-        
+
         return score;
     }
 
@@ -538,21 +536,21 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
 
     normalizeSportName(sport) {
         const mapping = {
-            'bball': 'basketball',
-            'vball': 'volleyball',
-            'football': 'soccer',
-            'futbol': 'soccer'
+            bball: 'basketball',
+            vball: 'volleyball',
+            football: 'soccer',
+            futbol: 'soccer'
         };
         return mapping[sport?.toLowerCase()] || sport?.toLowerCase() || 'general';
     }
 
     normalizeDateTime(dateTime) {
-        if (!dateTime) return null;
+        if (!dateTime) { return null; }
         return new Date(dateTime).toISOString();
     }
 
     normalizePrice(price) {
-        if (typeof price === 'number') return price;
+        if (typeof price === 'number') { return price; }
         if (typeof price === 'string') {
             const match = price.match(/[\d.]+/);
             return match ? parseFloat(match[0]) : 0;
@@ -562,11 +560,11 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
 
     calculateReliability(game) {
         let score = 0.5; // Base score
-        
-        if (game.source?.includes('api')) score += 0.3;
-        if (game.organizer?.name) score += 0.1;
-        if (game.venue?.coordinates) score += 0.1;
-        
+
+        if (game.source?.includes('api')) { score += 0.3; }
+        if (game.organizer?.name) { score += 0.1; }
+        if (game.venue?.coordinates) { score += 0.1; }
+
         return Math.min(1, score);
     }
 
@@ -574,10 +572,10 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
 
@@ -618,7 +616,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
         this.metrics.totalGames += gamesFound;
         this.metrics.activeSources = sourcesChecked;
         this.metrics.lastUpdate = new Date();
-        
+
         // Update average response time
         if (this.metrics.averageResponseTime === 0) {
             this.metrics.averageResponseTime = duration;
@@ -657,19 +655,19 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Shutdown swarm
     async shutdown() {
         console.log('🛑 Shutting down Sports Scraping Swarm...');
-        
+
         if (this.agents.webScraper) {
             await this.agents.webScraper.shutdown();
         }
-        
+
         if (this.monitoring?.healthChecks) {
             clearInterval(this.monitoring.healthChecks);
         }
-        
+
         if (this.monitoring?.metrics) {
             clearInterval(this.monitoring.metrics);
         }
-        
+
         this.swarmStatus = 'stopped';
         console.log('✅ Swarm shutdown complete');
     }
