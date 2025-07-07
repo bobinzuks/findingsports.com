@@ -7,12 +7,16 @@ const authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 let isGuest = !authToken;
 
-// Load API
-if (!window.api) {
-    const script = document.createElement('script');
-    script.src = 'js/api.js';
-    document.head.appendChild(script);
-}
+// Load API and page components
+const scriptsToLoad = ['js/api.js', 'js/play-now.js', 'js/drop-in-games.js', 'js/social-feed.js', 'js/leagues.js'];
+
+scriptsToLoad.forEach(src => {
+    if (!document.querySelector(`script[src="${src}"]`)) {
+        const script = document.createElement('script');
+        script.src = src;
+        document.head.appendChild(script);
+    }
+});
 
 // Game data
 const gamesData = {
@@ -91,13 +95,22 @@ const gamesData = {
     ]
 };
 
+// Current page state
+window.currentPage = 'play-now';
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    // Wait for API to load
+    // Wait for all scripts to load
     await new Promise(resolve => {
-        const checkAPI = setInterval(() => {
-            if (window.api) {
-                clearInterval(checkAPI);
+        const checkScripts = setInterval(() => {
+            if (
+                window.api &&
+                window.PlayNowPage &&
+                window.DropInGamesPage &&
+                window.SocialFeedPage &&
+                window.LeaguesPage
+            ) {
+                clearInterval(checkScripts);
                 resolve();
             }
         }, 100);
@@ -135,13 +148,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize location detection
     const locationResult = await window.initializeLocationDetection();
 
-    // Initialize map with detected location
-    const mapCenter = locationResult?.userLocation ?
-        [locationResult.userLocation.lat, locationResult.userLocation.lng] :
-        null;
-    window.initializeMap(mapCenter);
+    // Update navigation
+    window.updateNavigation();
 
-    window.loadGamesFromAPI();
+    // Initialize default page (Play Now)
+    window.switchPage('play-now');
 });
 
 // Initialize Leaflet map
@@ -178,7 +189,7 @@ window.initializeMap = function (userLocation) {
             const userMarker = L.marker(userLocation, {
                 icon: L.divIcon({
                     className: 'user-location-marker',
-                    html: '<div style="background-color: #2196F3; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(33, 150, 243, 0.5); border: 3px solid white;">📍</div>',
+                    html: '<div style="background-color: #2196F3; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(33, 150, 243, 0.5); border: 3px solid white; font-size: 10px;">•</div>',
                     iconSize: [22, 22],
                     iconAnchor: [11, 11]
                 })
@@ -186,7 +197,7 @@ window.initializeMap = function (userLocation) {
 
             userMarker.bindPopup(`
                 <div style="padding: 0.5rem; text-align: center;">
-                    <strong>📍 Your Location</strong><br>
+                    <strong>Your Location</strong><br>
                     ${window.locationService.userLocation.city || 'Current position'}
                 </div>
             `);
@@ -300,14 +311,14 @@ window.createGameCard = function (game) {
 // Get sport icon
 window.getSportIcon = function (sport) {
     const icons = {
-        basketball: '🏀',
-        soccer: '⚽',
-        volleyball: '🏐',
-        tennis: '🎾',
-        hockey: '🏒',
-        baseball: '⚾'
+        basketball: 'B',
+        soccer: 'S',
+        volleyball: 'V',
+        tennis: 'T',
+        hockey: 'H',
+        baseball: 'BB'
     };
-    return icons[sport] || '🏃';
+    return icons[sport] || 'SP';
 };
 
 // Search games
@@ -371,18 +382,79 @@ window.displayFilteredGames = function (location, games) {
     }
 };
 
-// Switch tabs
-window.switchTab = function switchTab(tab) {
+// Update navigation
+window.updateNavigation = function () {
+    const navElement = document.querySelector('.tabs');
+    if (!navElement) {
+        return;
+    }
+
+    navElement.innerHTML = `
+        <button class="tab" onclick="window.switchPage('play-now')">Play Now</button>
+        <button class="tab" onclick="window.switchPage('drop-in')">Drop-in Games</button>
+        <button class="tab" onclick="window.switchPage('social')">Social Feed</button>
+        <button class="tab" onclick="window.switchPage('leagues')">Leagues</button>
+    `;
+};
+
+// Switch between pages
+window.switchPage = async function (page) {
+    // Update current page
+    window.currentPage = page;
+
+    // Update active tab
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach((tab, index) => {
+        tab.classList.remove('active');
+        if (
+            (page === 'play-now' && index === 0) ||
+            (page === 'drop-in' && index === 1) ||
+            (page === 'social' && index === 2) ||
+            (page === 'leagues' && index === 3)
+        ) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Hide search section for non-map pages
+    const searchSection = document.querySelector('.search-section');
+    if (searchSection) {
+        searchSection.style.display = page === 'social' || page === 'leagues' ? 'none' : 'block';
+    }
+
+    // Switch page content
+    switch (page) {
+    case 'play-now':
+        window.PlayNowPage.render();
+        await window.PlayNowPage.initialize();
+        break;
+    case 'drop-in':
+        window.DropInGamesPage.render();
+        await window.DropInGamesPage.initialize();
+        break;
+    case 'social':
+        window.SocialFeedPage.render();
+        await window.SocialFeedPage.initialize();
+        break;
+    case 'leagues':
+        window.LeaguesPage.render();
+        await window.LeaguesPage.initialize();
+        break;
+    }
+};
+
+// Switch between main tabs (Social Feed, Upcoming Games, Sport Rules)
+window.switchTab = function (tab) {
+    // Update active tab
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(t => t.classList.remove('active'));
 
+    // Find and activate the correct tab
     if (tab === 'social') {
-        tabs[0].classList.add('active');
-        // Show social feed content
-        window.displayGames(document.getElementById('locationSelect').value);
-    } else {
-        tabs[1].classList.add('active');
-        // Show upcoming games
+        tabs[0]?.classList.add('active');
+        window.switchPage('social');
+    } else if (tab === 'upcoming') {
+        tabs[1]?.classList.add('active');
         window.showUpcomingGames();
     }
 };
@@ -391,6 +463,47 @@ window.switchTab = function switchTab(tab) {
 window.showUpcomingGames = function () {
     const gamesList = document.getElementById('gamesList');
     gamesList.innerHTML = '<h3 style="text-align: center; color: #b8bdd8;">Your upcoming games will appear here</h3>';
+};
+
+// Show/hide sport rules page
+window.showRulesPage = function () {
+    // Update active tab
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    tabs[2]?.classList.add('active'); // Sport Rules tab
+
+    // Show rules page, hide main app
+    if (typeof window.showRulesPage !== 'undefined') {
+        document.querySelector('.app-container').style.display = 'none';
+
+        // Create or show the sport rules container
+        let rulesContainer = document.getElementById('sport-rules-container');
+        if (!rulesContainer) {
+            // The sport-rules.js will handle creating the container
+            // We just need to trigger its initialization
+            if (window.sportRulesManager) {
+                window.sportRulesManager.createRulesInterface();
+            }
+        }
+
+        rulesContainer = document.getElementById('sport-rules-container');
+        if (rulesContainer) {
+            rulesContainer.style.display = 'block';
+        }
+    }
+};
+
+window.hideRulesPage = function () {
+    const rulesContainer = document.getElementById('sport-rules-container');
+    if (rulesContainer) {
+        rulesContainer.style.display = 'none';
+    }
+    document.querySelector('.app-container').style.display = 'block';
+
+    // Reset main tabs
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    tabs[0]?.classList.add('active'); // Social Feed tab
 };
 
 // Show game details
@@ -510,7 +623,7 @@ window.updateLocationDropdown = function (locationResult) {
     if (locationResult.currentCity) {
         const currentOption = document.createElement('option');
         currentOption.value = locationResult.currentCity.key;
-        currentOption.textContent = `📍 ${locationResult.currentCity.name} (Current)`;
+        currentOption.textContent = `${locationResult.currentCity.name} (Current)`;
         currentOption.selected = true;
         locationSelect.appendChild(currentOption);
     }
@@ -575,19 +688,19 @@ window.showLocationFeedback = function (currentCity, isFallback, detectedLocatio
 
     let message;
     if (isFallback) {
-        message = `📍 Location detection failed - showing ${currentCity.name}, BC`;
+        message = `Location detection failed - showing ${currentCity.name}, BC`;
     } else {
-        message = `📍 Location detected: ${currentCity.name}, BC`;
+        message = `Location detected: ${currentCity.name}, BC`;
 
         // Add detected city info if available and different
         if (detectedLocationInfo && detectedLocationInfo.detectedCity) {
             const { detectedCity } = detectedLocationInfo;
             if (detectedCity.toLowerCase() !== currentCity.name.toLowerCase()) {
-                message += `\n🌐 Your location: ${detectedCity}`;
+                message += `\nYour location: ${detectedCity}`;
                 if (detectedLocationInfo.detectedRegion) {
                     message += `, ${detectedLocationInfo.detectedRegion}`;
                 }
-                message += `\n🎯 Nearest sports hub: ${currentCity.name}`;
+                message += `\nNearest sports hub: ${currentCity.name}`;
             }
         }
     }
@@ -664,7 +777,7 @@ window.playNow = async function () {
     } finally {
         // Remove loading state
         playNowBtn.classList.remove('loading');
-        playNowBtn.textContent = '🚀 Play Now!';
+        playNowBtn.textContent = 'Play Now';
     }
 };
 
@@ -683,7 +796,6 @@ window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendat
     if (errorMessage) {
         gamesList.innerHTML = `
             <div style="text-align: center; padding: 3rem; color: #b8bdd8;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
                 <h3 style="margin-bottom: 1rem;">No Immediate Games</h3>
                 <p>${errorMessage}</p>
                 <button onclick="searchGames()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #ff6b35; color: white; border: none; border-radius: 8px; cursor: pointer;">
@@ -708,7 +820,7 @@ window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendat
         text-align: center;
     `;
     playNowHeader.innerHTML = `
-        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">🚀 Best Games Right Now</h3>
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">Best Games Right Now</h3>
         <p style="margin: 0; opacity: 0.9;">Games ranked by proximity and start time</p>
     `;
     gamesList.appendChild(playNowHeader);
@@ -719,7 +831,7 @@ window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendat
         gamesList.appendChild(gameCard);
 
         // Add marker to map
-        window.addGameMarker(game, '🏃‍♂️');
+        window.addGameMarker(game, 'P');
     });
 
     // Add recommendations section if available
@@ -838,8 +950,8 @@ window.addGameMarker = function (game, iconOverride) {
             <strong>${game.title}</strong><br>
             ${game.venue?.name || game.venue || game.location}<br>
             ${game.attendees || 0}${game.maxAttendees ? `/${game.maxAttendees}` : ''} players<br>
-            ${timeText ? `⏰ ${timeText}` : ''}
-            ${distanceText ? ` • 📍 ${distanceText}` : ''}
+            ${timeText ? `${timeText}` : ''}
+            ${distanceText ? ` • ${distanceText}` : ''}
         </div>
     `;
 
@@ -856,15 +968,15 @@ window.addRecommendationsSections = function (recommendations, gamesList) {
 
     // Other recommendations
     if (recommendations.soonestGames.length > 0) {
-        window.addRecommendationSection(gamesList, 'Soonest Games', recommendations.soonestGames.slice(0, 3), '⏰');
+        window.addRecommendationSection(gamesList, 'Soonest Games', recommendations.soonestGames.slice(0, 3), '');
     }
 
     if (recommendations.nearestGames.length > 0) {
-        window.addRecommendationSection(gamesList, 'Nearest Games', recommendations.nearestGames.slice(0, 3), '📍');
+        window.addRecommendationSection(gamesList, 'Nearest Games', recommendations.nearestGames.slice(0, 3), '');
     }
 
     if (recommendations.todayGames.length > 0) {
-        window.addRecommendationSection(gamesList, 'Today\'s Games', recommendations.todayGames.slice(0, 3), '📅');
+        window.addRecommendationSection(gamesList, 'Today\'s Games', recommendations.todayGames.slice(0, 3), '');
     }
 };
 
@@ -878,7 +990,7 @@ window.addRecommendationSection = function (gamesList, title, games, icon) {
         margin: 1rem 0 0.5rem 0;
         border-left: 3px solid #ff6b35;
     `;
-    sectionHeader.innerHTML = `<h4 style="margin: 0; color: #ff6b35;">${icon} ${title}</h4>`;
+    sectionHeader.innerHTML = `<h4 style="margin: 0; color: #ff6b35;">${title}</h4>`;
     gamesList.appendChild(sectionHeader);
 
     games.forEach(game => {
@@ -1145,10 +1257,10 @@ window.getUrgencyColor = function (urgency) {
 
 window.getUrgencyText = function (urgency) {
     if (urgency === 'urgent') {
-        return '🔥 Urgent';
+        return 'Urgent';
     }
     if (urgency === 'soon') {
-        return '⏰ Soon';
+        return 'Soon';
     }
-    return '✅ Good timing';
+    return 'Good timing';
 };

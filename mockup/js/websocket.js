@@ -105,6 +105,37 @@ class WebSocketClient {
             this.emit('notification', data);
             this.showNotification(data.message);
         });
+
+        // Chat-specific events
+        this.socket.on('chat-message', data => {
+            console.log('Chat message:', data);
+            this.emit('chat-message', data);
+        });
+
+        this.socket.on('user-typing', data => {
+            console.log('User typing:', data);
+            this.emit('user-typing', data);
+        });
+
+        this.socket.on('user-stopped-typing', data => {
+            console.log('User stopped typing:', data);
+            this.emit('user-stopped-typing', data);
+        });
+
+        this.socket.on('message-reaction', data => {
+            console.log('Message reaction:', data);
+            this.emit('message-reaction', data);
+        });
+
+        this.socket.on('user-online', data => {
+            console.log('User online:', data);
+            this.emit('user-online', data);
+        });
+
+        this.socket.on('user-offline', data => {
+            console.log('User offline:', data);
+            this.emit('user-offline', data);
+        });
     }
 
     // Authenticate with the server

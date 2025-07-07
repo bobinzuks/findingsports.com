@@ -92,7 +92,7 @@ class LocationSearchUI {
         modal.className = 'location-prompt-modal';
         modal.innerHTML = `
             <div class="location-prompt">
-                <h2>📍 Where are you looking for sports?</h2>
+                <h2>Where are you looking for sports?</h2>
                 <p>Help us find drop-in games in your area</p>
                 
                 <div class="location-form">
@@ -177,15 +177,15 @@ class LocationSearchUI {
         this.modal.innerHTML = `
             <div class="search-content">
                 <div class="search-header">
-                    <h2>🔍 Searching for Drop-in Sports</h2>
+                    <h2>Searching for Drop-in Sports</h2>
                     <h3>${searchData.location.city}, ${searchData.location.region}</h3>
                 </div>
                 
                 <div class="ai-agents-visual">
-                    <div class="agent-icon agent-1">🤖</div>
-                    <div class="agent-icon agent-2">🕷️</div>
-                    <div class="agent-icon agent-3">🔎</div>
-                    <div class="central-hub">🧠</div>
+                    <div class="agent-icon agent-1">A1</div>
+                    <div class="agent-icon agent-2">A2</div>
+                    <div class="agent-icon agent-3">A3</div>
+                    <div class="central-hub">HUB</div>
                 </div>
                 
                 <p class="search-message">Our AI agents are searching multiple sources for drop-in games...</p>
@@ -193,7 +193,7 @@ class LocationSearchUI {
                 <div class="progress-stages">
                     <div class="stage" data-stage="agents">
                         <div class="stage-header">
-                            <span class="stage-icon">🤖</span>
+                            <span class="stage-icon">•</span>
                             <span class="stage-name">Deploying Agents</span>
                             <span class="stage-status">0%</span>
                         </div>
@@ -204,7 +204,7 @@ class LocationSearchUI {
                     
                     <div class="stage" data-stage="search">
                         <div class="stage-header">
-                            <span class="stage-icon">🌐</span>
+                            <span class="stage-icon">•</span>
                             <span class="stage-name">Searching Sources</span>
                             <span class="stage-status">0%</span>
                         </div>
@@ -215,7 +215,7 @@ class LocationSearchUI {
                     
                     <div class="stage" data-stage="analysis">
                         <div class="stage-header">
-                            <span class="stage-icon">🧠</span>
+                            <span class="stage-icon">•</span>
                             <span class="stage-name">Analyzing Results</span>
                             <span class="stage-status">0%</span>
                         </div>
@@ -226,7 +226,7 @@ class LocationSearchUI {
                     
                     <div class="stage" data-stage="validation">
                         <div class="stage-header">
-                            <span class="stage-icon">✅</span>
+                            <span class="stage-icon">•</span>
                             <span class="stage-name">Validating Drop-ins</span>
                             <span class="stage-status">0%</span>
                         </div>
@@ -237,7 +237,7 @@ class LocationSearchUI {
                     
                     <div class="stage" data-stage="storage">
                         <div class="stage-header">
-                            <span class="stage-icon">💾</span>
+                            <span class="stage-icon">•</span>
                             <span class="stage-name">Saving Results</span>
                             <span class="stage-status">0%</span>
                         </div>
@@ -376,7 +376,7 @@ class LocationSearchUI {
         const content = this.modal.querySelector('.search-content');
         content.innerHTML = `
             <div class="search-complete">
-                <div class="success-icon">✅</div>
+                <div class="success-icon" style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;">COMPLETE</div>
                 <h2>Search Complete!</h2>
                 <h3>Found ${data.gamesFound} drop-in games in ${data.location.city}</h3>
                 <p>The page will refresh to show your results...</p>

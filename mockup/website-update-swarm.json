@@ -1,0 +1,121 @@
+{
+  "deployment": "website-update",
+  "timestamp": "2025-07-06T22:05:47.160Z",
+  "agents": [
+    {
+      "id": "logo-visual-agent",
+      "name": "Logo and Visual Design Agent",
+      "tasks": [
+        "Update logo implementation to use transparent background and make it larger",
+        "Match website font to logo font (appears to be bold/italic style)",
+        "Remove all emojis and exclamation marks from UI",
+        "Make buttons much darker grey (#1a1a1a)",
+        "Change tagline to \"Wherever, whenever\" in smaller size",
+        "Update sport icons to match dark theme colors",
+        "Ensure white/cream color (#f5f3ed) matches logo throughout"
+      ],
+      "files": [
+        "css/styles.css",
+        "index.html",
+        "js/app.js"
+      ]
+    },
+    {
+      "id": "main-page-agent",
+      "name": "Main Page Redesign Agent",
+      "tasks": [
+        "Redesign main page to auto-detect location",
+        "Add comprehensive sport selection dropdown",
+        "Show map with available fields for selected sport",
+        "Add prominent \"Play Now\" button",
+        "Integrate with field availability checking logic"
+      ],
+      "files": [
+        "index.html",
+        "js/app.js",
+        "js/location-service.js",
+        "js/play-now-service.js"
+      ]
+    },
+    {
+      "id": "dropin-games-agent",
+      "name": "Drop-in Games Page Agent",
+      "tasks": [
+        "Create new drop-in games page",
+        "Move current games functionality to new page",
+        "Keep the \"+ Submit a drop-in game\" button",
+        "Update navigation to reflect new structure",
+        "Ensure smooth transition from main page"
+      ],
+      "files": [
+        "dropin-games.html",
+        "js/dropin-games.js",
+        "index.html"
+      ]
+    },
+    {
+      "id": "social-feed-agent",
+      "name": "Social Feed Page Agent",
+      "tasks": [
+        "Create Discord-style chat interface",
+        "Implement blur effect for non-registered users",
+        "Add user registration/login requirement",
+        "Design marketplace section within social feed",
+        "Use real-time updates for chat messages"
+      ],
+      "files": [
+        "social-feed.html",
+        "js/social-feed.js",
+        "css/social-feed.css"
+      ]
+    },
+    {
+      "id": "leagues-rules-agent",
+      "name": "Leagues & Rules Pages Agent",
+      "tasks": [
+        "Create Leagues page showing current leagues",
+        "Add links to NVFC and Millars League",
+        "Create sport rules page with dropdown menus",
+        "Include game variations",
+        "Make content clean and easy to read"
+      ],
+      "files": [
+        "leagues.html",
+        "rules.html",
+        "js/leagues.js",
+        "js/rules.js"
+      ]
+    }
+  ],
+  "sportsList": [
+    "Any sport",
+    "Soccer",
+    "Basketball",
+    "Tennis",
+    "Badminton",
+    "Volleyball",
+    "Hockey",
+    "Football",
+    "Ping pong",
+    "Frisbee",
+    "Rugby",
+    "Tag",
+    "Baseball",
+    "Kabaddi",
+    "Softball",
+    "Cricket",
+    "Pickleball",
+    "Squash",
+    "Running",
+    "Cycling"
+  ],
+  "colorScheme": {
+    "primary": "#f4c542",
+    "secondary": "#f5f3ed",
+    "background": "#000000",
+    "darkGrey": "#1a1a1a",
+    "textLight": "#f5f3ed",
+    "textDark": "#000000"
+  },
+  "status": "active"
+}

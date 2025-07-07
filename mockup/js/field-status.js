@@ -37,7 +37,9 @@ class FieldStatusMonitor {
     }
 
     renderFieldStatus() {
-        if (!this.statusContainer) { return; }
+        if (!this.statusContainer) {
+            return;
+        }
 
         const fieldsArray = Array.from(this.fields.values());
 
@@ -63,9 +65,13 @@ class FieldStatusMonitor {
                     <span class="field-status-icon">${statusIcon}</span>
                 </div>
                 <div class="field-status">${field.status}</div>
-                ${field.nextAvailable ? `
+                ${
+    field.nextAvailable ?
+        `
                     <div class="next-available">Next available: ${field.nextAvailable}</div>
-                ` : ''}
+                ` :
+        ''
+}
                 <div class="field-type">${field.type || 'Field'}</div>
             </div>
         `;
@@ -86,13 +92,13 @@ class FieldStatusMonitor {
     getStatusIcon(status) {
         const statusLower = status.toLowerCase();
         if (statusLower.includes('open') || statusLower.includes('available')) {
-            return '✅';
+            return 'OPEN';
         } else if (statusLower.includes('closed') || statusLower.includes('unavailable')) {
-            return '❌';
+            return 'CLOSED';
         } else if (statusLower.includes('maintenance')) {
-            return '🔧';
+            return 'MAINT';
         }
-        return '❓';
+        return '?';
     }
 
     // Export field data to CSV (similar to Rust script)

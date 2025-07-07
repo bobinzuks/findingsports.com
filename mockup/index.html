@@ -20,7 +20,7 @@
                 <div class="header-content">
                     <div class="logo-section">
                         <img src="images/finding-sports-logo.png" alt="Finding Sports" class="logo-image" />
-                        <p class="tagline">Finding Sports near you—wherever, whenever.</p>
+                        <p class="tagline">Wherever, whenever</p>
                     </div>
                     <div class="user-menu header-right">
                         <!-- User menu will be populated by JavaScript -->
@@ -48,11 +48,23 @@
                     </select>
 
                     <button class="search-btn" onclick="searchGames()">Search</button>
-                    <button class="play-now-btn" onclick="playNow()">🚀 Play Now!</button>
+                    <button class="play-now-btn" onclick="playNow()">Play Now</button>
 
-                    <div style="text-align: center; margin-top: 1rem">
+                    <div
+                        style="
+                            text-align: center;
+                            margin-top: 1rem;
+                            display: flex;
+                            justify-content: center;
+                            gap: 2rem;
+                            flex-wrap: wrap;
+                        "
+                    >
                         <a href="/submit-game.html" style="color: #ff6b35; text-decoration: none; font-weight: 500">
-                            + Submit a Drop-in Game
+                            Submit a Drop-in Game
+                        </a>
+                        <a href="sport-rules.html" style="color: #f4c542; text-decoration: none; font-weight: 500">
+                            Sport Rules Guide
                         </a>
                     </div>
                 </div>
@@ -62,6 +74,7 @@
             <nav class="tabs">
                 <button class="tab active" onclick="switchTab('social')">Social Feed</button>
                 <button class="tab" onclick="switchTab('upcoming')">Upcoming Games</button>
+                <button class="tab" onclick="showRulesPage()">Sport Rules</button>
             </nav>
 
             <!-- Main Content Area -->
@@ -94,6 +107,11 @@
         <script src="js/location-search-ui.js"></script>
         <script src="js/location-service.js"></script>
         <script src="js/play-now-service.js"></script>
+        <script src="js/play-now.js"></script>
+        <script src="js/drop-in-games.js"></script>
+        <script src="js/social-feed.js"></script>
+        <script src="js/leagues.js"></script>
+        <script src="js/sport-rules.js"></script>
         <script src="js/app.js"></script>
     </body>
 </html>

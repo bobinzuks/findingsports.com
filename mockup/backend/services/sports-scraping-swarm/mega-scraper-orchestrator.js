@@ -178,12 +178,12 @@ class MegaScraperOrchestrator extends EventEmitter {
     // Handle messages from workers
     handleWorkerMessage(worker, message) {
         switch (message.type) {
-        case 'TASK_COMPLETE':
-            this.handleTaskComplete(worker, message);
-            break;
-        case 'TASK_FAILED':
-            this.handleTaskFailed(worker, message);
-            break;
+            case 'TASK_COMPLETE':
+                this.handleTaskComplete(worker, message);
+                break;
+            case 'TASK_FAILED':
+                this.handleTaskFailed(worker, message);
+                break;
         }
     }
 
@@ -243,13 +243,15 @@ class MegaScraperOrchestrator extends EventEmitter {
         console.log(`📊 Found ${sources.length} relevant sources`);
 
         // Filter by user's sports interests
-        const filteredSources = userSports.length > 0 ?
-            sources.filter(source =>
-                !source.specialties ||
-                source.specialties.some(sport => userSports.includes(sport)) ||
-                source.specialties.includes('all_sports')
-            ) :
-            sources;
+        const filteredSources =
+            userSports.length > 0
+                ? sources.filter(
+                      source =>
+                          !source.specialties ||
+                          source.specialties.some(sport => userSports.includes(sport)) ||
+                          source.specialties.includes('all_sports')
+                  )
+                : sources;
 
         // Create scraping tasks
         const tasks = this.createScrapingTasks(filteredSources);
@@ -424,11 +426,15 @@ class MegaScraperOrchestrator extends EventEmitter {
 
         console.log(`📊 Scraper Metrics (${runtimeHours}h runtime):`);
         console.log(`   Sources processed: ${this.metrics.successfulScrapes + this.metrics.failedScrapes}`);
-        console.log(`   Success rate: ${((this.metrics.successfulScrapes / (this.metrics.successfulScrapes + this.metrics.failedScrapes)) * 100).toFixed(1)}%`);
+        console.log(
+            `   Success rate: ${((this.metrics.successfulScrapes / (this.metrics.successfulScrapes + this.metrics.failedScrapes)) * 100).toFixed(1)}%`
+        );
         console.log(`   Games found: ${this.metrics.totalGamesFound}`);
         console.log(`   Avg response time: ${this.metrics.averageResponseTime}ms`);
         console.log(`   Active jobs: ${this.activeJobs.size}`);
-        console.log(`   Queue sizes: C:${this.priorityQueues.critical.length} H:${this.priorityQueues.high.length} M:${this.priorityQueues.medium.length} L:${this.priorityQueues.low.length}`);
+        console.log(
+            `   Queue sizes: C:${this.priorityQueues.critical.length} H:${this.priorityQueues.high.length} M:${this.priorityQueues.medium.length} L:${this.priorityQueues.low.length}`
+        );
     }
 
     // Check for stuck jobs and restart them
@@ -469,7 +475,7 @@ class MegaScraperOrchestrator extends EventEmitter {
     updateAverageResponseTime(responseTime) {
         const totalScrapes = this.metrics.successfulScrapes + this.metrics.failedScrapes;
         this.metrics.averageResponseTime =
-            ((this.metrics.averageResponseTime * (totalScrapes - 1)) + responseTime) / totalScrapes;
+            (this.metrics.averageResponseTime * (totalScrapes - 1) + responseTime) / totalScrapes;
     }
 
     // Estimate completion time
@@ -519,11 +525,13 @@ class MegaScraperOrchestrator extends EventEmitter {
 
         for (const result of this.completedJobs.values()) {
             if (result.games && Array.isArray(result.games)) {
-                allGames.push(...result.games.map(game => ({
-                    ...game,
-                    source: result.source,
-                    scrapedAt: result.timestamp || Date.now()
-                })));
+                allGames.push(
+                    ...result.games.map(game => ({
+                        ...game,
+                        source: result.source,
+                        scrapedAt: result.timestamp || Date.now()
+                    }))
+                );
             }
         }
 

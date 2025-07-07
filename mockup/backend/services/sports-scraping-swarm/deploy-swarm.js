@@ -51,7 +51,10 @@ class SwarmDeployment {
     setupEventListeners() {
         this.swarm.on('scrapingComplete', data => {
             console.log(`✅ Location scraping complete: ${data.games.length} games found in ${data.duration}ms`);
-            this.logDeployment('INFO', `Scraped ${data.games.length} games for location ${data.location.lat}, ${data.location.lng}`);
+            this.logDeployment(
+                'INFO',
+                `Scraped ${data.games.length} games for location ${data.location.lat}, ${data.location.lng}`
+            );
         });
 
         this.swarm.on('realTimeUpdate', data => {
@@ -124,16 +127,21 @@ class SwarmDeployment {
 
     // Start monitoring deployment health
     startDeploymentMonitoring() {
-        setInterval(() => {
-            const status = this.swarm.getSwarmStatus();
+        setInterval(
+            () => {
+                const status = this.swarm.getSwarmStatus();
 
-            if (status.status !== 'active') {
-                console.warn('⚠️ Swarm status warning:', status.status);
-            }
+                if (status.status !== 'active') {
+                    console.warn('⚠️ Swarm status warning:', status.status);
+                }
 
-            // Log metrics every 5 minutes
-            console.log(`📊 Swarm Metrics: ${status.metrics.totalGames} total games, ${status.metrics.activeSources} active sources`);
-        }, 5 * 60 * 1000); // Every 5 minutes
+                // Log metrics every 5 minutes
+                console.log(
+                    `📊 Swarm Metrics: ${status.metrics.totalGames} total games, ${status.metrics.activeSources} active sources`
+                );
+            },
+            5 * 60 * 1000
+        ); // Every 5 minutes
     }
 
     // Log deployment events
@@ -185,12 +193,7 @@ class SwarmDeployment {
             console.log('----------------------------');
 
             try {
-                const result = await this.scrapeForUser(
-                    location.lat,
-                    location.lng,
-                    location.sports,
-                    'demo'
-                );
+                const result = await this.scrapeForUser(location.lat, location.lng, location.sports, 'demo');
 
                 results.push({
                     location: location.name,

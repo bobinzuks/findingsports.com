@@ -207,14 +207,14 @@ class AdvancedScraper {
         const $ = cheerio.load(html);
 
         switch (type) {
-        case 'schedule':
-            return this.extractScheduleData($);
-        case 'facility':
-            return this.extractFacilityData($);
-        case 'event':
-            return this.extractEventData($);
-        default:
-            return this.extractGenericSportsData($);
+            case 'schedule':
+                return this.extractScheduleData($);
+            case 'facility':
+                return this.extractFacilityData($);
+            case 'event':
+                return this.extractEventData($);
+            default:
+                return this.extractGenericSportsData($);
         }
     }
 
@@ -223,8 +223,13 @@ class AdvancedScraper {
 
         // Common schedule patterns
         const scheduleSelectors = [
-            'table tr', '.schedule-item', '.program-item', '.class-item',
-            '[class*="schedule"]', '[class*="program"]', '[class*="activity"]'
+            'table tr',
+            '.schedule-item',
+            '.program-item',
+            '.class-item',
+            '[class*="schedule"]',
+            '[class*="program"]',
+            '[class*="activity"]'
         ];
 
         for (const selector of scheduleSelectors) {
@@ -263,8 +268,8 @@ class AdvancedScraper {
         const venue = this.extractVenue($item);
 
         return {
-            title: $item.find('h1, h2, h3, h4, .title, .name').first().text().trim() ||
-                   $item.text().split('\n')[0].trim(),
+            title:
+                $item.find('h1, h2, h3, h4, .title, .name').first().text().trim() || $item.text().split('\n')[0].trim(),
             sport,
             venue,
             times,
@@ -275,16 +280,18 @@ class AdvancedScraper {
     }
 
     extractFacilityData($) {
-        return $('.facility, .location, .venue, [class*="facility"]').map((i, el) => {
-            const $facility = $(el);
-            return {
-                name: $facility.find('.name, h1, h2, h3').first().text().trim(),
-                address: this.extractAddress($facility),
-                hours: this.extractHours($facility),
-                amenities: this.extractAmenities($facility),
-                sports: this.extractSupportedSports($facility)
-            };
-        }).get();
+        return $('.facility, .location, .venue, [class*="facility"]')
+            .map((i, el) => {
+                const $facility = $(el);
+                return {
+                    name: $facility.find('.name, h1, h2, h3').first().text().trim(),
+                    address: this.extractAddress($facility),
+                    hours: this.extractHours($facility),
+                    amenities: this.extractAmenities($facility),
+                    sports: this.extractSupportedSports($facility)
+                };
+            })
+            .get();
     }
 
     // Sport identification using keywords
@@ -314,10 +321,26 @@ class AdvancedScraper {
     // Check if activity is sports-related
     isSportsRelated(text) {
         const sportsKeywords = [
-            'basketball', 'soccer', 'volleyball', 'tennis', 'badminton',
-            'hockey', 'swimming', 'fitness', 'baseball', 'running',
-            'sport', 'athletic', 'gym', 'court', 'field', 'pool',
-            'drop-in', 'pickup', 'recreational', 'game'
+            'basketball',
+            'soccer',
+            'volleyball',
+            'tennis',
+            'badminton',
+            'hockey',
+            'swimming',
+            'fitness',
+            'baseball',
+            'running',
+            'sport',
+            'athletic',
+            'gym',
+            'court',
+            'field',
+            'pool',
+            'drop-in',
+            'pickup',
+            'recreational',
+            'game'
         ];
 
         return sportsKeywords.some(keyword => text.includes(keyword));
@@ -326,8 +349,15 @@ class AdvancedScraper {
     // Check if activity is drop-in
     isDropIn(text) {
         const dropInKeywords = [
-            'drop-in', 'drop in', 'dropin', 'walk-in', 'pickup',
-            'open gym', 'recreational', 'casual', 'public'
+            'drop-in',
+            'drop in',
+            'dropin',
+            'walk-in',
+            'pickup',
+            'open gym',
+            'recreational',
+            'casual',
+            'public'
         ];
 
         return dropInKeywords.some(keyword => text.includes(keyword));
@@ -399,7 +429,9 @@ class AdvancedScraper {
         const text = $element.text();
         for (const pattern of addressPatterns) {
             const match = text.match(pattern);
-            if (match) { return match[0]; }
+            if (match) {
+                return match[0];
+            }
         }
 
         return null;
@@ -423,7 +455,9 @@ class AdvancedScraper {
 
         for (const selector of venueSelectors) {
             const venue = $item.find(selector).text().trim();
-            if (venue) { return venue; }
+            if (venue) {
+                return venue;
+            }
         }
 
         // Extract from parent elements

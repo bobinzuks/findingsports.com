@@ -2,8 +2,30 @@
 class SportsSourceDiscovery {
     constructor() {
         this.sources = new Map();
-        this.regions = ['vancouver', 'burnaby', 'richmond', 'surrey', 'coquitlam', 'north-vancouver', 'west-vancouver', 'delta', 'langley', 'maple-ridge'];
-        this.sports = ['basketball', 'soccer', 'volleyball', 'tennis', 'badminton', 'hockey', 'baseball', 'swimming', 'fitness', 'martial-arts'];
+        this.regions = [
+            'vancouver',
+            'burnaby',
+            'richmond',
+            'surrey',
+            'coquitlam',
+            'north-vancouver',
+            'west-vancouver',
+            'delta',
+            'langley',
+            'maple-ridge'
+        ];
+        this.sports = [
+            'basketball',
+            'soccer',
+            'volleyball',
+            'tennis',
+            'badminton',
+            'hockey',
+            'baseball',
+            'swimming',
+            'fitness',
+            'martial-arts'
+        ];
     }
 
     // Comprehensive source mapping for British Columbia
@@ -345,11 +367,7 @@ class SportsSourceDiscovery {
                 url: 'https://www.facebook.com/events/',
                 type: 'social_platform',
                 region: 'multiple',
-                search_terms: [
-                    'drop in basketball vancouver',
-                    'pickup soccer vancouver',
-                    'recreational volleyball'
-                ]
+                search_terms: ['drop in basketball vancouver', 'pickup soccer vancouver', 'recreational volleyball']
             },
             {
                 name: 'Eventbrite Sports',
@@ -362,12 +380,7 @@ class SportsSourceDiscovery {
                 name: 'Reddit Local Sports',
                 url: 'https://www.reddit.com/',
                 type: 'social_platform',
-                subreddits: [
-                    'r/vancouver',
-                    'r/vancouversports',
-                    'r/pickup_basketball',
-                    'r/vancouverfc'
-                ]
+                subreddits: ['r/vancouver', 'r/vancouversports', 'r/pickup_basketball', 'r/vancouverfc']
             }
         ];
 
@@ -459,18 +472,30 @@ class SportsSourceDiscovery {
         let priority = 0;
 
         // API availability increases priority
-        if (source.api_available) { priority += 50; }
-        if (source.endpoints) { priority += 30; }
+        if (source.api_available) {
+            priority += 50;
+        }
+        if (source.endpoints) {
+            priority += 30;
+        }
 
         // Public access increases priority
-        if (source.public_access !== false) { priority += 20; }
+        if (source.public_access !== false) {
+            priority += 20;
+        }
 
         // Real-time data sources get higher priority
-        if (source.type === 'social_platform') { priority += 40; }
-        if (source.type === 'sports_app') { priority += 35; }
+        if (source.type === 'social_platform') {
+            priority += 40;
+        }
+        if (source.type === 'sports_app') {
+            priority += 35;
+        }
 
         // Government sources are reliable
-        if (source.type === 'government' || source.type === 'recreation_center') { priority += 25; }
+        if (source.type === 'government' || source.type === 'recreation_center') {
+            priority += 25;
+        }
 
         return priority;
     }
@@ -502,20 +527,30 @@ class SportsSourceDiscovery {
 
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLng = ((lng2 - lng1) * Math.PI) / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLng / 2) *
+                Math.sin(dLng / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
 
     isWithinMetroArea(sourceRegion, userCity) {
         const metroVancouver = [
-            'vancouver', 'burnaby', 'richmond', 'surrey',
-            'coquitlam', 'north-vancouver', 'west-vancouver',
-            'delta', 'langley', 'maple-ridge'
+            'vancouver',
+            'burnaby',
+            'richmond',
+            'surrey',
+            'coquitlam',
+            'north-vancouver',
+            'west-vancouver',
+            'delta',
+            'langley',
+            'maple-ridge'
         ];
 
         return metroVancouver.includes(sourceRegion) && metroVancouver.includes(userCity);
@@ -567,8 +602,8 @@ class SportsSourceDiscovery {
 
     // Get sources by region
     getSourcesByRegion(region) {
-        return Array.from(this.sources.values()).filter(source =>
-            source.region === region || source.region === 'multiple' || source.region === 'bc'
+        return Array.from(this.sources.values()).filter(
+            source => source.region === region || source.region === 'multiple' || source.region === 'bc'
         );
     }
 }

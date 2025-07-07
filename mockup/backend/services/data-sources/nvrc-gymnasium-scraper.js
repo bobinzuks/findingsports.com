@@ -23,7 +23,7 @@ class NVRCGymnasiumScraper {
             // First, look for embedded JSON data from Leaflet maps
             const scriptTags = $('script').get();
             let facilitiesData = [];
-            
+
             for (const script of scriptTags) {
                 const scriptContent = $(script).html();
                 if (scriptContent && scriptContent.includes('facilities') && scriptContent.includes('lat')) {
@@ -54,39 +54,46 @@ class NVRCGymnasiumScraper {
             }
 
             // Fallback to HTML parsing with more robust selectors
-            $('.facility-item, .location-item, .gym-facility, .content-wrapper div, .field-content').each((index, element) => {
-                const $elem = $(element);
+            $('.facility-item, .location-item, .gym-facility, .content-wrapper div, .field-content').each(
+                (index, element) => {
+                    const $elem = $(element);
 
-                // Try multiple selectors for facility names
-                const facilityName = $elem.find('.facility-title, .location-name, h3, h4, h2, .field-title').first().text().trim() ||
-                                   $elem.find('strong, b').first().text().trim() ||
-                                   $elem.find('.field-name, .location-title').first().text().trim();
+                    // Try multiple selectors for facility names
+                    const facilityName =
+                        $elem.find('.facility-title, .location-name, h3, h4, h2, .field-title').first().text().trim() ||
+                        $elem.find('strong, b').first().text().trim() ||
+                        $elem.find('.field-name, .location-title').first().text().trim();
 
-                // Try multiple selectors for schedules
-                const scheduleText = $elem.find('.facility-hours, .schedule-text, .hours-info, .field-body, .field-content').text().trim() ||
-                                   $elem.find('p, .description, .hours').text().trim();
+                    // Try multiple selectors for schedules
+                    const scheduleText =
+                        $elem
+                            .find('.facility-hours, .schedule-text, .hours-info, .field-body, .field-content')
+                            .text()
+                            .trim() || $elem.find('p, .description, .hours').text().trim();
 
-                if (facilityName && scheduleText && facilityName.length > 2) {
-                    // Avoid duplicates
-                    const existing = schedules.find(s => s.centre === facilityName);
-                    if (!existing) {
-                        schedules.push({
-                            centre: facilityName,
-                            schedule: scheduleText
-                        });
+                    if (facilityName && scheduleText && facilityName.length > 2) {
+                        // Avoid duplicates
+                        const existing = schedules.find(s => s.centre === facilityName);
+                        if (!existing) {
+                            schedules.push({
+                                centre: facilityName,
+                                schedule: scheduleText
+                            });
 
-                        // Parse for drop-in activities
-                        const dropInActivities = this.parseDropInActivities(facilityName, scheduleText);
-                        dropInGames.push(...dropInActivities);
+                            // Parse for drop-in activities
+                            const dropInActivities = this.parseDropInActivities(facilityName, scheduleText);
+                            dropInGames.push(...dropInActivities);
+                        }
                     }
                 }
-            });
+            );
 
             // Also check for table-based schedules
             $('table.schedule-table, table.gym-schedule').each((index, table) => {
                 const $table = $(table);
-                const facilityName = $table.prev('h3, h4').text().trim() ||
-                                   $table.closest('.facility-section').find('.facility-name').text().trim();
+                const facilityName =
+                    $table.prev('h3, h4').text().trim() ||
+                    $table.closest('.facility-section').find('.facility-name').text().trim();
 
                 $table.find('tr').each((rowIndex, row) => {
                     const $row = $(row);
@@ -132,9 +139,15 @@ class NVRCGymnasiumScraper {
 
         // Keywords indicating drop-in activities
         const dropInKeywords = [
-            'drop-in', 'drop in', 'dropin',
-            'open gym', 'public', 'all ages',
-            'casual', 'recreational', 'free play'
+            'drop-in',
+            'drop in',
+            'dropin',
+            'open gym',
+            'public',
+            'all ages',
+            'casual',
+            'recreational',
+            'free play'
         ];
 
         // Sport keywords
@@ -152,7 +165,9 @@ class NVRCGymnasiumScraper {
 
             // Check if it's a drop-in activity
             const isDropIn = dropInKeywords.some(keyword => lowerLine.includes(keyword));
-            if (!isDropIn) { return; }
+            if (!isDropIn) {
+                return;
+            }
 
             // Identify the sport
             let sport = 'general';
@@ -164,11 +179,14 @@ class NVRCGymnasiumScraper {
             }
 
             // Parse time information
-            const timeMatch = line.match(/(\d{1,2}:\d{2}\s*[ap]m\s*-\s*\d{1,2}:\d{2}\s*[ap]m)/i) ||
-                            line.match(/(\d{1,2}\s*[ap]m\s*-\s*\d{1,2}\s*[ap]m)/i);
+            const timeMatch =
+                line.match(/(\d{1,2}:\d{2}\s*[ap]m\s*-\s*\d{1,2}:\d{2}\s*[ap]m)/i) ||
+                line.match(/(\d{1,2}\s*[ap]m\s*-\s*\d{1,2}\s*[ap]m)/i);
 
             // Parse day information
-            const dayMatch = line.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)/i);
+            const dayMatch = line.match(
+                /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)/i
+            );
 
             if (timeMatch || dayMatch) {
                 activities.push({
@@ -191,8 +209,7 @@ class NVRCGymnasiumScraper {
         const $ = cheerio.load($row.html());
 
         // Extract additional info from the row
-        const day = $row.find('.day-column').text().trim() ||
-                   $row.prev('tr').find('.day-header').text().trim();
+        const day = $row.find('.day-column').text().trim() || $row.prev('tr').find('.day-header').text().trim();
 
         const cost = $row.find('.cost-column').text().trim() || 'Free';
         const ages = $row.find('.ages-column').text().trim() || 'All ages';
@@ -201,7 +218,17 @@ class NVRCGymnasiumScraper {
         let sport = 'general';
         const activityLower = activity.toLowerCase();
 
-        if (activityLower.includes('basketball')) { sport = 'basketball'; } else if (activityLower.includes('volleyball')) { sport = 'volleyball'; } else if (activityLower.includes('badminton')) { sport = 'badminton'; } else if (activityLower.includes('pickleball')) { sport = 'pickleball'; } else if (activityLower.includes('soccer') || activityLower.includes('futsal')) { sport = 'soccer'; }
+        if (activityLower.includes('basketball')) {
+            sport = 'basketball';
+        } else if (activityLower.includes('volleyball')) {
+            sport = 'volleyball';
+        } else if (activityLower.includes('badminton')) {
+            sport = 'badminton';
+        } else if (activityLower.includes('pickleball')) {
+            sport = 'pickleball';
+        } else if (activityLower.includes('soccer') || activityLower.includes('futsal')) {
+            sport = 'soccer';
+        }
 
         return {
             facility,
@@ -241,12 +268,10 @@ class NVRCGymnasiumScraper {
 
             schedules.forEach(({ centre, schedule }) => {
                 // Escape quotes and commas in CSV
-                const escapedCentre = centre.includes(',') || centre.includes('"') ?
-                    `"${centre.replace(/"/g, '""')}"` :
-                    centre;
-                const escapedSchedule = schedule.includes(',') || schedule.includes('"') ?
-                    `"${schedule.replace(/"/g, '""')}"` :
-                    schedule;
+                const escapedCentre =
+                    centre.includes(',') || centre.includes('"') ? `"${centre.replace(/"/g, '""')}"` : centre;
+                const escapedSchedule =
+                    schedule.includes(',') || schedule.includes('"') ? `"${schedule.replace(/"/g, '""')}"` : schedule;
 
                 csvContent += `${escapedCentre},${escapedSchedule}\n`;
             });

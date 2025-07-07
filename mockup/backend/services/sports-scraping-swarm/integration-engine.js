@@ -202,10 +202,7 @@ class SportsIntegrationEngine extends EventEmitter {
             endpoints: {
                 events: 'calendars/{calendarId}/events'
             },
-            publicCalendars: [
-                'vancouver.ca_sports@group.calendar.google.com',
-                'recreation.vancouver@gmail.com'
-            ],
+            publicCalendars: ['vancouver.ca_sports@group.calendar.google.com', 'recreation.vancouver@gmail.com'],
             rateLimit: 1000,
             requiresAuth: true,
             reliability: 'high'
@@ -241,7 +238,9 @@ class SportsIntegrationEngine extends EventEmitter {
 
     // Process Vancouver facilities data
     processVancouverFacilities(data) {
-        if (!data.records) { return []; }
+        if (!data.records) {
+            return [];
+        }
 
         return data.records.map(record => {
             const { fields } = record;
@@ -250,10 +249,12 @@ class SportsIntegrationEngine extends EventEmitter {
                 type: fields.facilitytype,
                 address: fields.address,
                 neighbourhood: fields.neighbourhood,
-                coordinates: fields.geom ? {
-                    lat: fields.geom.coordinates[1],
-                    lng: fields.geom.coordinates[0]
-                } : null,
+                coordinates: fields.geom
+                    ? {
+                          lat: fields.geom.coordinates[1],
+                          lng: fields.geom.coordinates[0]
+                      }
+                    : null,
                 amenities: fields.amenities ? fields.amenities.split(',') : [],
                 source: 'vancouver_parks_api',
                 lastUpdated: new Date()
@@ -263,7 +264,9 @@ class SportsIntegrationEngine extends EventEmitter {
 
     // Process Vancouver programs data
     processVancouverPrograms(data) {
-        if (!data.records) { return []; }
+        if (!data.records) {
+            return [];
+        }
 
         return data.records
             .filter(record => this.isSportsProgram(record.fields))
@@ -338,10 +341,12 @@ class SportsIntegrationEngine extends EventEmitter {
             venue: {
                 name: event.venue ? event.venue.name : 'TBD',
                 address: event.venue ? event.venue.address_1 : null,
-                coordinates: event.venue ? {
-                    lat: event.venue.lat,
-                    lng: event.venue.lon
-                } : null
+                coordinates: event.venue
+                    ? {
+                          lat: event.venue.lat,
+                          lng: event.venue.lon
+                      }
+                    : null
             },
             startTime: new Date(event.time),
             endTime: event.duration ? new Date(event.time + event.duration) : null,
@@ -399,19 +404,23 @@ class SportsIntegrationEngine extends EventEmitter {
             .map(event => ({
                 title: event.name.text,
                 sport: this.identifySport(`${event.name.text} ${event.description.text || ''}`),
-                venue: event.venue ? {
-                    name: event.venue.name,
-                    address: event.venue.address ?
-                        `${event.venue.address.address_1}, ${event.venue.address.city}` : null,
-                    coordinates: event.venue.latitude ? {
-                        lat: parseFloat(event.venue.latitude),
-                        lng: parseFloat(event.venue.longitude)
-                    } : null
-                } : null,
+                venue: event.venue
+                    ? {
+                          name: event.venue.name,
+                          address: event.venue.address
+                              ? `${event.venue.address.address_1}, ${event.venue.address.city}`
+                              : null,
+                          coordinates: event.venue.latitude
+                              ? {
+                                    lat: parseFloat(event.venue.latitude),
+                                    lng: parseFloat(event.venue.longitude)
+                                }
+                              : null
+                      }
+                    : null,
                 startTime: new Date(event.start.utc),
                 endTime: new Date(event.end.utc),
-                price: event.ticket_availability ?
-                    event.ticket_availability.minimum_ticket_price?.major_value || 0 : 0,
+                price: event.ticket_availability ? event.ticket_availability.minimum_ticket_price?.major_value || 0 : 0,
                 capacity: event.capacity,
                 description: event.description.text,
                 organizer: {
@@ -544,16 +553,24 @@ class SportsIntegrationEngine extends EventEmitter {
         const combined = `${text} ${description}`;
 
         const sportsKeywords = [
-            'basketball', 'soccer', 'volleyball', 'tennis', 'badminton',
-            'hockey', 'swimming', 'fitness', 'sport', 'athletic', 'gym'
+            'basketball',
+            'soccer',
+            'volleyball',
+            'tennis',
+            'badminton',
+            'hockey',
+            'swimming',
+            'fitness',
+            'sport',
+            'athletic',
+            'gym'
         ];
 
         return sportsKeywords.some(keyword => combined.includes(keyword));
     }
 
     isDropInProgram(program) {
-        const text = (`${program.program_name || program.name || ''} ${
-            program.description || ''}`).toLowerCase();
+        const text = `${program.program_name || program.name || ''} ${program.description || ''}`.toLowerCase();
 
         const dropInKeywords = ['drop-in', 'drop in', 'dropin', 'walk-in', 'public'];
         return dropInKeywords.some(keyword => text.includes(keyword));

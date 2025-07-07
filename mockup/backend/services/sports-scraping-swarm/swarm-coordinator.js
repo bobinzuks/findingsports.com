@@ -87,7 +87,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
         } catch (error) {
             console.error('❌ Phase 1 failed:', error.message);
             console.log('⚠️ Continuing with fallback configuration...');
-            
+
             // Fallback configuration
             this.metrics.totalSources = 0;
             this.planDataArchitecture([]);
@@ -426,11 +426,7 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
 
     // Validate game data
     isValidGame(game) {
-        return game &&
-               game.title &&
-               game.sport &&
-               (game.venue || game.location) &&
-               (game.startTime || game.date);
+        return game && game.title && game.sport && (game.venue || game.location) && (game.startTime || game.date);
     }
 
     // Deduplicate games based on title, venue, and time
@@ -488,13 +484,11 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     // Filter games by proximity to user
     filterByProximity(games, lat, lng, radiusKm) {
         return games.filter(game => {
-            if (!game.venue.coordinates) { return true; } // Include games without coordinates
+            if (!game.venue.coordinates) {
+                return true;
+            } // Include games without coordinates
 
-            const distance = this.calculateDistance(
-                lat, lng,
-                game.venue.coordinates.lat,
-                game.venue.coordinates.lng
-            );
+            const distance = this.calculateDistance(lat, lng, game.venue.coordinates.lat, game.venue.coordinates.lng);
 
             return distance <= radiusKm;
         });
@@ -526,7 +520,8 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
             const gameTime = new Date(game.startTime);
             const hoursUntil = (gameTime - now) / (1000 * 60 * 60);
 
-            if (hoursUntil > 0 && hoursUntil < 168) { // Within a week
+            if (hoursUntil > 0 && hoursUntil < 168) {
+                // Within a week
                 score += Math.max(0, 30 - Math.abs(hoursUntil - 24)); // Optimal at 24 hours
             }
         }
@@ -554,12 +549,16 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     }
 
     normalizeDateTime(dateTime) {
-        if (!dateTime) { return null; }
+        if (!dateTime) {
+            return null;
+        }
         return new Date(dateTime).toISOString();
     }
 
     normalizePrice(price) {
-        if (typeof price === 'number') { return price; }
+        if (typeof price === 'number') {
+            return price;
+        }
         if (typeof price === 'string') {
             const match = price.match(/[\d.]+/);
             return match ? parseFloat(match[0]) : 0;
@@ -570,20 +569,29 @@ class SportsScrapingSwarmCoordinator extends EventEmitter {
     calculateReliability(game) {
         let score = 0.5; // Base score
 
-        if (game.source?.includes('api')) { score += 0.3; }
-        if (game.organizer?.name) { score += 0.1; }
-        if (game.venue?.coordinates) { score += 0.1; }
+        if (game.source?.includes('api')) {
+            score += 0.3;
+        }
+        if (game.organizer?.name) {
+            score += 0.1;
+        }
+        if (game.venue?.coordinates) {
+            score += 0.1;
+        }
 
         return Math.min(1, score);
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLng = ((lng2 - lng1) * Math.PI) / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLng / 2) *
+                Math.sin(dLng / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }

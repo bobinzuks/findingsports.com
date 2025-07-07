@@ -94,12 +94,7 @@ class SwarmAPIEndpoint {
 
                 // Quick search uses only high-priority sources
                 const sports = sport ? [sport] : [];
-                const result = await this.deployment.scrapeForUser(
-                    parseFloat(lat),
-                    parseFloat(lng),
-                    sports,
-                    'urgent'
-                );
+                const result = await this.deployment.scrapeForUser(parseFloat(lat), parseFloat(lng), sports, 'urgent');
 
                 // Limit results for quick response
                 const limitedGames = result.games.slice(0, parseInt(limit, 10));
@@ -176,11 +171,13 @@ class SwarmAPIEndpoint {
                     sports ? sports.split(',') : []
                 );
 
-                res.write(`data: ${JSON.stringify({
-                    type: 'initial',
-                    games: initialResult.games,
-                    timestamp: new Date().toISOString()
-                })}\n\n`);
+                res.write(
+                    `data: ${JSON.stringify({
+                        type: 'initial',
+                        games: initialResult.games,
+                        timestamp: new Date().toISOString()
+                    })}\n\n`
+                );
 
                 // Clean up on client disconnect
                 req.on('close', () => {
@@ -288,23 +285,25 @@ class SwarmAPIEndpoint {
     }
 
     isLocationRelevant(updateLocation, userLat, userLng, radiusKm = 25) {
-        if (!updateLocation) { return true; }
+        if (!updateLocation) {
+            return true;
+        }
 
-        const distance = this.calculateDistance(
-            userLat, userLng,
-            updateLocation.lat, updateLocation.lng
-        );
+        const distance = this.calculateDistance(userLat, userLng, updateLocation.lat, updateLocation.lng);
 
         return distance <= radiusKm;
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLng = ((lng2 - lng1) * Math.PI) / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLng / 2) *
+                Math.sin(dLng / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }

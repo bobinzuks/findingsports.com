@@ -492,8 +492,9 @@ app.get('/api/locations/nearby/:location', (req, res) => {
 // Field status endpoint
 app.get('/api/fields/status', async (req, res) => {
     try {
-        const fields = Array.from(dataPipeline.facilitiesDatabase.values())
-            .filter(facility => facility.type && facility.type.includes('field'));
+        const fields = Array.from(dataPipeline.facilitiesDatabase.values()).filter(
+            facility => facility.type && facility.type.includes('field')
+        );
 
         res.json({
             success: true,
