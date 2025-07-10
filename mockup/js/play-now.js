@@ -13,7 +13,7 @@ window.PlayNowPage = {
             [locationResult.userLocation.lat, locationResult.userLocation.lng] :
             null;
 
-        if (!window.map) {
+        if (!window.googleMap && !window.map) {
             window.initializeMap(userLocation);
         }
 
@@ -146,7 +146,9 @@ window.PlayNowPage = {
             this.displayResults(games, sport);
 
             // Update map markers
-            this.updateMapMarkers(games);
+            if (window.googleMap || window.map) {
+                this.updateMapMarkers(games);
+            }
         } catch (error) {
             console.error('Failed to find games:', error);
             resultsDiv.innerHTML = `

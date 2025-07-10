@@ -102,19 +102,31 @@ let userLocationMarker = null;
 window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
     // Check if Google Maps API is loaded
     if (typeof google === 'undefined' || !google.maps) {
-        console.error('Google Maps API not loaded');
-        // Show fallback message
+        console.log('Google Maps API not loaded yet, waiting...');
+        // Show loading message
         const mapElement = document.getElementById(mapElementId);
         if (mapElement) {
             mapElement.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1a1a1a; color: #757575;">
                     <div style="text-align: center;">
-                        <p>Map loading...</p>
-                        <p style="font-size: 0.9em; margin-top: 10px;">If the map doesn't load, please check your internet connection.</p>
+                        <p>Loading map...</p>
+                        <div style="margin-top: 10px;">
+                            <div style="width: 40px; height: 40px; border: 3px solid #757575; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block;"></div>
+                        </div>
                     </div>
                 </div>
             `;
+            
+            // Add spinning animation
+            const style = document.createElement('style');
+            style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+            document.head.appendChild(style);
         }
+        
+        // Wait for Google Maps to load and retry
+        window.addEventListener('googlemapsloaded', () => {
+            window.initializeGoogleMap(userLocation, mapElementId);
+        });
         return;
     }
 
@@ -338,7 +350,7 @@ function handleMapError(mapElementId) {
     }
 }
 
-// Load Google Maps API
+// Load Google Maps API (now handled in index.html)
 window.loadGoogleMapsAPI = function (apiKey) {
     return new Promise((resolve, reject) => {
         // Check if already loaded
@@ -346,26 +358,22 @@ window.loadGoogleMapsAPI = function (apiKey) {
             resolve();
             return;
         }
-
-        // Create script element
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=onGoogleMapsReady`;
-        script.async = true;
-        script.defer = true;
-
-        // Handle load error
-        script.onerror = () => {
-            console.error('Failed to load Google Maps API');
-            reject(new Error('Failed to load Google Maps API'));
-        };
-
-        // Define callback
-        window.onGoogleMapsReady = () => {
-            console.log('Google Maps API loaded');
+        
+        // Check if already loading (script added in index.html)
+        if (window.googleMapsLoaded) {
             resolve();
-        };
-
-        document.head.appendChild(script);
+            return;
+        }
+        
+        // Wait for it to load
+        window.addEventListener('googlemapsloaded', resolve);
+        
+        // Set a timeout
+        setTimeout(() => {
+            if (typeof google === 'undefined' || !google.maps) {
+                reject(new Error('Google Maps API failed to load'));
+            }
+        }, 10000); // 10 second timeout
     });
 };
 

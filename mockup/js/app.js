@@ -100,6 +100,7 @@ window.currentPage = 'play-now';
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, initializing app...');
     // Wait for all scripts to load
     await new Promise(resolve => {
         const checkScripts = setInterval(() => {
@@ -153,6 +154,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize default page (Play Now)
     window.switchPage('play-now');
+    
+    // Log map status for debugging
+    if (window.mapDebug) {
+        setTimeout(() => window.mapDebug.checkStatus(), 1000);
+    }
 });
 
 // Initialize map (delegates to Google Maps implementation)
@@ -251,8 +257,12 @@ window.displayGames = function (location) {
     gamesList.innerHTML = '';
 
     // Clear existing markers
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
+    if (window.googleMap && window.clearGoogleMarkers) {
+        window.clearGoogleMarkers();
+    } else if (map && markers) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    }
 
     // Add games to list and map
     games.forEach(game => {
@@ -261,17 +271,22 @@ window.displayGames = function (location) {
         gamesList.appendChild(gameCard);
 
         // Add marker to map
-        const marker = L.marker(game.coords).addTo(map).bindPopup(`
-                <strong>${game.title}</strong><br>
-                ${game.location}<br>
-                ${game.attendees} attendees
-            `);
-
-        markers.push(marker);
+        if (window.googleMap && window.addGoogleGameMarker) {
+            window.addGoogleGameMarker(game);
+        } else if (map) {
+            const marker = L.marker(game.coords).addTo(map).bindPopup(`
+                    <strong>${game.title}</strong><br>
+                    ${game.location}<br>
+                    ${game.attendees} attendees
+                `);
+            markers.push(marker);
+        }
     });
 
     // Adjust map view to show all markers
-    if (markers.length > 0) {
+    if (window.googleMap && window.fitMapToMarkers) {
+        window.fitMapToMarkers();
+    } else if (map && markers && markers.length > 0) {
         const group = new L.FeatureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
     }
@@ -377,8 +392,12 @@ window.displayFilteredGames = function (location, games) {
     gamesList.innerHTML = '';
 
     // Clear markers
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
+    if (window.googleMap && window.clearGoogleMarkers) {
+        window.clearGoogleMarkers();
+    } else if (map && markers) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    }
 
     if (games.length === 0) {
         gamesList.innerHTML =
@@ -390,17 +409,22 @@ window.displayFilteredGames = function (location, games) {
         const gameCard = window.createGameCard(game);
         gamesList.appendChild(gameCard);
 
-        const marker = L.marker(game.coords).addTo(map).bindPopup(`
-                <strong>${game.title}</strong><br>
-                ${game.location}<br>
-                ${game.attendees} attendees
-            `);
-
-        markers.push(marker);
+        if (window.googleMap && window.addGoogleGameMarker) {
+            window.addGoogleGameMarker(game);
+        } else if (map) {
+            const marker = L.marker(game.coords).addTo(map).bindPopup(`
+                    <strong>${game.title}</strong><br>
+                    ${game.location}<br>
+                    ${game.attendees} attendees
+                `);
+            markers.push(marker);
+        }
     });
 
     // Adjust map view
-    if (markers.length > 0) {
+    if (window.googleMap && window.fitMapToMarkers) {
+        window.fitMapToMarkers();
+    } else if (map && markers && markers.length > 0) {
         const group = new L.FeatureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
     }
@@ -814,8 +838,12 @@ window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendat
     gamesList.innerHTML = '';
 
     // Clear map markers
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
+    if (window.googleMap && window.clearGoogleMarkers) {
+        window.clearGoogleMarkers();
+    } else if (map && markers) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    }
 
     if (errorMessage) {
         gamesList.innerHTML = `
@@ -1160,8 +1188,12 @@ window.displayGamesOnMap = function (games) {
 
     // Clear existing
     gamesList.innerHTML = '';
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
+    if (window.googleMap && window.clearGoogleMarkers) {
+        window.clearGoogleMarkers();
+    } else if (map && markers) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    }
 
     if (games.length === 0) {
         gamesList.innerHTML =
@@ -1184,38 +1216,41 @@ window.displayGamesOnMap = function (games) {
         gamesList.appendChild(gameCard);
 
         // Add marker to map if coordinates exist
-        if (coords && map) {
-            try {
-                const markerIcon = L.divIcon({
-                    className: 'game-marker',
-                    html: `<div style="background-color: #ff6b35; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${window.getSportIcon(game.type || game.sport)}</div>`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
+        if (coords) {
+            if (window.googleMap && window.addGoogleGameMarker) {
+                window.addGoogleGameMarker(game);
+            } else if (map) {
+                try {
+                    const markerIcon = L.divIcon({
+                        className: 'game-marker',
+                        html: `<div style="background-color: #ff6b35; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${window.getSportIcon(game.type || game.sport)}</div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
 
-                const marker = L.marker(coords, { icon: markerIcon }).addTo(map);
+                    const marker = L.marker(coords, { icon: markerIcon }).addTo(map);
 
-                const popupContent = `
-                    <div style="padding: 0.5rem;">
-                        <strong>${game.title}</strong><br>
-                        ${game.venue?.name || game.venue || game.location}<br>
-                        ${game.attendees || 0}${game.maxAttendees ? `/${game.maxAttendees}` : ''} players<br>
-                        ${
-    game.startTime ?
-        new Date(game.startTime).toLocaleString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit'
-        }) :
-        ''
-}
-                    </div>
-                `;
+                    const popupContent = `
+                        <div style="padding: 0.5rem;">
+                            <strong>${game.title}</strong><br>
+                            ${game.venue?.name || game.venue || game.location}<br>
+                            ${game.attendees || 0}${game.maxAttendees ? `/${game.maxAttendees}` : ''} players<br>
+                            ${
+        game.startTime ?
+            new Date(game.startTime).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            }) :
+            ''
+    }
+                        </div>
+                    `;
 
-                marker.bindPopup(popupContent);
-                markers.push(marker);
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
             } catch (error) {
                 console.error('Error adding marker for game:', game, error);
             }
@@ -1223,7 +1258,9 @@ window.displayGamesOnMap = function (games) {
     });
 
     // Adjust map view
-    if (markers.length > 0 && map) {
+    if (window.googleMap && window.fitMapToMarkers) {
+        window.fitMapToMarkers();
+    } else if (markers && markers.length > 0 && map) {
         try {
             const group = new L.FeatureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));

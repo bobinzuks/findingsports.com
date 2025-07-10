@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complete Fixes - Finding Sports</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .logo-test {
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+            padding: 20px;
+            text-align: center;
+        }
+        .checkerboard {
+            background-image: 
+                repeating-linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
+                repeating-linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            background: #1a1a1a;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Finding Sports - Complete Fixes Test</h1>
+
+    <!-- Logo Transparency Test -->
+    <div class="test-section">
+        <h2>1. Logo Transparency Test</h2>
+        <p>The logo below should have NO visible background - it should appear to float on the colorful gradient:</p>
+        <div class="logo-test">
+            <img src="images/logo2.png" alt="Finding Sports Logo" style="height: 150px;">
+        </div>
+        <p>Same logo on checkerboard pattern (transparency indicator):</p>
+        <div class="checkerboard">
+            <img src="images/logo2.png" alt="Finding Sports Logo" style="height: 150px;">
+        </div>
+        <div id="logo-status" class="status"></div>
+    </div>
+
+    <!-- Google Maps Test -->
+    <div class="test-section">
+        <h2>2. Google Maps Test</h2>
+        <p>The map below should load with dark theme:</p>
+        <div id="map"></div>
+        <div id="map-status" class="status"></div>
+        <button onclick="testAddMarker()">Test Add Marker</button>
+        <button onclick="testClearMarkers()">Clear Markers</button>
+    </div>
+
+    <!-- Include necessary scripts -->
+    <script src="js/config.js"></script>
+    <script>
+        // Logo transparency check
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1;
+            canvas.height = 1;
+            ctx.drawImage(img, 0, 0, 1, 1);
+            const pixel = ctx.getImageData(0, 0, 1, 1).data;
+            
+            const logoStatus = document.getElementById('logo-status');
+            if (pixel[3] < 255) {
+                logoStatus.className = 'status success';
+                logoStatus.textContent = '✓ Logo has transparency (alpha channel detected)';
+            } else {
+                logoStatus.className = 'status error';
+                logoStatus.textContent = '✗ Logo appears to have opaque background';
+            }
+        };
+        img.src = 'images/logo2.png';
+
+        // Google Maps test
+        let map = null;
+        let markers = [];
+
+        function initMap() {
+            const mapStatus = document.getElementById('map-status');
+            try {
+                const darkMapStyles = [
+                    { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+                    { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+                    { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+                    { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+                    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] }
+                ];
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 49.2827, lng: -123.1207 },
+                    zoom: 12,
+                    styles: darkMapStyles
+                });
+
+                mapStatus.className = 'status success';
+                mapStatus.textContent = '✓ Google Maps loaded successfully with dark theme';
+            } catch (error) {
+                mapStatus.className = 'status error';
+                mapStatus.textContent = '✗ Google Maps failed to load: ' + error.message;
+            }
+        }
+
+        function testAddMarker() {
+            if (!map) {
+                alert('Map not loaded yet!');
+                return;
+            }
+
+            const marker = new google.maps.Marker({
+                position: { lat: 49.2827, lng: -123.1207 },
+                map: map,
+                title: 'Test Game Location'
+            });
+
+            markers.push(marker);
+            alert('Marker added!');
+        }
+
+        function testClearMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            alert('Markers cleared!');
+        }
+
+        // Check if Google Maps is already loaded
+        if (typeof google !== 'undefined' && google.maps) {
+            initMap();
+        }
+    </script>
+    <!-- Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4&callback=initMap"></script>
+</body>
+</html>

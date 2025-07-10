@@ -11,7 +11,7 @@
 
 window.APP_CONFIG = {
     // Google Maps API Key
-    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4',
+    GOOGLE_MAPS_API_KEY: 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4',
 
     // Enable/disable map providers
     ENABLE_GOOGLE_MAPS: true,
@@ -24,7 +24,13 @@ window.APP_CONFIG = {
     // API endpoints
     API_BASE_URL: window.location.hostname === 'localhost' ?
         'http://localhost:3000' :
-        window.location.origin
+        window.location.origin,
+        
+    // Additional settings
+    API_URL: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api',
+    WS_URL: window.location.hostname === 'localhost' ? 'ws://localhost:3000' : `wss://${window.location.host}`,
+    ENABLE_MOCK_DATA: false,
+    DEBUG_MODE: window.location.hostname === 'localhost'
 };
 
 // Override Google Maps API key if set in window

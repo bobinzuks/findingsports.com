@@ -16,6 +16,27 @@
         <script>
             // Google Maps API Key (replace with your own key in production)
             window.GOOGLE_MAPS_API_KEY = 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4';
+            
+            // Load Google Maps API
+            function loadGoogleMapsScript() {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&libraries=places&callback=onGoogleMapsReady`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+            
+            // Callback when Google Maps is ready
+            window.onGoogleMapsReady = function() {
+                console.log('Google Maps API loaded successfully');
+                window.googleMapsLoaded = true;
+                
+                // Dispatch event for any waiting code
+                window.dispatchEvent(new Event('googlemapsloaded'));
+            };
+            
+            // Start loading Google Maps
+            loadGoogleMapsScript();
         </script>
     </head>
     <body>
@@ -122,6 +143,8 @@
         <script src="js/sport-rules.js"></script>
         <script src="js/language-service.js"></script>
         <script src="js/debug-utils.js"></script>
+        <script src="js/map-debug.js"></script>
+        <script src="js/map-init-fix.js"></script>
         <script src="js/app.js"></script>
     </body>
 </html>

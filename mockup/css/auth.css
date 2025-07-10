@@ -32,8 +32,13 @@
     height: 150px;
     width: auto;
     margin-bottom: 0.5rem;
-    filter: drop-shadow(0 2px 8px rgba(244, 197, 66, 0.3));
+    /* Removed drop-shadow for true transparency */
+    filter: none;
     background: transparent;
+    /* Ensure no other background effects */
+    box-shadow: none;
+    border: none;
+    outline: none;
 }
 
 .auth-box .tagline {
