@@ -249,12 +249,14 @@ window.PlayNowPage = {
 
     // Update map markers
     updateMapMarkers(games) {
-        if (!window.map) {
+        if (!window.map && !window.googleMap) {
             return;
         }
 
         // Clear existing markers
-        if (window.markers) {
+        if (window.googleMap && window.clearGoogleMarkers) {
+            window.clearGoogleMarkers();
+        } else if (window.markers) {
             window.markers.forEach(marker => window.map.removeLayer(marker));
             window.markers = [];
         }
@@ -267,7 +269,9 @@ window.PlayNowPage = {
         });
 
         // Fit map to show all markers
-        if (window.markers && window.markers.length > 0) {
+        if (window.googleMap && window.fitMapToMarkers) {
+            window.fitMapToMarkers();
+        } else if (window.markers && window.markers.length > 0) {
             const group = new L.FeatureGroup(window.markers);
             window.map.fitBounds(group.getBounds().pad(0.1));
         }

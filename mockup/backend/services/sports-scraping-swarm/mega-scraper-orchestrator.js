@@ -178,12 +178,12 @@ class MegaScraperOrchestrator extends EventEmitter {
     // Handle messages from workers
     handleWorkerMessage(worker, message) {
         switch (message.type) {
-            case 'TASK_COMPLETE':
-                this.handleTaskComplete(worker, message);
-                break;
-            case 'TASK_FAILED':
-                this.handleTaskFailed(worker, message);
-                break;
+        case 'TASK_COMPLETE':
+            this.handleTaskComplete(worker, message);
+            break;
+        case 'TASK_FAILED':
+            this.handleTaskFailed(worker, message);
+            break;
         }
     }
 
@@ -244,14 +244,14 @@ class MegaScraperOrchestrator extends EventEmitter {
 
         // Filter by user's sports interests
         const filteredSources =
-            userSports.length > 0
-                ? sources.filter(
-                      source =>
-                          !source.specialties ||
+            userSports.length > 0 ?
+                sources.filter(
+                    source =>
+                        !source.specialties ||
                           source.specialties.some(sport => userSports.includes(sport)) ||
                           source.specialties.includes('all_sports')
-                  )
-                : sources;
+                ) :
+                sources;
 
         // Create scraping tasks
         const tasks = this.createScrapingTasks(filteredSources);

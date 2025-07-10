@@ -207,14 +207,14 @@ class AdvancedScraper {
         const $ = cheerio.load(html);
 
         switch (type) {
-            case 'schedule':
-                return this.extractScheduleData($);
-            case 'facility':
-                return this.extractFacilityData($);
-            case 'event':
-                return this.extractEventData($);
-            default:
-                return this.extractGenericSportsData($);
+        case 'schedule':
+            return this.extractScheduleData($);
+        case 'facility':
+            return this.extractFacilityData($);
+        case 'event':
+            return this.extractEventData($);
+        default:
+            return this.extractGenericSportsData($);
         }
     }
 

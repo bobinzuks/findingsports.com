@@ -357,6 +357,9 @@
             </div>
         </div>
 
+        <!-- Load API script first -->
+        <script src="js/api.js"></script>
+        
         <!-- Load Google OAuth script -->
         <script src="auth/google-oauth.js"></script>
 
@@ -367,12 +370,38 @@
         <script>
             // Initialize Google OAuth when page loads
             window.addEventListener('load', () => {
-                GoogleAuth.initialize();
+                // Ensure API is loaded
+                if (!window.api) {
+                    console.error('API not loaded');
+                    window.showError('Failed to load authentication system');
+                    return;
+                }
+                
+                // Initialize Google Auth
+                if (window.GoogleAuth && window.GoogleAuth.initialize) {
+                    window.GoogleAuth.initialize();
+                } else {
+                    console.error('Google Auth not loaded');
+                    window.showError('Failed to load Google authentication');
+                }
             });
 
             // Show signup form (placeholder)
             function showSignup() {
                 alert('Signup form will open here. For now, use Google Sign-In!');
+            }
+            
+            // Error display function if not defined
+            if (!window.showError) {
+                window.showError = function(message) {
+                    const errorDiv = document.getElementById('authError');
+                    if (errorDiv) {
+                        errorDiv.textContent = message;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        alert(message);
+                    }
+                };
             }
         </script>
     </body>

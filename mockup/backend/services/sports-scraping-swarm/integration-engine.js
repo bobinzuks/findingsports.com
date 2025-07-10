@@ -249,12 +249,12 @@ class SportsIntegrationEngine extends EventEmitter {
                 type: fields.facilitytype,
                 address: fields.address,
                 neighbourhood: fields.neighbourhood,
-                coordinates: fields.geom
-                    ? {
-                          lat: fields.geom.coordinates[1],
-                          lng: fields.geom.coordinates[0]
-                      }
-                    : null,
+                coordinates: fields.geom ?
+                    {
+                        lat: fields.geom.coordinates[1],
+                        lng: fields.geom.coordinates[0]
+                    } :
+                    null,
                 amenities: fields.amenities ? fields.amenities.split(',') : [],
                 source: 'vancouver_parks_api',
                 lastUpdated: new Date()
@@ -341,12 +341,12 @@ class SportsIntegrationEngine extends EventEmitter {
             venue: {
                 name: event.venue ? event.venue.name : 'TBD',
                 address: event.venue ? event.venue.address_1 : null,
-                coordinates: event.venue
-                    ? {
-                          lat: event.venue.lat,
-                          lng: event.venue.lon
-                      }
-                    : null
+                coordinates: event.venue ?
+                    {
+                        lat: event.venue.lat,
+                        lng: event.venue.lon
+                    } :
+                    null
             },
             startTime: new Date(event.time),
             endTime: event.duration ? new Date(event.time + event.duration) : null,
@@ -404,20 +404,20 @@ class SportsIntegrationEngine extends EventEmitter {
             .map(event => ({
                 title: event.name.text,
                 sport: this.identifySport(`${event.name.text} ${event.description.text || ''}`),
-                venue: event.venue
-                    ? {
-                          name: event.venue.name,
-                          address: event.venue.address
-                              ? `${event.venue.address.address_1}, ${event.venue.address.city}`
-                              : null,
-                          coordinates: event.venue.latitude
-                              ? {
-                                    lat: parseFloat(event.venue.latitude),
-                                    lng: parseFloat(event.venue.longitude)
-                                }
-                              : null
-                      }
-                    : null,
+                venue: event.venue ?
+                    {
+                        name: event.venue.name,
+                        address: event.venue.address ?
+                            `${event.venue.address.address_1}, ${event.venue.address.city}` :
+                            null,
+                        coordinates: event.venue.latitude ?
+                            {
+                                lat: parseFloat(event.venue.latitude),
+                                lng: parseFloat(event.venue.longitude)
+                            } :
+                            null
+                    } :
+                    null,
                 startTime: new Date(event.start.utc),
                 endTime: new Date(event.end.utc),
                 price: event.ticket_availability ? event.ticket_availability.minimum_ticket_price?.major_value || 0 : 0,

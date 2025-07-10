@@ -108,11 +108,25 @@ class FindingSportsAPI {
 
     // Games methods
     async getGames(filters = {}) {
-        const params = new URLSearchParams(filters);
-        // Games endpoint doesn't require auth for viewing
-        const url = `${API_BASE_URL}/api/games?${params}`;
-        const response = await fetch(url);
-        return await response.json();
+        try {
+            const params = new URLSearchParams(filters);
+            // Games endpoint doesn't require auth for viewing
+            const url = `${API_BASE_URL}/api/games?${params}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Check if games array exists
+            if (!data.games) {
+                console.warn('No games array in response, returning empty result');
+                return { games: [], totalGames: 0 };
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch games:', error);
+            // Return empty result on error
+            return { games: [], totalGames: 0, error: error.message };
+        }
     }
 
     async joinGame(gameId) {

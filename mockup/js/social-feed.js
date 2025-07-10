@@ -9,6 +9,9 @@ window.SocialFeedPage = {
     onlineUsers: new Map(), // Map of userId -> user data
     currentUserId: null,
     emojiPicker: null,
+    userLocation: null,
+    userSport: null,
+    currentLanguage: 'en',
 
     // Initialize the Social Feed page
     async initialize() {
@@ -23,8 +26,69 @@ window.SocialFeedPage = {
         // Get current user ID
         this.currentUserId = localStorage.getItem('userId') || `guest-${Date.now()}`;
 
+        // Auto-detect user location and preferences
+        await this.autoDetectUserPreferences();
+
         // Load initial feed data
         await this.loadFeed();
+    },
+
+    // Auto-detect user location and sport preferences
+    async autoDetectUserPreferences() {
+        // Get location from browser geolocation API
+        if (navigator.geolocation) {
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+                });
+
+                // Map coordinates to nearest city
+                this.userLocation = this.getLocationFromCoords(position.coords.latitude, position.coords.longitude);
+            } catch (error) {
+                console.log('Geolocation failed, using default');
+            }
+        }
+
+        // Get user's sport preference from localStorage or recent activity
+        this.userSport = localStorage.getItem('preferredSport') || 'general';
+
+        // Get user's language preference
+        this.currentLanguage = localStorage.getItem('preferredLanguage') || navigator.language.split('-')[0] || 'en';
+
+        // Auto-join appropriate channel based on location and sport
+        if (this.userLocation && this.userSport !== 'general') {
+            // Join location-specific sport channel if available
+            this.currentChannel = `${this.userLocation}-${this.userSport}`;
+        } else if (this.userSport !== 'general') {
+            // Join sport-specific channel
+            this.currentChannel = this.userSport;
+        } else if (this.userLocation) {
+            // Join location-specific channel
+            this.currentChannel = this.userLocation;
+        }
+        // Otherwise stay in general channel
+    },
+
+    // Get location name from coordinates
+    getLocationFromCoords(lat, lng) {
+        // Vancouver area boundaries
+        const locations = {
+            vancouver: { lat: 49.2827, lng: -123.1207, bounds: { north: 49.3170, south: 49.1987, east: -123.0234, west: -123.2240 } },
+            burnaby: { lat: 49.2488, lng: -122.9805, bounds: { north: 49.2950, south: 49.2000, east: -122.8900, west: -123.0250 } },
+            richmond: { lat: 49.1666, lng: -123.1336, bounds: { north: 49.2050, south: 49.1000, east: -123.0400, west: -123.2200 } },
+            surrey: { lat: 49.1913, lng: -122.8490, bounds: { north: 49.2200, south: 49.0050, east: -122.6890, west: -122.9800 } }
+        };
+
+        // Find closest location
+        for (const [name, loc] of Object.entries(locations)) {
+            if (lat >= loc.bounds.south && lat <= loc.bounds.north &&
+                lng >= loc.bounds.west && lng <= loc.bounds.east) {
+                return name;
+            }
+        }
+
+        // Default to vancouver if no match
+        return 'vancouver';
     },
 
     // Load feed data
@@ -61,6 +125,10 @@ window.SocialFeedPage = {
 
         // Handle new messages
         window.wsClient.on('chat-message', data => {
+            this.handleNewMessage(data);
+        });
+
+        window.wsClient.on('channel-message', data => {
             this.handleNewMessage(data);
         });
 
@@ -213,43 +281,52 @@ window.SocialFeedPage = {
             <!-- Social Feed Section -->
             <section class="social-feed-section discord-style">
                 <div class="discord-container">
-                    <!-- Left Sidebar - Channels -->
+                    <!-- Left Sidebar - Simplified -->
                     <div class="discord-sidebar">
                         <div class="sidebar-header">
                             <h3>FindingSports Community</h3>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">
+                                📍 ${this.userLocation ? this.userLocation.charAt(0).toUpperCase() + this.userLocation.slice(1) : 'Detecting location...'}
+                                ${this.userSport && this.userSport !== 'general' ? `| 🏀 ${this.userSport.charAt(0).toUpperCase() + this.userSport.slice(1)}` : ''}
+                            </div>
                         </div>
                         
-                        <!-- Chat Channels -->
+                        <!-- Current Channel Info -->
                         <div class="channel-section">
                             <div class="channel-header">
                                 <span class="collapse-icon">▼</span>
-                                TEXT CHANNELS
+                                CURRENT CHANNEL
+                            </div>
+                            <div class="channels-list">
+                                <div class="channel-item active">
+                                    <span class="channel-icon">#</span> ${this.currentChannel}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Channel Switch -->
+                        <div class="channel-section">
+                            <div class="channel-header">
+                                <span class="collapse-icon">▼</span>
+                                QUICK SWITCH
                             </div>
                             <div class="channels-list">
                                 <div class="channel-item ${this.currentChannel === 'general' ? 'active' : ''}" 
                                      onclick="window.SocialFeedPage.switchChannel('general')">
                                     <span class="channel-icon">#</span> general
                                 </div>
-                                <div class="channel-item ${this.currentChannel === 'basketball' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('basketball')">
-                                    <span class="channel-icon">#</span> basketball
+                                ${this.userSport && this.userSport !== 'general' ? `
+                                <div class="channel-item ${this.currentChannel === this.userSport ? 'active' : ''}" 
+                                     onclick="window.SocialFeedPage.switchChannel('${this.userSport}')">
+                                    <span class="channel-icon">#</span> ${this.userSport}
                                 </div>
-                                <div class="channel-item ${this.currentChannel === 'soccer' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('soccer')">
-                                    <span class="channel-icon">#</span> soccer
+                                ` : ''}
+                                ${this.userLocation ? `
+                                <div class="channel-item ${this.currentChannel === this.userLocation ? 'active' : ''}" 
+                                     onclick="window.SocialFeedPage.switchChannel('${this.userLocation}')">
+                                    <span class="channel-icon">#</span> ${this.userLocation}
                                 </div>
-                                <div class="channel-item ${this.currentChannel === 'volleyball' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('volleyball')">
-                                    <span class="channel-icon">#</span> volleyball
-                                </div>
-                                <div class="channel-item ${this.currentChannel === 'tennis' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('tennis')">
-                                    <span class="channel-icon">#</span> tennis
-                                </div>
-                                <div class="channel-item ${this.currentChannel === 'hockey' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('hockey')">
-                                    <span class="channel-icon">#</span> hockey
-                                </div>
+                                ` : ''}
                             </div>
                         </div>
 
@@ -267,28 +344,15 @@ window.SocialFeedPage = {
                             </div>
                         </div>
 
-                        <!-- Location Channels -->
-                        <div class="channel-section">
+                        <!-- Settings -->
+                        <div class="channel-section" style="margin-top: auto; padding-bottom: 20px;">
                             <div class="channel-header">
                                 <span class="collapse-icon">▼</span>
-                                LOCATIONS
+                                PREFERENCES
                             </div>
                             <div class="channels-list">
-                                <div class="channel-item ${this.currentChannel === 'vancouver' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('vancouver')">
-                                    <span class="channel-icon">#</span> vancouver
-                                </div>
-                                <div class="channel-item ${this.currentChannel === 'burnaby' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('burnaby')">
-                                    <span class="channel-icon">#</span> burnaby
-                                </div>
-                                <div class="channel-item ${this.currentChannel === 'richmond' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('richmond')">
-                                    <span class="channel-icon">#</span> richmond
-                                </div>
-                                <div class="channel-item ${this.currentChannel === 'surrey' ? 'active' : ''}" 
-                                     onclick="window.SocialFeedPage.switchChannel('surrey')">
-                                    <span class="channel-icon">#</span> surrey
+                                <div class="channel-item" onclick="window.SocialFeedPage.showPreferences()">
+                                    <span class="channel-icon">⚙️</span> Change Location/Sport
                                 </div>
                             </div>
                         </div>
@@ -1227,10 +1291,10 @@ window.SocialFeedPage = {
             top: 20px;
             right: 20px;
             background: ${(() => {
-                if (type === 'success') return '#4CAF50';
-                if (type === 'info') return '#2196F3';
-                return '#f44336';
-            })()};
+        if (type === 'success') { return '#4CAF50'; }
+        if (type === 'info') { return '#2196F3'; }
+        return '#f44336';
+    })()};
             color: white;
             padding: 12px 20px;
             border-radius: 8px;
@@ -1248,5 +1312,106 @@ window.SocialFeedPage = {
             feedback.style.opacity = '0';
             setTimeout(() => feedback.remove(), 300);
         }, 3000);
+    },
+
+    // Show preferences modal
+    showPreferences() {
+        const modal = document.createElement('div');
+        modal.className = 'preferences-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: #2f3136;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            color: white;
+        `;
+
+        content.innerHTML = `
+            <h2 style="margin-bottom: 20px;">Chat Preferences</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #b9bbbe;">Preferred Location</label>
+                <select id="prefLocation" style="width: 100%; padding: 10px; background: #40444b; border: 1px solid #202225; border-radius: 4px; color: white;">
+                    <option value="vancouver" ${this.userLocation === 'vancouver' ? 'selected' : ''}>Vancouver</option>
+                    <option value="burnaby" ${this.userLocation === 'burnaby' ? 'selected' : ''}>Burnaby</option>
+                    <option value="richmond" ${this.userLocation === 'richmond' ? 'selected' : ''}>Richmond</option>
+                    <option value="surrey" ${this.userLocation === 'surrey' ? 'selected' : ''}>Surrey</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #b9bbbe;">Preferred Sport</label>
+                <select id="prefSport" style="width: 100%; padding: 10px; background: #40444b; border: 1px solid #202225; border-radius: 4px; color: white;">
+                    <option value="general" ${this.userSport === 'general' ? 'selected' : ''}>General (All Sports)</option>
+                    <option value="basketball" ${this.userSport === 'basketball' ? 'selected' : ''}>Basketball</option>
+                    <option value="soccer" ${this.userSport === 'soccer' ? 'selected' : ''}>Soccer</option>
+                    <option value="volleyball" ${this.userSport === 'volleyball' ? 'selected' : ''}>Volleyball</option>
+                    <option value="tennis" ${this.userSport === 'tennis' ? 'selected' : ''}>Tennis</option>
+                    <option value="hockey" ${this.userSport === 'hockey' ? 'selected' : ''}>Hockey</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="window.SocialFeedPage.savePreferences()" style="flex: 1; padding: 12px; background: #5865f2; border: none; border-radius: 4px; color: white; font-weight: 600; cursor: pointer;">
+                    Save & Join Channel
+                </button>
+                <button onclick="document.querySelector('.preferences-modal').remove()" style="flex: 1; padding: 12px; background: #40444b; border: none; border-radius: 4px; color: white; font-weight: 600; cursor: pointer;">
+                    Cancel
+                </button>
+            </div>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+    },
+
+    // Save preferences
+    savePreferences() {
+        const location = document.getElementById('prefLocation').value;
+        const sport = document.getElementById('prefSport').value;
+
+        // Save to localStorage
+        localStorage.setItem('preferredLocation', location);
+        localStorage.setItem('preferredSport', sport);
+
+        // Update current preferences
+        this.userLocation = location;
+        this.userSport = sport;
+
+        // Determine new channel
+        let newChannel = 'general';
+        if (location && sport !== 'general') {
+            newChannel = sport; // Prioritize sport-specific channels
+        } else if (location) {
+            newChannel = location;
+        }
+
+        // Close modal
+        document.querySelector('.preferences-modal').remove();
+
+        // Switch to new channel
+        if (newChannel !== this.currentChannel) {
+            this.switchChannel(newChannel);
+        } else {
+            // Just re-render to update UI
+            this.render();
+        }
+
+        this.showFeedback(`Preferences saved! Joined #${newChannel}`, 'success');
     }
 };

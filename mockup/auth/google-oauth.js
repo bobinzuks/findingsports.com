@@ -1,5 +1,6 @@
 // Google OAuth Configuration
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+// Using a test client ID for development - replace with your own in production
+const GOOGLE_CLIENT_ID = '386932037035-k8v833noqjk7m4t641js92fvjmm5ri71.apps.googleusercontent.com';
 const REDIRECT_URI = `${window.location.origin}/auth/google/callback`;
 
 // Initialize Google Sign-In
@@ -58,8 +59,8 @@ window.handleCredentialResponse = async function (response) {
             window.location.href = '/';
         }
     } catch (error) {
-        // console.error('Google authentication error:', error);
-        window.showError('Failed to sign in with Google. Please try again.');
+        console.error('Google authentication error:', error);
+        window.showError(`Failed to sign in with Google: ${error.message}`);
     }
 };
 
@@ -84,8 +85,11 @@ window.handleOAuthCallback = async function () {
     const error = urlParams.get('error');
 
     if (error) {
-        // console.error('OAuth error:', error);
-        window.showError('Authentication was cancelled or failed.');
+        console.error('OAuth error:', error);
+        window.showError(`Authentication failed: ${error}`);
+        window.setTimeout(() => {
+            window.location.href = '/login-google.html';
+        }, 3000);
         return;
     }
 
@@ -118,8 +122,11 @@ window.handleOAuthCallback = async function () {
                 throw new Error('Failed to exchange authorization code');
             }
         } catch (oauthError) {
-            // console.error('OAuth callback error:', oauthError);
-            window.showError('Failed to complete authentication. Please try again.');
+            console.error('OAuth callback error:', oauthError);
+            window.showError(`Failed to complete authentication: ${oauthError.message}`);
+            window.setTimeout(() => {
+                window.location.href = '/login-google.html';
+            }, 3000);
         }
     }
 };

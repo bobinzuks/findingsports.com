@@ -92,7 +92,8 @@ global.users = users;
 
 // Environment variables (set these in Railway)
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+// Using a test client ID for development - replace with your own in production
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '386932037035-k8v833noqjk7m4t641js92fvjmm5ri71.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Helper functions
@@ -246,6 +247,7 @@ app.post('/api/auth/google', async (req, res) => {
         });
 
         const payload = ticket.getPayload();
+        console.log('Google auth payload:', { email: payload.email, name: payload.name });
 
         // Find or create user
         let user = null;
@@ -298,7 +300,31 @@ app.post('/api/auth/google', async (req, res) => {
         });
     } catch (error) {
         console.error('Google auth error:', error);
-        res.status(401).json({ error: 'Authentication failed' });
+        res.status(401).json({
+            error: 'Authentication failed',
+            message: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
+// Google OAuth callback (for authorization code flow)
+app.post('/api/auth/google/callback', async (req, res) => {
+    const { code, redirectUri } = req.body;
+
+    try {
+        // For now, we're using the simpler credential-based flow
+        // This endpoint is here for future OAuth2 code flow implementation
+        res.status(501).json({
+            error: 'OAuth code flow not implemented',
+            message: 'Please use the Google Sign-In button instead'
+        });
+    } catch (error) {
+        console.error('OAuth callback error:', error);
+        res.status(500).json({
+            error: 'OAuth callback failed',
+            message: error.message
+        });
     }
 });
 
@@ -349,6 +375,31 @@ app.get('/api/users/preferences', authenticateToken, (req, res) => {
 app.post('/api/auth/logout', authenticateToken, (req, res) => {
     // In a real app, you might want to blacklist the token
     res.json({ success: true });
+});
+
+// Debug endpoint to check scraping status
+app.get('/api/debug/scraping-status', (req, res) => {
+    const stats = dataPipeline.getStats();
+    const wsStats = webSocketService.getStats();
+
+    res.json({
+        dataAggregation: stats,
+        webSocket: wsStats,
+        swarmStatus: getSwarmStatus ? getSwarmStatus() : null,
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage()
+    });
+});
+
+// Debug endpoint to manually trigger scraping
+app.post('/api/debug/trigger-scraping', async (req, res) => {
+    try {
+        console.log('Manually triggering data collection...');
+        await dataPipeline.runInitialCollection();
+        res.json({ success: true, message: 'Scraping jobs queued' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Games API - PUBLIC ACCESS FOR VIEWING

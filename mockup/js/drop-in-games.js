@@ -3,7 +3,7 @@ window.DropInGamesPage = {
     // Initialize the Drop-in Games page
     async initialize() {
         // Initialize map if not already done
-        if (!window.map) {
+        if (!window.map && !window.googleMap) {
             const locationResult = window.locationService?.getLocationInfo();
             const userLocation = locationResult?.userLocation ?
                 [locationResult.userLocation.lat, locationResult.userLocation.lng] :
@@ -194,7 +194,9 @@ window.DropInGamesPage = {
         gamesList.innerHTML = '';
 
         // Clear map markers
-        if (window.markers) {
+        if (window.googleMap && window.clearGoogleMarkers) {
+            window.clearGoogleMarkers();
+        } else if (window.markers) {
             window.markers.forEach(marker => window.map.removeLayer(marker));
             window.markers = [];
         }
@@ -223,7 +225,9 @@ window.DropInGamesPage = {
         });
 
         // Adjust map view
-        if (window.markers && window.markers.length > 0) {
+        if (window.googleMap && window.fitMapToMarkers) {
+            window.fitMapToMarkers();
+        } else if (window.markers && window.markers.length > 0) {
             const group = new L.FeatureGroup(window.markers);
             window.map.fitBounds(group.getBounds().pad(0.1));
         }

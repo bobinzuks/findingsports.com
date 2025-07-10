@@ -155,8 +155,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.switchPage('play-now');
 });
 
-// Initialize Leaflet map
+// Initialize map (delegates to Google Maps implementation)
 window.initializeMap = function (userLocation) {
+    const config = window.APP_CONFIG || {};
+    const useGoogleMaps = config.ENABLE_GOOGLE_MAPS !== false;
+    const apiKey = config.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY || 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4';
+
+    if (useGoogleMaps && (typeof google === 'undefined' || !google.maps)) {
+        window.loadGoogleMapsAPI(apiKey).then(() => {
+            window.initializeGoogleMap(userLocation);
+        }).catch(error => {
+            console.error('Failed to load Google Maps:', error);
+            // Fallback to Leaflet if enabled
+            if (config.ENABLE_LEAFLET_FALLBACK !== false) {
+                initializeLeafletMap(userLocation);
+            }
+        });
+    } else if (useGoogleMaps) {
+        window.initializeGoogleMap(userLocation);
+    } else {
+        // Use Leaflet if Google Maps is disabled
+        initializeLeafletMap(userLocation);
+    }
+};
+
+// Fallback Leaflet map implementation
+function initializeLeafletMap(userLocation) {
     try {
         // Check if map element exists
         const mapElement = document.getElementById('map');
@@ -212,7 +236,7 @@ window.initializeMap = function (userLocation) {
     } catch (error) {
         console.error('Error initializing map:', error);
     }
-};
+}
 
 // Display games based on location
 window.displayGames = function (location) {
@@ -919,6 +943,12 @@ window.createPlayNowCard = function (game, rank) {
 
 // Add game marker to map
 window.addGameMarker = function (game, iconOverride) {
+    // Use Google Maps if available, otherwise fall back to Leaflet
+    if (window.googleMap && window.addGoogleGameMarker) {
+        return window.addGoogleGameMarker(game);
+    }
+
+    // Leaflet fallback
     let coords = null;
 
     if (game.coords && Array.isArray(game.coords)) {
@@ -1086,12 +1116,35 @@ window.logout = async function logout() {
 // Load games from API
 window.loadGamesFromAPI = async function (location = 'vancouver', sport = null) {
     try {
+        console.log('Loading games from API...', { location, sport });
+
         const filters = { location };
         if (sport && sport !== 'any') {
             filters.sport = sport;
         }
 
-        const { games } = await window.api.getGames(filters);
+        const response = await window.api.getGames(filters);
+        console.log('API Response:', response);
+
+        const games = response.games || [];
+
+        if (games.length === 0) {
+            console.warn('No games returned from API');
+
+            // Check if scraping needs to be triggered
+            if (window.DebugUtils) {
+                console.log('Checking scraping status...');
+                const status = await window.DebugUtils.checkScrapingStatus();
+                if (status && status.dataAggregation.totalGames === 0) {
+                    console.log('No games in database, triggering auto-fix...');
+                    // Don't auto-trigger in production
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        window.DebugUtils.autoFixGames();
+                    }
+                }
+            }
+        }
+
         window.displayGamesOnMap(games);
     } catch (error) {
         console.error('Failed to load games:', error);

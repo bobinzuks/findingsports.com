@@ -22,7 +22,7 @@ class NVRCGymnasiumScraper {
             // Enhanced scraping for NVRC dynamic content
             // First, look for embedded JSON data from Leaflet maps
             const scriptTags = $('script').get();
-            let facilitiesData = [];
+            const facilitiesData = [];
 
             for (const script of scriptTags) {
                 const scriptContent = $(script).html();

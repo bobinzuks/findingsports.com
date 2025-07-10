@@ -53,7 +53,7 @@ router.post('/request', authenticateToken, async (req, res) => {
                 status: request.status,
                 estimatedCompletion: request.estimatedCompletion,
                 message:
-                    "Your venue request has been received. We'll research this location and add it within 24 hours if drop-in sports are available."
+                    'Your venue request has been received. We\'ll research this location and add it within 24 hours if drop-in sports are available.'
             }
         });
     } catch (error) {
@@ -170,9 +170,9 @@ router.put('/admin/:requestId/status', authenticateToken, async (req, res) => {
             requestId: request.id,
             status: request.status,
             message:
-                status === 'completed'
-                    ? 'Your venue request has been completed! The venue is now available for game submissions.'
-                    : `Your venue request status: ${status}`
+                status === 'completed' ?
+                    'Your venue request has been completed! The venue is now available for game submissions.' :
+                    `Your venue request status: ${status}`
         });
 
         res.json({ success: true, request });

@@ -318,22 +318,22 @@ window.LeaguesPage = {
 
                         <div class="league-actions">
                             ${(() => {
-                                if (type === 'active') {
-                                    if (league.spotsAvailable) {
-                                        return `
+        if (type === 'active') {
+            if (league.spotsAvailable) {
+                return `
                                     <button class="join-league-btn" onclick="window.LeaguesPage.joinLeague(${league.id})">
                                         Join League
                                     </button>
                                 `;
-                                    } else {
-                                        return `
+            } else {
+                return `
                                     <button class="join-league-btn disabled" disabled>
                                         League Full
                                     </button>
                                 `;
-                                    }
-                                } else if (type === 'upcoming') {
-                                    return `
+            }
+        } else if (type === 'upcoming') {
+            return `
                                 <div class="registration-info">
                                     Registration opens: ${new Date(league.registrationOpens).toLocaleDateString()}
                                 </div>
@@ -341,10 +341,10 @@ window.LeaguesPage = {
                                     Notify Me
                                 </button>
                             `;
-                                } else {
-                                    return '';
-                                }
-                            })()}
+        } else {
+            return '';
+        }
+    })()}
                             
                             <button class="info-btn" onclick="window.LeaguesPage.showLeagueInfo(${league.id})">
                                 More Info

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Auth Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #4285f4;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        .error {
+            color: red;
+            background: #fee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            background: #efe;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-ok { background: #4caf50; }
+        .status-error { background: #f44336; }
+        .status-pending { background: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>Google OAuth Authentication Test</h1>
+    
+    <div class="test-section">
+        <h2>Configuration Status</h2>
+        <div id="configStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Actions</h2>
+        <button onclick="testGoogleSignIn()">Test Google Sign-In Button</button>
+        <button onclick="testOAuthFlow()">Test OAuth Flow</button>
+        <button onclick="testBackendAPI()">Test Backend API</button>
+        <button onclick="clearAuth()">Clear Auth Data</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Google Sign-In Button</h2>
+        <div id="googleSignInButton"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/auth/google-oauth.js"></script>
+    <script>
+        // Test functions
+        const resultsDiv = document.getElementById('testResults');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(div);
+        }
+
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+
+        // Check configuration
+        function checkConfig() {
+            const configDiv = document.getElementById('configStatus');
+            let html = '<ul>';
+            
+            // Check API
+            html += `<li><span class="status-indicator ${window.api ? 'status-ok' : 'status-error'}"></span>API Module: ${window.api ? 'Loaded' : 'Not Loaded'}</li>`;
+            
+            // Check Google Auth
+            html += `<li><span class="status-indicator ${window.GoogleAuth ? 'status-ok' : 'status-error'}"></span>Google Auth Module: ${window.GoogleAuth ? 'Loaded' : 'Not Loaded'}</li>`;
+            
+            // Check Google Client ID
+            const hasClientId = typeof GOOGLE_CLIENT_ID !== 'undefined' && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+            html += `<li><span class="status-indicator ${hasClientId ? 'status-ok' : 'status-error'}"></span>Google Client ID: ${hasClientId ? 'Configured' : 'Not Configured'}</li>`;
+            
+            // Check localStorage
+            const hasToken = localStorage.getItem('authToken');
+            html += `<li><span class="status-indicator ${hasToken ? 'status-ok' : 'status-pending'}"></span>Auth Token: ${hasToken ? 'Present' : 'Not Present'}</li>`;
+            
+            html += '</ul>';
+            configDiv.innerHTML = html;
+        }
+
+        // Test Google Sign-In
+        function testGoogleSignIn() {
+            clearResults();
+            log('Testing Google Sign-In...');
+            
+            if (!window.GoogleAuth) {
+                log('Error: Google Auth module not loaded', 'error');
+                return;
+            }
+            
+            try {
+                // Check if Google SDK is loaded
+                if (typeof google === 'undefined') {
+                    log('Google SDK not loaded, initializing...', 'warning');
+                    window.GoogleAuth.initialize();
+                    log('Google Auth initialized', 'success');
+                } else {
+                    log('Google SDK already loaded', 'success');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test OAuth Flow
+        function testOAuthFlow() {
+            clearResults();
+            log('Testing OAuth Flow...');
+            
+            if (!window.GoogleAuth || !window.GoogleAuth.signIn) {
+                log('Error: OAuth sign-in function not available', 'error');
+                return;
+            }
+            
+            log('Redirecting to Google OAuth...', 'info');
+            window.GoogleAuth.signIn();
+        }
+
+        // Test Backend API
+        async function testBackendAPI() {
+            clearResults();
+            log('Testing Backend API...');
+            
+            try {
+                // Test health endpoint
+                log('Testing /health endpoint...');
+                const healthResponse = await fetch('/health');
+                const healthData = await healthResponse.json();
+                log(`Health check: ${JSON.stringify(healthData)}`, 'success');
+                
+                // Test auth endpoint
+                log('Testing /api/auth/me endpoint...');
+                const authResponse = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || 'no-token'}`
+                    }
+                });
+                
+                if (authResponse.ok) {
+                    const userData = await authResponse.json();
+                    log(`Current user: ${JSON.stringify(userData.user)}`, 'success');
+                } else {
+                    log(`Auth check failed: ${authResponse.status} ${authResponse.statusText}`, 'error');
+                }
+                
+                // Test Google auth endpoint
+                log('Testing Google auth endpoint readiness...');
+                const testCredential = 'test.credential';
+                const googleAuthResponse = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ credential: testCredential })
+                });
+                
+                const googleAuthData = await googleAuthResponse.json();
+                if (googleAuthResponse.ok) {
+                    log('Google auth endpoint responding', 'success');
+                } else {
+                    log(`Google auth endpoint test: ${googleAuthData.error} - ${googleAuthData.message}`, 'info');
+                }
+                
+            } catch (error) {
+                log(`Backend test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear authentication data
+        function clearAuth() {
+            clearResults();
+            log('Clearing authentication data...');
+            
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('googleTokens');
+            
+            log('Authentication data cleared', 'success');
+            checkConfig();
+        }
+
+        // Handle credential response
+        window.handleCredentialResponse = async function(response) {
+            log('Received Google credential response', 'info');
+            log(`Credential length: ${response.credential.length} characters`, 'info');
+            
+            try {
+                log('Sending credential to backend...');
+                const data = await window.api.googleLogin(response.credential);
+                log(`Authentication successful! User: ${data.user.email}`, 'success');
+                log(`User data: ${JSON.stringify(data.user)}`, 'success');
+                
+                if (data.isNewUser) {
+                    log('New user detected - would redirect to onboarding', 'info');
+                } else {
+                    log('Existing user - would redirect to main app', 'info');
+                }
+                
+                checkConfig();
+            } catch (error) {
+                log(`Authentication failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            checkConfig();
+            
+            // Initialize Google Auth
+            if (window.GoogleAuth && window.GoogleAuth.initialize) {
+                try {
+                    window.GoogleAuth.initialize();
+                    log('Google Auth initialized on page load', 'success');
+                } catch (error) {
+                    log(`Failed to initialize Google Auth: ${error.message}`, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
