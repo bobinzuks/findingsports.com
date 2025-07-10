@@ -78,6 +78,54 @@ class CommunityCenterScraper extends BaseDataSource {
                 }
             },
             {
+                title: 'Drop-in Tennis',
+                sport: 'tennis',
+                venue: {
+                    name: 'Kitsilano Beach Tennis Courts',
+                    address: '1499 Arbutus St, Vancouver',
+                    coordinates: { lat: 49.2738, lng: -123.1531 }
+                },
+                startTime: this.getNextDayTime(0, 9, 0), // Next Sunday 9am
+                endTime: this.getNextDayTime(0, 11, 0), // 11am
+                capacity: { max: 8 },
+                requirements: ['Bring your own racquet', 'First come first served'],
+                source: {
+                    name: 'Vancouver Parks',
+                    type: 'community-center',
+                    lastUpdated: new Date()
+                },
+                isIndoor: false,
+                recurring: {
+                    enabled: true,
+                    frequency: 'weekly',
+                    days: ['sunday']
+                }
+            },
+            {
+                title: 'Drop-in Floor Hockey',
+                sport: 'hockey',
+                venue: {
+                    name: 'Douglas Park Community Centre',
+                    address: '801 West 22nd Ave, Vancouver',
+                    coordinates: { lat: 49.2520, lng: -123.1235 }
+                },
+                startTime: this.getNextDayTime(5, 19, 30), // Next Friday 7:30pm
+                endTime: this.getNextDayTime(5, 21, 0), // 9pm
+                capacity: { max: 30 },
+                requirements: ['Stick and gloves required', '$3 drop-in fee'],
+                source: {
+                    name: 'Douglas Park CC',
+                    type: 'community-center',
+                    lastUpdated: new Date()
+                },
+                isIndoor: true,
+                recurring: {
+                    enabled: true,
+                    frequency: 'weekly',
+                    days: ['friday']
+                }
+            },
+            {
                 title: 'Drop-in Soccer',
                 sport: 'soccer',
                 venue: {

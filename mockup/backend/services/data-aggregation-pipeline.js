@@ -174,10 +174,17 @@ class DataAggregationPipeline {
             // Store drop-in games
             let processed = 0;
             for (const game of dropInGames) {
-                const gameId = this.generateGameId(game);
+                // Create proper game data for NVRC games
                 const gameData = {
-                    id: gameId,
-                    ...game,
+                    title: game.type || `Drop-in ${game.sport}`,
+                    sport: game.sport,
+                    venue: game.venue || {
+                        name: game.centre,
+                        address: game.address || 'North Vancouver',
+                        coordinates: game.coordinates || { lat: 49.3234, lng: -123.0831 }
+                    },
+                    startTime: this.getNextDayTime(game.day, game.time),
+                    description: `${game.type} at ${game.centre}`,
                     type: 'drop-in',
                     isDropIn: true,
                     source: 'NVRC Gymnasiums',
@@ -185,9 +192,13 @@ class DataAggregationPipeline {
                     recurring: {
                         enabled: true,
                         frequency: 'weekly',
-                        days: game.day ? [game.day] : []
+                        days: game.day ? [game.day.toLowerCase()] : []
                     }
                 };
+                
+                const gameId = this.generateGameId(gameData);
+                gameData.id = gameId;
+                
                 this.gamesDatabase.set(gameId, gameData);
                 processed++;
             }
@@ -376,7 +387,9 @@ class DataAggregationPipeline {
                     return false;
                 }
                 const distance = this.calculateDistance(lat, lng, g.venue.coordinates.lat, g.venue.coordinates.lng);
-                return distance <= radius;
+                // Convert radius to meters if it seems to be in km (less than 1000)
+                const radiusInMeters = radius < 1000 ? radius * 1000 : radius;
+                return distance <= radiusInMeters;
             });
         }
 
@@ -430,6 +443,60 @@ class DataAggregationPipeline {
             breakdown[game.sport] = (breakdown[game.sport] || 0) + 1;
         }
         return breakdown;
+    }
+    
+    // Helper to get next occurrence of a weekday with time
+    getNextDayTime(dayName, timeString) {
+        if (!dayName || !timeString) {
+            // Return next available time slot if missing
+            const nextDate = new Date();
+            nextDate.setDate(nextDate.getDate() + 1);
+            nextDate.setHours(19, 0, 0, 0);
+            return nextDate;
+        }
+        
+        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const targetDay = daysOfWeek.indexOf(dayName.toLowerCase());
+        
+        if (targetDay === -1) {
+            // Invalid day, return tomorrow
+            const nextDate = new Date();
+            nextDate.setDate(nextDate.getDate() + 1);
+            nextDate.setHours(19, 0, 0, 0);
+            return nextDate;
+        }
+        
+        const now = new Date();
+        const currentDay = now.getDay();
+        let daysUntilTarget = targetDay - currentDay;
+        
+        if (daysUntilTarget <= 0) {
+            daysUntilTarget += 7;
+        }
+        
+        const targetDate = new Date();
+        targetDate.setDate(now.getDate() + daysUntilTarget);
+        
+        // Parse time from string like "7:00pm-9:00pm"
+        const timeMatch = timeString.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)/i);
+        if (timeMatch) {
+            let hours = parseInt(timeMatch[1], 10);
+            const minutes = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+            const isPM = timeMatch[3].toLowerCase() === 'pm';
+            
+            if (isPM && hours !== 12) {
+                hours += 12;
+            } else if (!isPM && hours === 12) {
+                hours = 0;
+            }
+            
+            targetDate.setHours(hours, minutes, 0, 0);
+        } else {
+            // Default to 7 PM if time parsing fails
+            targetDate.setHours(19, 0, 0, 0);
+        }
+        
+        return targetDate;
     }
 }
 

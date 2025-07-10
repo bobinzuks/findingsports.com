@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "centre": "Delbrook Community Recreation Centre",
+    "sport": "basketball",
+    "day": "Tuesday",
+    "time": "7:00pm-9:00pm",
+    "type": "Adult Drop-in Basketball",
+    "venue": {
+      "name": "Delbrook Community Recreation Centre",
+      "address": "600 West Queens Rd, North Vancouver",
+      "coordinates": {
+        "lat": 49.3234,
+        "lng": -123.1043
+      }
+    }
+  },
+  {
+    "centre": "Ron Andrews Community Recreation Centre",
+    "sport": "volleyball",
+    "day": "Thursday",
+    "time": "8:00pm-10:00pm",
+    "type": "Adult Drop-in Volleyball",
+    "venue": {
+      "name": "Ron Andrews Community Recreation Centre",
+      "address": "931 Lytton St, North Vancouver",
+      "coordinates": {
+        "lat": 49.3234,
+        "lng": -123.0831
+      }
+    }
+  },
+  {
+    "centre": "Harry Jerome Community Recreation Centre",
+    "sport": "badminton",
+    "day": "Friday",
+    "time": "6:30pm-8:30pm",
+    "type": "All Ages Drop-in Badminton",
+    "venue": {
+      "name": "Harry Jerome Community Recreation Centre",
+      "address": "123 East 23rd St, North Vancouver",
+      "coordinates": {
+        "lat": 49.3267,
+        "lng": -123.0688
+      }
+    }
+  },
+  {
+    "centre": "John Braithwaite Community Centre",
+    "sport": "pickleball",
+    "day": "Wednesday",
+    "time": "10:00am-12:00pm",
+    "type": "Senior Drop-in Pickleball",
+    "venue": {
+      "name": "John Braithwaite Community Centre",
+      "address": "145 West 1st St, North Vancouver",
+      "coordinates": {
+        "lat": 49.314,
+        "lng": -123.0753
+      }
+    }
+  }
+]

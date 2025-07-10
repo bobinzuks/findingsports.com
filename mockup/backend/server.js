@@ -428,9 +428,22 @@ app.get('/api/games', async (req, res) => {
         if (location && !lat && !lng) {
             const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
             if (normalizedLocation) {
-                filteredGames = aggregatedGames.filter(game =>
-                    bcLocationService.isGameNearLocation(game, normalizedLocation, 75)
-                );
+                // Get coordinates for the location and use them for filtering
+                const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
+                if (locationCoords) {
+                    // Update search params with location coordinates
+                    searchParams.lat = locationCoords.lat;
+                    searchParams.lng = locationCoords.lng;
+                    searchParams.radius = searchParams.radius || 50; // Default 50km radius
+                    
+                    // Re-search with coordinates
+                    filteredGames = await dataPipeline.searchGames(searchParams);
+                } else {
+                    // If no coordinates found, still try to filter by location
+                    filteredGames = aggregatedGames.filter(game =>
+                        bcLocationService.isGameNearLocation(game, normalizedLocation, 75)
+                    );
+                }
             }
         }
 
