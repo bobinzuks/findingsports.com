@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Google Maps - Finding Sports</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #0f0f0f;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ff6b35;
+        }
+        .option {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .option h2 {
+            color: #ff8555;
+            margin-top: 0;
+        }
+        code {
+            background: #2a2a2a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .button {
+            display: inline-block;
+            background: #ff6b35;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #ff8555;
+        }
+        .warning {
+            background: #2a1f1a;
+            border-left: 4px solid #ff6b35;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #1a2a1a;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Fix Google Maps for Finding Sports</h1>
+        
+        <div class="warning">
+            <strong>Current Issue:</strong> The Google Maps API key in the code is a development/test key that may not work for your domain or may have exceeded its quota.
+        </div>
+
+        <div class="option">
+            <h2>Option 1: Use Your Own Google Maps API Key (Recommended)</h2>
+            <ol>
+                <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="button">Google Cloud Console</a></li>
+                <li>Create a new project or select an existing one</li>
+                <li>Enable the <strong>Maps JavaScript API</strong>:
+                    <ul>
+                        <li>Go to "APIs & Services" → "Library"</li>
+                        <li>Search for "Maps JavaScript API"</li>
+                        <li>Click on it and press "Enable"</li>
+                    </ul>
+                </li>
+                <li>Create an API Key:
+                    <ul>
+                        <li>Go to "APIs & Services" → "Credentials"</li>
+                        <li>Click "Create Credentials" → "API Key"</li>
+                        <li>Copy the generated API key</li>
+                    </ul>
+                </li>
+                <li>Restrict the API Key (Important for security):
+                    <ul>
+                        <li>Click on your API key</li>
+                        <li>Under "Application restrictions", select "HTTP referrers"</li>
+                        <li>Add your domains:
+                            <pre>http://localhost:*
+https://yourdomain.com/*
+https://*.yourdomain.com/*</pre>
+                        </li>
+                        <li>Under "API restrictions", select "Restrict key"</li>
+                        <li>Select only "Maps JavaScript API"</li>
+                        <li>Save the changes</li>
+                    </ul>
+                </li>
+                <li>Update the code with your API key in <code>/mockup/js/config.js</code>:
+                    <pre>window.APP_CONFIG = {
+    // Replace with your API key
+    GOOGLE_MAPS_API_KEY: 'YOUR_API_KEY_HERE',
+    ...</pre>
+                </li>
+            </ol>
+            
+            <a href="google-maps-debug.html" class="button">Test Your API Key</a>
+        </div>
+
+        <div class="option">
+            <h2>Option 2: Use Leaflet Maps (Free Alternative)</h2>
+            <p>If you don't want to use Google Maps, the app automatically falls back to Leaflet with OpenStreetMap tiles.</p>
+            
+            <p>To force Leaflet usage, edit <code>/mockup/js/config.js</code>:</p>
+            <pre>window.APP_CONFIG = {
+    GOOGLE_MAPS_API_KEY: '', // Leave empty
+    ENABLE_GOOGLE_MAPS: false,
+    ENABLE_LEAFLET_FALLBACK: true,
+    ...</pre>
+            
+            <div class="success">
+                <strong>Benefits:</strong> No API key needed, completely free, no usage limits
+            </div>
+        </div>
+
+        <div class="option">
+            <h2>Option 3: Quick Test with Temporary Fix</h2>
+            <p>For immediate testing, you can try these temporary solutions:</p>
+            
+            <ol>
+                <li><strong>Clear Browser Cache:</strong> Sometimes old cached responses cause issues</li>
+                <li><strong>Use Incognito Mode:</strong> Test without extensions or cache</li>
+                <li><strong>Check Console Errors:</strong> Press F12 and look for specific error messages</li>
+            </ol>
+            
+            <p>Common error messages and solutions:</p>
+            <ul>
+                <li><code>InvalidKeyMapError</code> → You need a valid API key</li>
+                <li><code>RefererNotAllowedMapError</code> → Add your domain to allowed referrers</li>
+                <li><code>ApiNotActivatedMapError</code> → Enable Maps JavaScript API in Cloud Console</li>
+                <li><code>OverQuotaMapError</code> → API key has exceeded its usage quota</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Security Note</h3>
+            <p>Never commit your real Google Maps API key to a public repository. Use environment variables or configuration files that are excluded from version control.</p>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="index.html" class="button">Back to App</a>
+            <a href="google-maps-debug.html" class="button">Debug Panel</a>
+        </div>
+    </div>
+</body>
+</html>

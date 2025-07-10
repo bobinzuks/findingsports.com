@@ -15,29 +15,61 @@ const PORT = process.env.PORT || 8080;
 const webSocketService = require('./services/websocket');
 webSocketService.initialize(server, process.env.CORS_ORIGIN);
 
-// Initialize data aggregation pipeline
+// Initialize data aggregation services
 const { getInstance: getDataPipeline } = require('./services/data-aggregation-pipeline');
+const { getInstance: getDataSwarm } = require('./services/data-aggregation-swarm');
+const { getInstance: getSiteMethodsManager } = require('./services/site-methods-manager');
+const { getInstance: getIntelligentCache } = require('./services/intelligent-cache');
+
 const dataPipeline = getDataPipeline();
+const dataSwarm = getDataSwarm();
+const siteMethodsManager = getSiteMethodsManager();
+const intelligentCache = getIntelligentCache();
 
 // Initialize the 10-agent sports scraping swarm
 const { initializeSwarmIntegration, getSwarmStatus, shutdownSwarm } = require('./integrate-swarm');
 
-// Start data aggregation in development
+// Start data aggregation services
 if (process.env.NODE_ENV !== 'production') {
     // Use in-memory queue for development
     setTimeout(() => {
-        console.log('Starting data aggregation pipeline...');
+        console.log('🚀 Starting enhanced data aggregation services...');
+        
+        // Start legacy pipeline for backwards compatibility
         dataPipeline.start();
-
-        // Initialize swarm after pipeline starts
+        
+        // Initialize new swarm system
+        console.log('🐝 Initializing 100+ source data aggregation swarm...');
+        console.log(`📊 Registered sources: ${dataSwarm.sources.size}`);
+        console.log(`🧠 Site methods database: ${siteMethodsManager.methods.size} methods`);
+        console.log(`💾 Intelligent cache initialized with ${intelligentCache.config.defaultTTL}s TTL`);
+        
+        // Warm up cache with popular searches
         setTimeout(async () => {
             try {
-                console.log('🏀 Initializing 10-Agent Sports Scraping Swarm...');
-                await initializeSwarmIntegration(app);
-                console.log('✅ Swarm integration complete');
+                console.log('🔥 Warming up cache with popular searches...');
+                const warmupItems = [
+                    {
+                        key: 'games:basketball:any:any:10:today:drop-in',
+                        fetcher: () => dataSwarm.collectFromAllSources({ sports: ['basketball'] }),
+                        options: { ttl: 3600, priority: 'high' }
+                    }
+                ];
+                await intelligentCache.warmUp(warmupItems);
             } catch (error) {
-                console.error('❌ Swarm initialization failed:', error.message);
-                console.log('⚠️ Continuing without swarm - using standard scraping only');
+                console.error('Cache warmup failed:', error);
+            }
+        }, 10000);
+        
+        // Initialize legacy swarm after pipeline starts
+        setTimeout(async () => {
+            try {
+                console.log('🏀 Initializing legacy 10-Agent Sports Scraping Swarm...');
+                await initializeSwarmIntegration(app);
+                console.log('✅ Legacy swarm integration complete');
+            } catch (error) {
+                console.error('❌ Legacy swarm initialization failed:', error.message);
+                console.log('⚠️ Continuing with new swarm system only');
             }
         }, 5000);
     }, 2000);
@@ -141,6 +173,12 @@ app.use('/api/user-games', require('./routes/user-games'));
 
 // Venue request routes
 app.use('/api/venue-requests', require('./routes/venue-requests'));
+
+// API v2 - Enhanced swarm endpoints
+app.use('/api/v2', require('./routes/api-v2'));
+
+// Play Now endpoint
+app.use('/api/play-now', require('./routes/play-now'));
 
 // Health check
 app.get('/health', (req, res) => {

@@ -11,9 +11,15 @@
 
 window.APP_CONFIG = {
     // Google Maps API Key
-    GOOGLE_MAPS_API_KEY: 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4',
+    // NOTE: Replace YOUR_API_KEY_HERE with your actual Google Maps API key
+    // To update: Change 'YOUR_API_KEY_HERE' to your key (e.g., 'AIzaSy...')
+    GOOGLE_MAPS_API_KEY: 'AIzaSyD2ux0PIekUQLAqVDNhy0tHwhBht6vcXqA',
+    
+    // Alternative: Disable Google Maps and use Leaflet
+    // GOOGLE_MAPS_API_KEY: '',
 
     // Enable/disable map providers
+    // Set ENABLE_GOOGLE_MAPS to false if you don't have a valid API key
     ENABLE_GOOGLE_MAPS: true,
     ENABLE_LEAFLET_FALLBACK: true,
 
