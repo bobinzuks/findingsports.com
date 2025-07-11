@@ -1,5 +1,7 @@
 # Play Now API Demo Results
 
+Last Updated: 2025-07-10
+
 ## What the API Shows
 
 When a user clicks "Play Now", the API returns real-time drop-in sports activities based on their location:
