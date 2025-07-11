@@ -597,6 +597,67 @@ window.joinGame = async function (gameId) {
     }
 };
 
+// Show activity details (for Play Now drop-in activities)
+window.showActivityDetails = function (activity) {
+    const message = `
+${activity.sport.toUpperCase()} at ${activity.venue}
+Time: ${activity.timeString}
+Cost: $${activity.cost}
+${activity.ageGroup ? `Age Group: ${activity.ageGroup}` : ''}
+${activity.skillLevel ? `Skill Level: ${activity.skillLevel}` : ''}
+Distance: ${activity.distance}
+${activity.note ? `\nNote: ${activity.note}` : ''}
+
+Get directions to this location?`;
+
+    if (confirm(message)) {
+        window.getDirections(activity.coordinates.lat, activity.coordinates.lng);
+    }
+};
+
+// Show court details
+window.showCourtDetails = function (court) {
+    const message = `
+${court.type.toUpperCase()} - ${court.venue}
+Status: ${court.status.toUpperCase()}
+${court.courts ? `Courts: ${court.courts}` : ''}
+${court.lights ? `Lights: ${court.lights}` : ''}
+${court.busyTimes ? `Busy Times: ${court.busyTimes}` : ''}
+Distance: ${court.distance}
+
+Get directions to this location?`;
+
+    if (confirm(message)) {
+        window.getDirections(court.coordinates.lat, court.coordinates.lng);
+    }
+};
+
+// Show pickup game details
+window.showPickupGameDetails = function (game) {
+    const message = `
+${game.sport.toUpperCase()} Pickup Game
+Location: ${game.venue}
+Organizer: ${game.organizer} via ${game.platform}
+Time: ${game.time}
+Skill Level: ${game.skillLevel}
+${game.playersNeeded ? `Players Needed: ${game.playersNeeded}` : ''}
+${game.spotsLeft ? `Spots Left: ${game.spotsLeft}` : ''}
+How to Join: ${game.joinMethod}
+Distance: ${game.distance}
+
+Get directions to this location?`;
+
+    if (confirm(message)) {
+        window.getDirections(game.coordinates.lat, game.coordinates.lng);
+    }
+};
+
+// Get directions to a location
+window.getDirections = function (lat, lng) {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+};
+
 // Update location
 document.getElementById('locationSelect').addEventListener('change', async e => {
     const newLocation = e.target.value;

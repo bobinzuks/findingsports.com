@@ -127,27 +127,30 @@ window.PlayNowPage = {
         actionBtn.classList.add('loading');
         actionBtn.querySelector('.btn-text').textContent = 'Finding games...';
 
-        resultsDiv.innerHTML = '<div class="loading-message">Searching for available fields...</div>';
+        resultsDiv.innerHTML = '<div class="loading-message">Searching for available games happening now...</div>';
 
         try {
-            // Get current location
+            // Get user's current location
             const locationInfo = window.locationService?.getLocationInfo();
-            const currentLocation = locationInfo?.currentCity?.key || 'vancouver';
+            const userLocation = locationInfo?.userLocation || { lat: 49.2827, lng: -123.1207 }; // Default to downtown Vancouver
+            
+            // Call the Play Now API
+            const params = new URLSearchParams({
+                lat: userLocation.lat,
+                lng: userLocation.lng,
+                radius: 10, // 10km radius
+                includeOpenCourts: true
+            });
 
-            // Fetch games/fields
-            const filters = { location: currentLocation };
-            if (sport !== 'any') {
-                filters.sport = sport;
-            }
-
-            const { games } = await window.api.getGames(filters);
+            const response = await fetch(`${API_BASE_URL}/api/play-now?${params}`);
+            const data = await response.json();
 
             // Display results
-            this.displayResults(games, sport);
+            this.displayPlayNowResults(data, sport);
 
-            // Update map markers
+            // Update map markers with all activities
             if (window.googleMap || window.map) {
-                this.updateMapMarkers(games);
+                this.updateMapMarkersForPlayNow(data.activities);
             }
         } catch (error) {
             console.error('Failed to find games:', error);
@@ -161,6 +164,217 @@ window.PlayNowPage = {
             actionBtn.classList.remove('loading');
             actionBtn.querySelector('.btn-text').textContent = 'Play Now';
         }
+    },
+
+    // Display Play Now results
+    displayPlayNowResults(data, sportFilter) {
+        const resultsDiv = document.getElementById('playNowResults');
+        const { activities, summary } = data;
+        
+        // Filter activities by sport if needed
+        let filteredActivities = {
+            happeningNow: activities.happeningNow,
+            startingSoon: activities.startingSoon,
+            openCourts: activities.openCourts,
+            pickupGames: activities.pickupGames
+        };
+        
+        if (sportFilter !== 'any') {
+            filteredActivities = {
+                happeningNow: activities.happeningNow.filter(a => a.sport === sportFilter),
+                startingSoon: activities.startingSoon.filter(a => a.sport === sportFilter),
+                openCourts: activities.openCourts.filter(a => a.type === sportFilter),
+                pickupGames: activities.pickupGames.filter(a => a.sport === sportFilter)
+            };
+        }
+        
+        const totalFiltered = 
+            filteredActivities.happeningNow.length + 
+            filteredActivities.startingSoon.length + 
+            filteredActivities.openCourts.length + 
+            filteredActivities.pickupGames.length;
+        
+        if (totalFiltered === 0) {
+            resultsDiv.innerHTML = `
+                <div class="no-results">
+                    <h3>No ${sportFilter === 'any' ? '' : sportFilter} activities available right now</h3>
+                    <p>Try selecting a different sport or check back later.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="play-now-results-container">';
+        
+        // Happening Now
+        if (filteredActivities.happeningNow.length > 0) {
+            html += `
+                <div class="activity-section happening-now">
+                    <h3 class="section-header">
+                        <span class="status-icon">🟢</span>
+                        Happening Now (${filteredActivities.happeningNow.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+            
+            filteredActivities.happeningNow.forEach(activity => {
+                html += this.createActivityCard(activity, 'happening-now');
+            });
+            
+            html += '</div></div>';
+        }
+        
+        // Starting Soon
+        if (filteredActivities.startingSoon.length > 0) {
+            html += `
+                <div class="activity-section starting-soon">
+                    <h3 class="section-header">
+                        <span class="status-icon">🟡</span>
+                        Starting Soon (${filteredActivities.startingSoon.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+            
+            filteredActivities.startingSoon.forEach(activity => {
+                html += this.createActivityCard(activity, 'starting-soon');
+            });
+            
+            html += '</div></div>';
+        }
+        
+        // Open Courts
+        if (filteredActivities.openCourts.length > 0) {
+            html += `
+                <div class="activity-section open-courts">
+                    <h3 class="section-header">
+                        <span class="status-icon">🏞️</span>
+                        Open Courts/Fields (${filteredActivities.openCourts.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+            
+            filteredActivities.openCourts.forEach(court => {
+                html += this.createCourtCard(court);
+            });
+            
+            html += '</div></div>';
+        }
+        
+        // Pickup Games
+        if (filteredActivities.pickupGames.length > 0) {
+            html += `
+                <div class="activity-section pickup-games">
+                    <h3 class="section-header">
+                        <span class="status-icon">👥</span>
+                        Pickup Games (${filteredActivities.pickupGames.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+            
+            filteredActivities.pickupGames.forEach(game => {
+                html += this.createPickupGameCard(game);
+            });
+            
+            html += '</div></div>';
+        }
+        
+        html += '</div>';
+        resultsDiv.innerHTML = html;
+    },
+    
+    // Create activity card for drop-in activities
+    createActivityCard(activity, type) {
+        const sportEmoji = this.getSportEmoji(activity.sport);
+        const timeInfo = type === 'happening-now' ? 
+            `Started ${activity.startedAgo}` : 
+            `Starts in ${activity.startsIn}`;
+        
+        return `
+            <div class="activity-card ${type}" onclick="window.showActivityDetails(${JSON.stringify(activity).replace(/"/g, '&quot;')})">
+                <div class="activity-header">
+                    <span class="sport-icon">${sportEmoji}</span>
+                    <span class="sport-name">${activity.sport.toUpperCase()}</span>
+                    <span class="distance">${activity.distance}</span>
+                </div>
+                <div class="activity-venue">${activity.venue}</div>
+                <div class="activity-details">
+                    <span class="time-info">${activity.timeString}</span>
+                    <span class="status">${timeInfo}</span>
+                </div>
+                <div class="activity-footer">
+                    <span class="cost">$${activity.cost}</span>
+                    ${activity.ageGroup ? `<span class="age-group">${activity.ageGroup}</span>` : ''}
+                    ${activity.skillLevel ? `<span class="skill-level">${activity.skillLevel}</span>` : ''}
+                </div>
+            </div>
+        `;
+    },
+    
+    // Create card for open courts
+    createCourtCard(court) {
+        const typeEmoji = this.getSportEmoji(court.type);
+        const statusClass = court.status === 'open' ? 'status-open' : 'status-partial';
+        
+        return `
+            <div class="court-card" onclick="window.showCourtDetails(${JSON.stringify(court).replace(/"/g, '&quot;')})">
+                <div class="court-header">
+                    <span class="court-icon">${typeEmoji}</span>
+                    <span class="court-type">${court.type.toUpperCase()}</span>
+                    <span class="distance">${court.distance}</span>
+                </div>
+                <div class="court-venue">${court.venue}</div>
+                <div class="court-status ${statusClass}">${court.status.toUpperCase()}</div>
+                ${court.courts ? `<div class="court-count">${court.courts} courts</div>` : ''}
+                ${court.busyTimes ? `<div class="busy-times">${court.busyTimes}</div>` : ''}
+            </div>
+        `;
+    },
+    
+    // Create card for pickup games
+    createPickupGameCard(game) {
+        const sportEmoji = this.getSportEmoji(game.sport);
+        
+        return `
+            <div class="pickup-game-card" onclick="window.showPickupGameDetails(${JSON.stringify(game).replace(/"/g, '&quot;')})">
+                <div class="game-header">
+                    <span class="sport-icon">${sportEmoji}</span>
+                    <span class="sport-name">${game.sport.toUpperCase()}</span>
+                    <span class="distance">${game.distance}</span>
+                </div>
+                <div class="game-venue">${game.venue}</div>
+                <div class="game-organizer">${game.organizer} via ${game.platform}</div>
+                <div class="game-details">
+                    <span class="time">${game.time}</span>
+                    <span class="skill-level">${game.skillLevel}</span>
+                </div>
+                <div class="game-footer">
+                    ${game.playersNeeded ? `<span class="players-needed">Need ${game.playersNeeded} players</span>` : ''}
+                    ${game.spotsLeft ? `<span class="spots-left">${game.spotsLeft} spots left</span>` : ''}
+                    <span class="join-method">${game.joinMethod}</span>
+                </div>
+            </div>
+        `;
+    },
+    
+    // Get sport emoji
+    getSportEmoji(sport) {
+        const emojis = {
+            basketball: '🏀',
+            volleyball: '🏐',
+            soccer: '⚽',
+            badminton: '🏸',
+            hockey: '🏒',
+            skating: '⛸️',
+            tennis: '🎾',
+            swimming: '🏊',
+            football: '🏈',
+            'ping-pong': '🏓',
+            frisbee: '🥏',
+            rugby: '🏉',
+            baseball: '⚾',
+            softball: '🥎'
+        };
+        return emojis[sport] || '🏃';
     },
 
     // Display search results
@@ -247,6 +461,55 @@ window.PlayNowPage = {
         });
 
         return venues;
+    },
+
+    // Update map markers for Play Now activities
+    updateMapMarkersForPlayNow(activities) {
+        if (!window.map && !window.googleMap) {
+            return;
+        }
+
+        // Clear existing markers
+        if (window.googleMap && window.clearGoogleMarkers) {
+            window.clearGoogleMarkers();
+        } else if (window.markers) {
+            window.markers.forEach(marker => window.map.removeLayer(marker));
+            window.markers = [];
+        }
+
+        // Add markers for all activity types
+        const allActivities = [
+            ...activities.happeningNow,
+            ...activities.startingSoon,
+            ...activities.openCourts,
+            ...activities.pickupGames
+        ];
+
+        allActivities.forEach(activity => {
+            if (activity.coordinates) {
+                const markerData = {
+                    id: activity.id,
+                    sport: activity.sport || activity.type,
+                    venue: { 
+                        name: activity.venue,
+                        coordinates: activity.coordinates
+                    },
+                    coords: [activity.coordinates.lat, activity.coordinates.lng],
+                    type: activity.type || 'drop-in',
+                    status: activity.status,
+                    time: activity.timeString || activity.time
+                };
+                window.addGameMarker(markerData);
+            }
+        });
+
+        // Fit map to show all markers
+        if (window.googleMap && window.fitMapToMarkers) {
+            window.fitMapToMarkers();
+        } else if (window.markers && window.markers.length > 0) {
+            const group = new L.FeatureGroup(window.markers);
+            window.map.fitBounds(group.getBounds().pad(0.1));
+        }
     },
 
     // Update map markers
