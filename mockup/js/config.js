@@ -29,12 +29,12 @@ window.APP_CONFIG = {
 
     // API endpoints
     API_BASE_URL: window.location.hostname === 'localhost' ?
-        'http://localhost:3000' :
+        'http://localhost:8080' :
         window.location.origin,
         
     // Additional settings
-    API_URL: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api',
-    WS_URL: window.location.hostname === 'localhost' ? 'ws://localhost:3000' : `wss://${window.location.host}`,
+    API_URL: window.location.hostname === 'localhost' ? 'http://localhost:8080/api' : '/api',
+    WS_URL: window.location.hostname === 'localhost' ? 'ws://localhost:8080' : `wss://${window.location.host}`,
     ENABLE_MOCK_DATA: false,
     DEBUG_MODE: window.location.hostname === 'localhost'
 };

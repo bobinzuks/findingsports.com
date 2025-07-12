@@ -836,58 +836,15 @@ window.showLocationFeedback = function (currentCity, isFallback, detectedLocatio
 
 // Play Now functionality
 window.playNow = async function () {
-    const playNowBtn = document.querySelector('.play-now-btn');
-    const gamesList = document.getElementById('gamesList');
-
-    // Add loading state
-    playNowBtn.classList.add('loading');
-    playNowBtn.textContent = 'Finding games...';
-
-    // Show location detection feedback when button is clicked
-    if (window.locationService) {
-        const locationResult = window.locationService.getLocationInfo();
-        if (locationResult && locationResult.currentCity) {
-            window.showLocationFeedback(
-                locationResult.currentCity,
-                locationResult.fallback,
-                locationResult.detectedLocationInfo
-            );
+    // Switch to the Play Now page
+    window.switchPage('play-now');
+    
+    // Optionally trigger the search immediately
+    setTimeout(() => {
+        if (window.PlayNowPage && window.PlayNowPage.findGames) {
+            window.PlayNowPage.findGames();
         }
-    }
-
-    try {
-        // Get current location for search
-        const currentLocation = document.getElementById('locationSelect').value || 'salmon-arm';
-
-        // Fetch games from current location and nearby areas
-        const { games } = await window.api.getGames({ location: currentLocation });
-
-        if (games.length === 0) {
-            window.showPlayNowResults([], 'No games found in your area');
-            return;
-        }
-
-        // Get Play Now recommendations
-        const recommendations = await window.playNowService.getRecommendations(games);
-
-        if (recommendations.playNow.length === 0) {
-            window.showPlayNowResults(
-                [],
-                'No immediate games available. Try searching for games later today or this week.'
-            );
-            return;
-        }
-
-        // Show Play Now results
-        window.showPlayNowResults(recommendations.playNow, null, recommendations);
-    } catch (error) {
-        console.error('Play Now failed:', error);
-        window.showPlayNowResults([], 'Failed to find games. Please try again.');
-    } finally {
-        // Remove loading state
-        playNowBtn.classList.remove('loading');
-        playNowBtn.textContent = 'Play Now';
-    }
+    }, 500);
 };
 
 // Show Play Now results

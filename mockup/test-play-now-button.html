@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Play Now Button</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #0a1628;
+            color: #cdd6f4;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #1e293b;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Play Now Button Test</h1>
+        
+        <button onclick="testAPI()">Test API Directly</button>
+        <button onclick="testConfig()">Check Config</button>
+        <button onclick="testPlayNowFunction()">Test Play Now Function</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/location-service.js"></script>
+    <script src="js/play-now.js"></script>
+    
+    <script>
+        const resultDiv = document.getElementById('result');
+        
+        async function testAPI() {
+            resultDiv.innerHTML = 'Testing API endpoint...';
+            
+            try {
+                const apiUrl = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8080';
+                const url = `${apiUrl}/api/play-now?lat=49.2827&lng=-123.1207&radius=10&includeOpenCourts=true`;
+                
+                resultDiv.innerHTML += `\n\nFetching: ${url}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                resultDiv.innerHTML += `\n\n<span class="success">✓ API Response Received!</span>`;
+                resultDiv.innerHTML += `\n\nActivities Found:`;
+                resultDiv.innerHTML += `\n- Happening Now: ${data.activities.happeningNow.length}`;
+                resultDiv.innerHTML += `\n- Starting Soon: ${data.activities.startingSoon.length}`;
+                resultDiv.innerHTML += `\n- Later Today: ${data.activities.laterToday.length}`;
+                resultDiv.innerHTML += `\n- Open Courts: ${data.activities.openCourts.length}`;
+                resultDiv.innerHTML += `\n- Pickup Games: ${data.activities.pickupGames.length}`;
+                
+                console.log('API Response:', data);
+            } catch (error) {
+                resultDiv.innerHTML += `\n\n<span class="error">✗ Error: ${error.message}</span>`;
+                console.error('API Error:', error);
+            }
+        }
+        
+        function testConfig() {
+            resultDiv.innerHTML = 'Checking configuration...';
+            
+            resultDiv.innerHTML += `\n\nwindow.APP_CONFIG exists: ${!!window.APP_CONFIG}`;
+            resultDiv.innerHTML += `\n\nAPI_BASE_URL: ${window.APP_CONFIG?.API_BASE_URL}`;
+            resultDiv.innerHTML += `\n\nDirect API_BASE_URL: ${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'undefined'}`;
+            resultDiv.innerHTML += `\n\nHostname: ${window.location.hostname}`;
+            resultDiv.innerHTML += `\n\nOrigin: ${window.location.origin}`;
+            
+            if (window.APP_CONFIG) {
+                resultDiv.innerHTML += `\n\n<span class="success">✓ Configuration loaded successfully!</span>`;
+            } else {
+                resultDiv.innerHTML += `\n\n<span class="error">✗ Configuration not loaded!</span>`;
+            }
+        }
+        
+        async function testPlayNowFunction() {
+            resultDiv.innerHTML = 'Testing Play Now function...';
+            
+            // Create mock DOM elements
+            const mockSelect = document.createElement('select');
+            mockSelect.id = 'playNowSportSelect';
+            mockSelect.value = 'any';
+            document.body.appendChild(mockSelect);
+            
+            const mockResults = document.createElement('div');
+            mockResults.id = 'playNowResults';
+            document.body.appendChild(mockResults);
+            
+            const mockBtn = document.createElement('button');
+            mockBtn.className = 'play-now-action-btn';
+            mockBtn.innerHTML = '<span class="btn-text">Play Now</span>';
+            document.body.appendChild(mockBtn);
+            
+            // Mock location service
+            if (!window.locationService) {
+                window.locationService = {
+                    getLocationInfo: () => ({
+                        userLocation: { lat: 49.2827, lng: -123.1207 }
+                    })
+                };
+            }
+            
+            try {
+                resultDiv.innerHTML += '\n\nCalling PlayNowPage.findGames()...';
+                await window.PlayNowPage.findGames();
+                
+                const resultsContent = mockResults.innerHTML;
+                if (resultsContent.includes('error')) {
+                    resultDiv.innerHTML += `\n\n<span class="error">✗ Error in results</span>`;
+                } else if (resultsContent.includes('activity-card') || resultsContent.includes('court-card')) {
+                    resultDiv.innerHTML += `\n\n<span class="success">✓ Results displayed successfully!</span>`;
+                } else if (resultsContent.includes('no-results')) {
+                    resultDiv.innerHTML += `\n\n<span class="success">✓ No results found (API working)</span>`;
+                } else {
+                    resultDiv.innerHTML += `\n\nResults HTML: ${resultsContent.substring(0, 200)}...`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `\n\n<span class="error">✗ Error: ${error.message}</span>`;
+                console.error('Play Now Error:', error);
+            } finally {
+                // Clean up
+                mockSelect.remove();
+                mockResults.remove();
+                mockBtn.remove();
+            }
+        }
+        
+        // Auto-run tests
+        window.onload = async () => {
+            resultDiv.innerHTML = 'Running tests...\n';
+            testConfig();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testAPI();
+        };
+    </script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 // Play Now page component
+const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+
 window.PlayNowPage = {
     // Initialize the Play Now page
     async initialize() {
