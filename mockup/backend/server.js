@@ -101,28 +101,15 @@ const sessions = new Map();
 // Make users available globally for auth middleware
 global.users = users;
 
-// Create demo user
-(async () => {
-    const demoPasswordHash = await bcrypt.hash('demo123', 10);
-    users.set('demo-user', {
-        id: 'demo-user',
-        email: 'demo@example.com',
-        username: 'demo_user',
-        name: 'Demo User',
-        passwordHash: demoPasswordHash,
-        provider: 'local',
-        createdAt: new Date().toISOString(),
-        onboarded: true,
-        preferences: {
-            location: 'vancouver',
-            sports: ['basketball', 'soccer'],
-            mcpServers: ['mcp-vancouver-rec'],
-            timePreferences: ['weekday-evening', 'weekend-afternoon']
-        }
-    });
-})();
+// REMOVED: Demo user for security - users should register properly
+// Demo accounts should never be hardcoded in production code
 
 // Environment variables (set these in Railway)
+// JWT_SECRET must be set in production environment
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+    console.error('CRITICAL: JWT_SECRET not set in production!');
+    process.exit(1);
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
 // Using a test client ID for development - replace with your own in production
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '386932037035-k8v833noqjk7m4t641js92fvjmm5ri71.apps.googleusercontent.com';
