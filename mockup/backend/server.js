@@ -182,6 +182,14 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Config endpoint for frontend
+app.get('/api/config', (req, res) => {
+    res.json({
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE',
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 // Traditional login
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
