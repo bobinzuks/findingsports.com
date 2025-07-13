@@ -167,6 +167,12 @@ app.use('/api/v2', require('./routes/api-v2'));
 // Play Now endpoint
 app.use('/api/play-now', require('./routes/play-now'));
 
+// Venues endpoint
+app.use('/api/venues', require('./routes/venues'));
+
+// Sports endpoint
+app.use('/api/sports', require('./routes/sports'));
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
