@@ -143,20 +143,44 @@ window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
             { lat: 49.2827, lng: -123.1207 };
         const defaultZoom = userLocation ? 13 : 12;
 
-        // Initialize map
-        googleMap = new google.maps.Map(mapElement, {
-            center: defaultCenter,
-            zoom: defaultZoom,
-            styles: darkMapStyles,
-            disableDefaultUI: false,
-            zoomControl: true,
-            mapTypeControl: false,
-            scaleControl: true,
-            streetViewControl: false,
-            rotateControl: false,
-            fullscreenControl: true,
-            gestureHandling: 'cooperative'
-        });
+        // Initialize map with error handling for API activation
+        try {
+            googleMap = new google.maps.Map(mapElement, {
+                center: defaultCenter,
+                zoom: defaultZoom,
+                styles: darkMapStyles,
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                scaleControl: true,
+                streetViewControl: false,
+                rotateControl: false,
+                fullscreenControl: true,
+                gestureHandling: 'cooperative'
+            });
+        } catch (apiError) {
+            console.error('Google Maps API Error:', apiError);
+            // Show helpful message for API activation error
+            if (apiError.message && apiError.message.includes('ApiNotActivatedMapError')) {
+                mapElement.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1a1a1a; color: #757575; padding: 20px;">
+                        <div style="text-align: center; max-width: 400px;">
+                            <h3 style="color: #ff6b35; margin-bottom: 10px;">Maps API Setup Required</h3>
+                            <p style="margin-bottom: 15px;">The Google Maps JavaScript API needs to be enabled for this project.</p>
+                            <p style="font-size: 0.9em; margin-bottom: 10px;">To fix this:</p>
+                            <ol style="text-align: left; font-size: 0.9em;">
+                                <li>Go to the <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" style="color: #ff6b35;">Google Cloud Console</a></li>
+                                <li>Enable "Maps JavaScript API"</li>
+                                <li>Add your domain to the API key restrictions</li>
+                            </ol>
+                            <p style="font-size: 0.8em; color: #999; margin-top: 15px;">Domain to add: ${window.location.hostname}</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            throw apiError;
+        }
 
         // Initialize info window
         infoWindow = new google.maps.InfoWindow();

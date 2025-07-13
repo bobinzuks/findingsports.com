@@ -3,8 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="deployment-version" content="2025-01-13-google-maps-fix" />
+        <meta name="railway-deployment" content="cache-fix-complete" />
         <title>Finding Sports - Find Sports Near You</title>
-        <!-- Deployment timestamp: 2025-07-13T14:42:00Z - Fixed buttons -->
+        <!-- Deployment timestamp: 2025-01-13T17:45:00Z - Fixed Maps API & Buttons -->
         <link rel="stylesheet" href="css/styles.css?v=1752417024232" />
         <link rel="stylesheet" href="css/background-enhancement.css?v=1752417024232" />
         <link rel="stylesheet" href="css/play-now.css?v=1752417024232" />
@@ -16,8 +18,11 @@
         />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1752417024232" />
         <script>
-            // Google Maps API Key (replace with your own key in production)
+            // Google Maps API Key with Railway deployment support
             window.GOOGLE_MAPS_API_KEY = 'AIzaSyD2ux0PIekUQLAqVDNhy0tHwhBht6vcXqA';
+            
+            // Add Railway deployment timestamp to force updates
+            window.DEPLOYMENT_VERSION = '2025-01-13-fix-' + Date.now();
             
             // Load Google Maps API
             function loadGoogleMapsScript() {
