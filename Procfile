@@ -1,1 +1,1 @@
-web: cd mockup/backend && node server-start.js
+web: cd mockup/backend && node test-minimal.js
