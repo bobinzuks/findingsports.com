@@ -99,4 +99,30 @@ router.get('/:activityId', async (req, res) => {
     }
 });
 
+
+// POST search endpoint for Play Now
+router.post('/search', async (req, res) => {
+    try {
+        const { location, sports } = req.body;
+        
+        // Use the same logic as GET but with body parameters
+        const lat = location ? 49.2827 : req.body.lat; // Default to Vancouver
+        const lng = location ? -123.1207 : req.body.lng;
+        const radius = req.body.radius || 10;
+        
+        const activities = await playNowService.getActivitiesNearLocation(
+            lat, 
+            lng, 
+            radius,
+            { sports, includeOpenCourts: true }
+        );
+        
+        res.json(activities);
+    } catch (error) {
+        console.error('Play Now search error:', error);
+        res.status(500).json({ error: 'Failed to search activities' });
+    }
+});
+
+
 module.exports = router;
