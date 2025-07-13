@@ -1,1 +1,1 @@
-web: cd mockup/backend && node server-emergency-test.js
+web: cd mockup/backend && node server.js
