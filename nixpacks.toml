@@ -8,4 +8,4 @@ cmds = ["cd mockup/backend && cp package-minimal.json package.json && npm instal
 cmds = ["echo 'No build step required'"]
 
 [start]
-cmd = "cd mockup/backend && node server-minimal.js"
+cmd = "cd mockup/backend && node server-emergency.js"
