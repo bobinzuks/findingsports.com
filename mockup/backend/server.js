@@ -86,6 +86,9 @@ locationAgentService.setWebSocketService(webSocketService);
 // Initialize BC location service
 const bcLocationService = require('./services/bc-locations');
 
+// Import cache control middleware
+const noCacheMiddleware = require('./middleware/no-cache');
+
 // Middleware
 app.use(
     cors({
@@ -95,8 +98,80 @@ app.use(
 );
 app.use(express.json());
 
+// Apply no-cache middleware to prevent Railway CDN caching
+app.use(noCacheMiddleware);
+
+// For production, force even more aggressive no-cache
+if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
+    console.log('🚫 Production mode: Forcing aggressive no-cache for all responses');
+    app.use((req, res, next) => {
+        res.set({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Surrogate-Control': 'no-store'
+        });
+        next();
+    });
+}
+
 // IMPORTANT: Serve static files from mockup directory
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..'), {
+    etag: false, // Disable ETags
+    lastModified: false, // Disable Last-Modified
+    maxAge: 0, // No caching
+    setHeaders: (res, path) => {
+        // Force no-cache for all static files
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
+        // Add deployment timestamp
+        res.setHeader('X-Deployment-Time', new Date().toISOString());
+        
+        // Special handling for deleted files - return 404
+        if (path.includes('immediate-button-fix.js') || path.includes('google-auth-fix.js')) {
+            res.status(404).send('File removed in latest deployment');
+        }
+        
+        // Force complete cache bypass for Railway CDN
+        res.setHeader('X-Railway-CDN-Bypass', 'true');
+        res.setHeader('X-Accel-Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store, max-age=0');
+    }
+}));
+
+// Health check endpoint for Railway
+app.get('/api/health', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        deployment_version: process.env.BUILD_VERSION || 'unknown',
+        environment: process.env.NODE_ENV || 'development',
+        cache_disabled: true,
+        railway_environment: !!process.env.RAILWAY_ENVIRONMENT
+    });
+});
+
+// Cache debugging endpoint
+app.get('/api/cache-test', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Test-Timestamp', Date.now().toString());
+    
+    res.json({
+        message: 'Cache test endpoint',
+        timestamp: new Date().toISOString(),
+        random: Math.random(),
+        headers_sent: {
+            'cache-control': res.getHeader('Cache-Control'),
+            'pragma': res.getHeader('Pragma'),
+            'expires': res.getHeader('Expires')
+        }
+    });
+});
 
 // In-memory database (replace with real database in production)
 const users = new Map();
