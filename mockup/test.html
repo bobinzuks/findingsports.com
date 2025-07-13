@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finding Sports - Button Test</title>
+    <meta name="deployment" content="2025-01-13-aggressive-cache-bypass">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+        }
+        .primary {
+            background: #ff6b35;
+            color: white;
+        }
+        .secondary {
+            background: #3498db;
+            color: white;
+        }
+        .success {
+            background: #27ae60;
+            color: white;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Finding Sports - Direct Button Test</h1>
+    <p>This page tests button functionality directly without any external scripts.</p>
+    
+    <button class="primary" onclick="testPlayNow()">Test Play Now</button>
+    <button class="secondary" onclick="testSearch()">Test Search</button>
+    <button class="success" onclick="testVersion()">Check Deployment Version</button>
+    
+    <div id="output">Click a button to test...</div>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent = new Date().toISOString() + '\n' + message;
+        }
+        
+        async function testPlayNow() {
+            log('Testing Play Now endpoint...');
+            try {
+                const response = await fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=15');
+                const data = await response.json();
+                log('Play Now Response:\n' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Play Now Error: ' + error.message);
+            }
+        }
+        
+        async function testSearch() {
+            log('Testing Games Search endpoint...');
+            try {
+                const response = await fetch('/api/games');
+                const data = await response.json();
+                log('Games Response:\n' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Games Error: ' + error.message);
+            }
+        }
+        
+        async function testVersion() {
+            log('Checking deployment version...');
+            try {
+                const response = await fetch('/api/version/check?t=' + Date.now());
+                const data = await response.json();
+                log('Version Info:\n' + JSON.stringify(data, null, 2));
+                
+                if (data.version === '2025-01-13-aggressive-cache-bypass') {
+                    log('\n✅ LATEST VERSION IS DEPLOYED!');
+                } else {
+                    log('\n❌ OLD VERSION - Railway CDN is caching!');
+                }
+            } catch (error) {
+                log('Version Check Error: ' + error.message);
+            }
+        }
+        
+        // Auto-check version on load
+        setTimeout(testVersion, 500);
+    </script>
+</body>
+</html>

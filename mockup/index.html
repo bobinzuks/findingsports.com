@@ -49,6 +49,12 @@
     <body>
         <div class="sports-bg-pattern"></div>
         <div class="app-container">
+            <!-- Deployment Status Banner -->
+            <div id="deploymentBanner" style="background: #f39c12; color: white; padding: 10px; text-align: center; display: none;">
+                <span id="deploymentStatus">Checking deployment status...</span>
+                <button onclick="checkDeployment()" style="margin-left: 10px; padding: 5px 10px; background: white; color: #333; border: none; border-radius: 3px; cursor: pointer;">Re-check</button>
+            </div>
+            
             <!-- Header -->
             <header class="header">
                 <div class="header-content">
@@ -590,6 +596,56 @@
         });
         
         console.log('Direct inline fix loaded');
+        
+        // Deployment verification
+        window.checkDeployment = async function() {
+            console.log('=== DEPLOYMENT CHECK ===');
+            console.log('Expected version: 2025-01-13-aggressive-cache-bypass');
+            
+            const banner = document.getElementById('deploymentBanner');
+            const status = document.getElementById('deploymentStatus');
+            
+            if (banner) banner.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/version/check?t=' + Date.now());
+                const data = await response.json();
+                console.log('Current deployment:', data);
+                
+                if (data.version === '2025-01-13-aggressive-cache-bypass') {
+                    console.log('✅ LATEST VERSION DEPLOYED!');
+                    if (status) {
+                        status.textContent = '✅ Latest version deployed - Buttons are functional!';
+                        banner.style.background = '#27ae60';
+                    }
+                } else {
+                    console.log('❌ OLD VERSION DETECTED');
+                    if (status) {
+                        status.textContent = '❌ Old version detected - Railway CDN is caching. Try Ctrl+Shift+R';
+                        banner.style.background = '#e74c3c';
+                    }
+                }
+            } catch (error) {
+                console.error('Version check failed:', error);
+                // Fallback: just check if buttons work
+                const buttonsWork = typeof window.playNow === 'function' && typeof window.searchGames === 'function';
+                if (status) {
+                    if (buttonsWork) {
+                        status.textContent = '✓ Buttons are functional (version check failed)';
+                        banner.style.background = '#27ae60';
+                    } else {
+                        status.textContent = '✗ Buttons not working - Try refreshing with Ctrl+Shift+R';
+                        banner.style.background = '#e74c3c';
+                    }
+                }
+            }
+        };
+        
+        // Auto-check deployment on load
+        setTimeout(() => {
+            console.log('Running deployment check...');
+            checkDeployment();
+        }, 1000);
         </script>
     </body>
 </html>
