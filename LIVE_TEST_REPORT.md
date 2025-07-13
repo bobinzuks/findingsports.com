@@ -1,111 +1,111 @@
 # 🌐 LIVE SITE TEST RESULTS
 
-**Test Time**: 2025-07-13T09:41:42.392Z
+**Test Time**: 2025-07-13T09:57:42.500Z
 **Live URL**: https://findingsports.com
-**Iteration**: 2
+**Iteration**: 15
 
 ## Summary
 - **Total Tests**: 19
-- **✅ Passed**: 13
-- **❌ Failed**: 6
-- **Success Rate**: 68%
+- **✅ Passed**: 14
+- **❌ Failed**: 5
+- **Success Rate**: 74%
 
 ## Detailed Results
 
 ### Health Check
 - **URL**: GET /health
 - **Status**: ✅ PASS (200)
-- **Response Time**: 266ms
+- **Response Time**: 202ms
 
 ### Play Now Core
 - **URL**: GET /api/play-now
 - **Status**: ✅ PASS (200)
-- **Response Time**: 209ms
+- **Response Time**: 57ms
 
 ### Play Now with Location
 - **URL**: GET /api/play-now?lat=49.2827&lng=-123.1207&radius=10
 - **Status**: ✅ PASS (200)
-- **Response Time**: 54ms
+- **Response Time**: 64ms
 
 ### Games API
 - **URL**: GET /api/games
 - **Status**: ✅ PASS (200)
-- **Response Time**: 350ms
+- **Response Time**: 61ms
 
 ### Play Now POST Search
 - **URL**: POST /api/play-now/search
 - **Status**: ❌ FAIL (404)
-- **Response Time**: 190ms
+- **Response Time**: 255ms
 
 ### Venues List
 - **URL**: GET /api/venues
 - **Status**: ❌ FAIL (404)
-- **Response Time**: 216ms
+- **Response Time**: 308ms
 
 ### Sports List
 - **URL**: GET /api/sports
 - **Status**: ❌ FAIL (404)
-- **Response Time**: 119ms
+- **Response Time**: 306ms
 
 ### BC Locations
 - **URL**: GET /api/locations/bc
 - **Status**: ✅ PASS (200)
-- **Response Time**: 193ms
+- **Response Time**: 201ms
 
 ### Location Suggestions
 - **URL**: GET /api/locations/suggestions?q=van
 - **Status**: ✅ PASS (200)
-- **Response Time**: 206ms
+- **Response Time**: 62ms
 
 ### WebSocket Stats
 - **URL**: GET /api/ws/stats
 - **Status**: ✅ PASS (200)
-- **Response Time**: 456ms
+- **Response Time**: 58ms
 
 ### Data Stats
 - **URL**: GET /api/data/stats
 - **Status**: ✅ PASS (200)
-- **Response Time**: 225ms
+- **Response Time**: 68ms
 
 ### Facilities
 - **URL**: GET /api/facilities
 - **Status**: ✅ PASS (200)
-- **Response Time**: 206ms
+- **Response Time**: 51ms
 
 ### Homepage
 - **URL**: GET /
 - **Status**: ✅ PASS (200)
-- **Response Time**: 211ms
+- **Response Time**: 63ms
 
 ### Login Page
 - **URL**: GET /login.html
 - **Status**: ✅ PASS (200)
-- **Response Time**: 209ms
+- **Response Time**: 51ms
 
 ### Dashboard
 - **URL**: GET /dashboard.html
-- **Status**: ❌ FAIL (Timeout)
-- **Response Time**: N/Ams
+- **Status**: ❌ FAIL (404)
+- **Response Time**: 62ms
 
 ### App JavaScript
 - **URL**: GET /js/app.js
-- **Status**: ❌ FAIL (connect ENETUNREACH 66.33.22.129:443)
-- **Response Time**: N/Ams
+- **Status**: ✅ PASS (200)
+- **Response Time**: 143ms
 
 ### Play Now JavaScript
 - **URL**: GET /js/play-now.js
 - **Status**: ✅ PASS (200)
-- **Response Time**: 1082ms
+- **Response Time**: 417ms
 
 ### Google OAuth
 - **URL**: GET /auth/google
 - **Status**: ✅ PASS (301)
-- **Response Time**: 101ms
+- **Response Time**: 96ms
 
 ### Login Attempt
 - **URL**: POST /api/auth/login
 - **Status**: ❌ FAIL (401)
-- **Response Time**: 103ms
+- **Response Time**: 211ms
 
 
 ⚠️ **Some tests failed - continuing loop...**
