@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs-20_x", "python311"]
+nixPkgs = ["nodejs_20", "python311"]
 
 [phases.install]
 cmds = ["cd mockup/backend && cp package-minimal.json package.json && npm install --production --no-audit --no-fund"]
