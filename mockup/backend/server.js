@@ -27,7 +27,8 @@ const siteMethodsManager = getSiteMethodsManager();
 const intelligentCache = getIntelligentCache();
 
 // Initialize the 10-agent sports scraping swarm
-const { initializeSwarmIntegration, getSwarmStatus, shutdownSwarm } = require('./integrate-swarm');
+// DISABLED: Missing puppeteer-extra dependency
+// const { initializeSwarmIntegration, getSwarmStatus, shutdownSwarm } = require('./integrate-swarm');
 
 // Start data aggregation services
 if (process.env.NODE_ENV !== 'production') {
@@ -62,6 +63,8 @@ if (process.env.NODE_ENV !== 'production') {
         }, 10000);
         
         // Initialize legacy swarm after pipeline starts
+        // DISABLED: Missing puppeteer-extra dependency
+        /*
         setTimeout(async () => {
             try {
                 console.log('🏀 Initializing legacy 10-Agent Sports Scraping Swarm...');
@@ -72,6 +75,7 @@ if (process.env.NODE_ENV !== 'production') {
                 console.log('⚠️ Continuing with new swarm system only');
             }
         }, 5000);
+        */
     }, 2000);
 }
 
@@ -416,7 +420,7 @@ app.get('/api/debug/scraping-status', (req, res) => {
     res.json({
         dataAggregation: stats,
         webSocket: wsStats,
-        swarmStatus: getSwarmStatus ? getSwarmStatus() : null,
+        swarmStatus: null, // getSwarmStatus ? getSwarmStatus() : null,
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage()
     });
