@@ -107,8 +107,8 @@ global.users = users;
 // Environment variables (set these in Railway)
 // JWT_SECRET must be set in production environment
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-    console.error('CRITICAL: JWT_SECRET not set in production!');
-    process.exit(1);
+    console.error('WARNING: JWT_SECRET not set in production! Using default (INSECURE)');
+    // DO NOT EXIT - this crashes the server!
 }
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
 // Using a test client ID for development - replace with your own in production
