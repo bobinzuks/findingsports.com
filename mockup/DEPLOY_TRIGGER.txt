@@ -1,0 +1,11 @@
+Railway Deploy Trigger
+Generated: 2025-01-13 20:05 UTC
+Purpose: Trigger Railway deployment
+
+Latest features:
+- Google Maps integration showing user and game locations
+- Login requirements for game details
+- Custom location search support
+- Aggressive cache bypass implementation
+
+Deploy ID: ${Date.now()}
