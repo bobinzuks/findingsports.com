@@ -32,9 +32,6 @@
     "google-auth-library": "^9.2.0",
     "axios": "^1.10.0",
     "cheerio": "^1.0.0-rc.12",
-    "puppeteer": "^21.5.2",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "node-cron": "^3.0.2"
   },
   "devDependencies": {

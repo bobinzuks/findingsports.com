@@ -1,6 +1,6 @@
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer'); // Removed for faster builds
 const cheerio = require('cheerio');
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 /**
  * AI-powered discovery module for finding data collection methods
@@ -15,8 +15,8 @@ async function analyzePage(url) {
     
     try {
         // First try simple fetch for initial analysis
-        const response = await fetch(url);
-        const html = await response.text();
+        const response = await axios.get(url);
+        const html = response.data;
         const $ = cheerio.load(html);
         
         const analysis = {
@@ -165,6 +165,15 @@ async function analyzePage(url) {
  * Analyze page with JavaScript execution
  */
 async function analyzePageWithJS(url) {
+    // Puppeteer disabled for faster builds - returning mock analysis
+    console.log('🔍 Dynamic analysis disabled (puppeteer removed for faster builds)');
+    return {
+        apiCalls: [],
+        dynamicContent: false,
+        framework: 'unknown'
+    };
+    
+    /* Original puppeteer code commented out:
     let browser;
     
     try {
@@ -338,7 +347,8 @@ async function detectAPIs(baseUrl, analysis) {
  */
 async function testAPIEndpoint(api) {
     try {
-        const response = await fetch(api.endpoint, {
+        const response = await axios({
+            url: api.endpoint,
             method: api.method || 'GET',
             headers: {
                 ...api.headers,
