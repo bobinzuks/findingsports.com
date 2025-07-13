@@ -5,10 +5,10 @@
     "watchPatterns": [
       "mockup/backend/**"
     ],
-    "buildCommand": "cd mockup/backend && cp package-minimal.json package.json && npm install --production --no-audit --no-fund"
+    "buildCommand": "cd mockup/backend && npm install --production --no-audit --no-fund"
   },
   "deploy": {
-    "startCommand": "cd mockup/backend && node server-emergency.js",
+    "startCommand": "cd mockup/backend && node server.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
