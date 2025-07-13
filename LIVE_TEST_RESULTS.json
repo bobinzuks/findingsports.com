@@ -1,0 +1,180 @@
+{
+  "timestamp": "2025-07-13T09:41:42.392Z",
+  "iteration": 2,
+  "liveUrl": "https://findingsports.com",
+  "testResults": [
+    {
+      "name": "Health Check",
+      "path": "/health",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 266,
+      "data": "{\"status\":\"ok\",\"timestamp\":\"2025-07-13T09:41:11.397Z\"}"
+    },
+    {
+      "name": "Play Now Core",
+      "path": "/api/play-now",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 209,
+      "data": "{\"activities\":{\"happeningNow\":[],\"startingSoon\":[{\"id\":\"killarney-community-centre-soccer-Sun Jul 13 2025 10:00:00 GMT+0000 (Coordinated Universal Time)\",\"sport\":\"soccer\",\"type\":\"drop-in indoor\",\"venue\":\"Killarney Community Centre\",\"address\":\"6260 Killarney Street, Vancouver\",\"coordinates\":{\"lat\":49.2292,\"lng\":-123.0465},\"distance\":\"8.0 km\",\"distanceValue\":8.02424595365533,\"cost\":5.5,\"ageGroup\":\"Adult (19+)\",\"capacity\":40,\"status\":\"starting-soon\",\"timeString\":\"10:00 AM - 12:00 PM\",\"startTime\":\"2025-07-13T10:00:00.000Z\",\"endTime\":\"2025-07-13T12:00:00.000Z\",\"startsIn\":\"19 minutes\"}],\"laterToday\":[],\"openCourts\":[{\"id\":\"david-lam-basketball\",\"type\":\"basketball\",\"venue\":\"David Lam Park\",\"address\":\"Pacific Blvd & Drake St, Vancouver\",\"coordinates\":{\"lat\":49.2729,\"lng\":-123.1267},\"status\":\"open\",\"courts\":2,\"surface\":\"outdoor\",\"lights\":\"Until 10 PM\",\"busyTimes\":\"Usually busy 6-8 PM\",\"distance\":\"1.2 km\",\"distanceValue\":1.1734208166451519},{\"id\":\"qe-tennis\",\"type\":\"tennis\",\"venue\":\"Queen Elizab"
+    },
+    {
+      "name": "Play Now with Location",
+      "path": "/api/play-now?lat=49.2827&lng=-123.1207&radius=10",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 54,
+      "data": "{\"activities\":{\"happeningNow\":[],\"startingSoon\":[{\"id\":\"killarney-community-centre-soccer-Sun Jul 13 2025 10:00:00 GMT+0000 (Coordinated Universal Time)\",\"sport\":\"soccer\",\"type\":\"drop-in indoor\",\"venue\":\"Killarney Community Centre\",\"address\":\"6260 Killarney Street, Vancouver\",\"coordinates\":{\"lat\":49.2292,\"lng\":-123.0465},\"distance\":\"8.0 km\",\"distanceValue\":8.02424595365533,\"cost\":5.5,\"ageGroup\":\"Adult (19+)\",\"capacity\":40,\"status\":\"starting-soon\",\"timeString\":\"10:00 AM - 12:00 PM\",\"startTime\":\"2025-07-13T10:00:00.000Z\",\"endTime\":\"2025-07-13T12:00:00.000Z\",\"startsIn\":\"19 minutes\"}],\"laterToday\":[],\"openCourts\":[{\"id\":\"david-lam-basketball\",\"type\":\"basketball\",\"venue\":\"David Lam Park\",\"address\":\"Pacific Blvd & Drake St, Vancouver\",\"coordinates\":{\"lat\":49.2729,\"lng\":-123.1267},\"status\":\"open\",\"courts\":2,\"surface\":\"outdoor\",\"lights\":\"Until 10 PM\",\"busyTimes\":\"Usually busy 6-8 PM\",\"distance\":\"1.2 km\",\"distanceValue\":1.1734208166451519},{\"id\":\"qe-tennis\",\"type\":\"tennis\",\"venue\":\"Queen Elizab"
+    },
+    {
+      "name": "Games API",
+      "path": "/api/games",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 350,
+      "data": "{\"games\":[],\"source\":\"aggregated\",\"searchInfo\":{\"normalizedLocation\":null,\"expandedSearch\":false}}"
+    },
+    {
+      "name": "Play Now POST Search",
+      "path": "/api/play-now/search",
+      "method": "POST",
+      "success": false,
+      "status": 404,
+      "responseTime": 190,
+      "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/play-now/search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "name": "Venues List",
+      "path": "/api/venues",
+      "method": "GET",
+      "success": false,
+      "status": 404,
+      "responseTime": 216,
+      "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/venues</pre>\n</body>\n</html>\n"
+    },
+    {
+      "name": "Sports List",
+      "path": "/api/sports",
+      "method": "GET",
+      "success": false,
+      "status": 404,
+      "responseTime": 119,
+      "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/sports</pre>\n</body>\n</html>\n"
+    },
+    {
+      "name": "BC Locations",
+      "path": "/api/locations/bc",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 193,
+      "data": "{\"locations\":[{\"key\":\"salmon-arm\",\"name\":\"Salmon Arm\",\"coordinates\":{\"lat\":50.7031,\"lng\":-119.2733},\"region\":\"Shuswap\",\"aliases\":[\"salmonarm\",\"salmon arm\"]},{\"key\":\"kamloops\",\"name\":\"Kamloops\",\"coordinates\":{\"lat\":50.6745,\"lng\":-120.3273},\"region\":\"Thompson-Nicola\",\"aliases\":[\"kamloops\"]},{\"key\":\"vernon\",\"name\":\"Vernon\",\"coordinates\":{\"lat\":50.2671,\"lng\":-119.272},\"region\":\"North Okanagan\",\"aliases\":[\"vernon\"]},{\"key\":\"kelowna\",\"name\":\"Kelowna\",\"coordinates\":{\"lat\":49.888,\"lng\":-119.496},\"region\":\"Central Okanagan\",\"aliases\":[\"kelowna\"]},{\"key\":\"penticton\",\"name\":\"Penticton\",\"coordinates\":{\"lat\":49.4928,\"lng\":-119.5937},\"region\":\"South Okanagan\",\"aliases\":[\"penticton\"]},{\"key\":\"revelstoke\",\"name\":\"Revelstoke\",\"coordinates\":{\"lat\":50.7981,\"lng\":-118.2095},\"region\":\"Columbia-Shuswap\",\"aliases\":[\"revelstoke\"]},{\"key\":\"sicamous\",\"name\":\"Sicamous\",\"coordinates\":{\"lat\":50.85,\"lng\":-118.9773},\"region\":\"Columbia-Shuswap\",\"aliases\":[\"sicamous\"]},{\"key\":\"enderby\",\"name\":\"Enderby\",\"coordinates\":{"
+    },
+    {
+      "name": "Location Suggestions",
+      "path": "/api/locations/suggestions?q=van",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 206,
+      "data": "{\"suggestions\":[{\"key\":\"vancouver\",\"name\":\"Vancouver\",\"region\":\"Metro Vancouver\",\"type\":\"name\"}]}"
+    },
+    {
+      "name": "WebSocket Stats",
+      "path": "/api/ws/stats",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 456,
+      "data": "{\"totalConnections\":0,\"gameRooms\":0,\"locationRooms\":0,\"channelRooms\":0,\"authenticatedUsers\":0,\"totalMessages\":0}"
+    },
+    {
+      "name": "Data Stats",
+      "path": "/api/data/stats",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 225,
+      "data": "{\"totalGames\":0,\"totalFacilities\":0,\"sources\":[{\"name\":\"vancouverOpenData\",\"lastUpdate\":null,\"type\":\"api\"},{\"name\":\"communityCenter\",\"lastUpdate\":null,\"type\":\"scrape\"},{\"name\":\"nvrcGymnasiums\"}],\"sportBreakdown\":{}}"
+    },
+    {
+      "name": "Facilities",
+      "path": "/api/facilities",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 206,
+      "data": "{\"facilities\":[]}"
+    },
+    {
+      "name": "Homepage",
+      "path": "/",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 211,
+      "data": "<!doctype html>\n<html lang=\"en\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Finding Sports - Find Sports Near You</title>\n        <link rel=\"stylesheet\" href=\"css/styles.css\" />\n        <link rel=\"stylesheet\" href=\"css/background-enhancement.css\" />\n        <link rel=\"stylesheet\" href=\"css/play-now.css\" />\n        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n        <link\n            href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap\"\n            rel=\"stylesheet\"\n        />\n        <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n        <script>\n            // Google Maps API Key (replace with your own key in production)\n            wi"
+    },
+    {
+      "name": "Login Page",
+      "path": "/login.html",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 209,
+      "data": "<!doctype html>\n<html lang=\"en\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Finding Sports - Login</title>\n        <link rel=\"stylesheet\" href=\"css/styles.css\" />\n        <link rel=\"stylesheet\" href=\"css/background-enhancement.css\" />\n        <link rel=\"stylesheet\" href=\"css/auth.css\" />\n        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n        <link\n            href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap\"\n            rel=\"stylesheet\"\n        />\n    </head>\n    <body>\n        <div class=\"sports-bg-pattern\"></div>\n        <div class=\"app-container\">\n            <div class=\"auth-container\">\n                <div class=\"auth-box\">\n                    <div class=\""
+    },
+    {
+      "name": "Dashboard",
+      "path": "/dashboard.html",
+      "method": "GET",
+      "success": false,
+      "error": "Timeout"
+    },
+    {
+      "name": "App JavaScript",
+      "path": "/js/app.js",
+      "method": "GET",
+      "success": false,
+      "error": "connect ENETUNREACH 66.33.22.129:443"
+    },
+    {
+      "name": "Play Now JavaScript",
+      "path": "/js/play-now.js",
+      "method": "GET",
+      "success": true,
+      "status": 200,
+      "responseTime": 1082,
+      "data": "// Play Now page component\nconst API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);\n\nwindow.PlayNowPage = {\n    // Initialize the Play Now page\n    async initialize() {\n        // Initialize location detection if not already done\n        if (!window.locationService) {\n            await window.initializeLocationDetection();\n        }\n\n        // Initialize map with user location\n        const locationResult = window.locationService?.getLocationInfo();\n        const userLocation = locationResult?.userLocation ?\n            [locationResult.userLocation.lat, locationResult.userLocation.lng] :\n            null;\n\n        if (!window.googleMap && !window.map) {\n            window.initializeMap(userLocation);\n        }\n\n        // Set up event listeners\n        this.setupEventListeners();\n    },\n\n    // Render the Play Now page content\n    render() {\n        const contentWrapper = document.querySelect"
+    },
+    {
+      "name": "Google OAuth",
+      "path": "/auth/google",
+      "method": "GET",
+      "success": true,
+      "status": 301,
+      "responseTime": 101,
+      "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Redirecting</title>\n</head>\n<body>\n<pre>Redirecting to /auth/google/</pre>\n</body>\n</html>\n"
+    },
+    {
+      "name": "Login Attempt",
+      "path": "/api/auth/login",
+      "method": "POST",
+      "success": false,
+      "status": 401,
+      "responseTime": 103,
+      "data": "{\"error\":\"Invalid credentials\"}"
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "passed": 13,
+    "failed": 6,
+    "allPassed": false
+  }
+}
