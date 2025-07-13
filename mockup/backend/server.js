@@ -88,6 +88,7 @@ const bcLocationService = require('./services/bc-locations');
 
 // Import cache control middleware
 const noCacheMiddleware = require('./middleware/no-cache');
+const aggressiveCacheBypass = require('./middleware/aggressive-cache-bypass');
 
 // Middleware
 app.use(
@@ -98,8 +99,8 @@ app.use(
 );
 app.use(express.json());
 
-// Apply no-cache middleware to prevent Railway CDN caching
-app.use(noCacheMiddleware);
+// Apply aggressive cache bypass middleware to prevent Railway CDN caching
+app.use(aggressiveCacheBypass);
 
 // For production, force even more aggressive no-cache
 if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
@@ -251,6 +252,9 @@ app.use('/api/venues', require('./routes/venues'));
 
 // Sports endpoint
 app.use('/api/sports', require('./routes/sports'));
+
+// Version check endpoint - Railway CDN can't cache this by design
+app.use('/api/version', require('./routes/version-check'));
 
 // Health check
 app.get('/health', (req, res) => {

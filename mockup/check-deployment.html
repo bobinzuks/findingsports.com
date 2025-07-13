@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding Sports - Deployment Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .check-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .success {
+            border-left: 5px solid #27ae60;
+        }
+        .error {
+            border-left: 5px solid #e74c3c;
+        }
+        .pending {
+            border-left: 5px solid #f39c12;
+        }
+        .version-info {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .code-block {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Finding Sports - Deployment Verification</h1>
+    
+    <div class="version-info">
+        <h2>Current Deployment Status</h2>
+        <div id="versionInfo">Checking deployment version...</div>
+    </div>
+    
+    <button onclick="runAllChecks()">Run All Deployment Checks</button>
+    
+    <div id="checkResults"></div>
+    
+    <script>
+        const DEPLOYMENT_VERSION = '2025-01-13-aggressive-cache-bypass';
+        const checks = [];
+        
+        function addCheck(name, status, details) {
+            const item = document.createElement('div');
+            item.className = `check-item ${status}`;
+            item.innerHTML = `
+                <h3>${status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'} ${name}</h3>
+                <p>${details}</p>
+            `;
+            document.getElementById('checkResults').appendChild(item);
+        }
+        
+        async function checkVersion() {
+            try {
+                const response = await fetch('/api/version/check?t=' + Date.now());
+                const data = await response.json();
+                
+                document.getElementById('versionInfo').innerHTML = `
+                    <p><strong>Version:</strong> ${data.version}</p>
+                    <p><strong>Deployment Time:</strong> ${data.deploymentTime}</p>
+                    <p><strong>Buttons Functional:</strong> ${data.buttonsFunctional ? 'YES ✅' : 'NO ❌'}</p>
+                    <p><strong>Play Now Ready:</strong> ${data.playNowImplemented ? 'YES ✅' : 'NO ❌'}</p>
+                `;
+                
+                if (data.version === DEPLOYMENT_VERSION) {
+                    addCheck('Version Check', 'success', `Latest version deployed: ${data.version}`);
+                } else {
+                    addCheck('Version Check', 'error', `Old version detected: ${data.version}. Expected: ${DEPLOYMENT_VERSION}`);
+                }
+                
+                return data;
+            } catch (error) {
+                addCheck('Version Check', 'error', `Failed to check version: ${error.message}`);
+                return null;
+            }
+        }
+        
+        async function checkButtonFunctionality() {
+            try {
+                // Check if button functions are defined
+                const functionsToCheck = ['playNow', 'searchGames', 'switchTab', 'showRulesPage'];
+                let allFunctionsExist = true;
+                let missingFunctions = [];
+                
+                for (const func of functionsToCheck) {
+                    if (typeof window.parent[func] !== 'function') {
+                        allFunctionsExist = false;
+                        missingFunctions.push(func);
+                    }
+                }
+                
+                if (allFunctionsExist) {
+                    addCheck('Button Functions', 'success', 'All button functions are defined and ready');
+                } else {
+                    addCheck('Button Functions', 'error', `Missing functions: ${missingFunctions.join(', ')}`);
+                }
+            } catch (error) {
+                addCheck('Button Functions', 'error', `Error checking functions: ${error.message}`);
+            }
+        }
+        
+        async function checkCacheHeaders() {
+            try {
+                const response = await fetch('/api/cache-test?t=' + Date.now());
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                const hasNoCacheHeaders = 
+                    headers['cache-control'] && headers['cache-control'].includes('no-cache') &&
+                    headers['pragma'] === 'no-cache' &&
+                    headers['expires'] === '0';
+                
+                if (hasNoCacheHeaders) {
+                    addCheck('Cache Headers', 'success', 'No-cache headers are properly set');
+                } else {
+                    addCheck('Cache Headers', 'error', 'Cache headers not properly configured');
+                }
+                
+                // Show actual headers
+                const headerDisplay = Object.entries(headers)
+                    .filter(([key]) => key.toLowerCase().includes('cache') || key === 'pragma' || key === 'expires')
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join('\n');
+                    
+                const headerBlock = document.createElement('div');
+                headerBlock.className = 'code-block';
+                headerBlock.textContent = headerDisplay;
+                document.getElementById('checkResults').lastChild.appendChild(headerBlock);
+                
+            } catch (error) {
+                addCheck('Cache Headers', 'error', `Failed to check cache headers: ${error.message}`);
+            }
+        }
+        
+        async function checkPlayNowEndpoint() {
+            try {
+                const response = await fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=15');
+                const data = await response.json();
+                
+                if (data.activities || data.games) {
+                    addCheck('Play Now API', 'success', 'Play Now endpoint is working correctly');
+                    
+                    // Show sample response structure
+                    const sampleData = {
+                        activities: Object.keys(data.activities || {}),
+                        totalGames: Object.values(data.activities || {}).reduce((sum, arr) => sum + (arr.length || 0), 0)
+                    };
+                    
+                    const dataBlock = document.createElement('div');
+                    dataBlock.className = 'code-block';
+                    dataBlock.textContent = JSON.stringify(sampleData, null, 2);
+                    document.getElementById('checkResults').lastChild.appendChild(dataBlock);
+                } else {
+                    addCheck('Play Now API', 'error', 'Play Now endpoint returned unexpected format');
+                }
+            } catch (error) {
+                addCheck('Play Now API', 'error', `Failed to check Play Now endpoint: ${error.message}`);
+            }
+        }
+        
+        async function checkIndexHtml() {
+            try {
+                const response = await fetch('/?t=' + Date.now());
+                const html = await response.text();
+                
+                // Check for deployment markers
+                const hasDeploymentMeta = html.includes('2025-01-13-google-maps-fix');
+                const hasInlineButtonFix = html.includes('Direct inline fix loading');
+                const hasPlayNowImplementation = html.includes('window.playNow = function()');
+                const hasStringDistanceFix = html.includes('Safe distance handling');
+                
+                const allChecks = hasDeploymentMeta && hasInlineButtonFix && hasPlayNowImplementation && hasStringDistanceFix;
+                
+                if (allChecks) {
+                    addCheck('Index.html', 'success', 'Latest index.html with all fixes is deployed');
+                } else {
+                    const missing = [];
+                    if (!hasDeploymentMeta) missing.push('deployment meta tag');
+                    if (!hasInlineButtonFix) missing.push('inline button fix');
+                    if (!hasPlayNowImplementation) missing.push('Play Now implementation');
+                    if (!hasStringDistanceFix) missing.push('string distance fix');
+                    
+                    addCheck('Index.html', 'error', `Missing components: ${missing.join(', ')}`);
+                }
+            } catch (error) {
+                addCheck('Index.html', 'error', `Failed to check index.html: ${error.message}`);
+            }
+        }
+        
+        async function runAllChecks() {
+            document.getElementById('checkResults').innerHTML = '';
+            
+            // Run checks sequentially
+            await checkVersion();
+            await checkCacheHeaders();
+            await checkPlayNowEndpoint();
+            await checkIndexHtml();
+            await checkButtonFunctionality();
+            
+            // Add manual verification steps
+            const manualSteps = document.createElement('div');
+            manualSteps.className = 'check-item pending';
+            manualSteps.innerHTML = `
+                <h3>📋 Manual Verification Steps</h3>
+                <ol>
+                    <li>Open the main site in an incognito window</li>
+                    <li>Click the "Play Now" button - it should show loading then games or location selection</li>
+                    <li>Click the "Search" button - it should show a games list</li>
+                    <li>Click the "Sport Rules" tab - it should navigate to sport-rules.html</li>
+                    <li>Check browser console for any JavaScript errors</li>
+                </ol>
+                <p><strong>If any of these fail, Railway's CDN is still serving cached content.</strong></p>
+            `;
+            document.getElementById('checkResults').appendChild(manualSteps);
+        }
+        
+        // Run initial version check on load
+        checkVersion();
+    </script>
+</body>
+</html>
