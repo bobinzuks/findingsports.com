@@ -3,10 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="deployment-version" content="2025-01-13-google-maps-fix" />
-        <meta name="railway-deployment" content="cache-fix-complete" />
+        <meta name="deployment-version" content="2025-01-13-maps-login-custom-location" />
+        <meta name="railway-deployment" content="google-maps-integrated" />
         <title>Finding Sports - Find Sports Near You</title>
-        <!-- Deployment timestamp: 2025-01-13T19:07:00Z - Play Now Complete with Location Selection -->
+        <!-- Deployment timestamp: 2025-01-13T19:45:00Z - Google Maps + Login + Custom Locations -->
         <link rel="stylesheet" href="css/styles.css?v=1752417024232" />
         <link rel="stylesheet" href="css/background-enhancement.css?v=1752417024232" />
         <link rel="stylesheet" href="css/play-now.css?v=1752417024232" />
@@ -17,6 +17,12 @@
             rel="stylesheet"
         />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1752417024232" />
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
         <script>
             // Google Maps API Key with Railway deployment support
             window.GOOGLE_MAPS_API_KEY = 'AIzaSyD2ux0PIekUQLAqVDNhy0tHwhBht6vcXqA';
@@ -210,7 +216,7 @@
         
         // Enhanced Play Now with full functionality and string distance support
         window.playNow = function() {
-            console.log('Play Now clicked - enhanced version with hotfix');
+            console.log('Play Now clicked - enhanced version with maps');
             
             // Show loading in main content area
             const mainContent = document.querySelector('.main-content');
@@ -225,6 +231,13 @@
                     <p style="margin-top: 2rem; color: #666;">Checking your location and finding nearby games...</p>
                 </div>
             `;
+            
+            // Check if user is logged in
+            const checkAuth = () => {
+                const token = localStorage.getItem('token');
+                const user = token ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+                return { isLoggedIn: !!token, user };
+            };
             
             // Make displayPlayNowResults globally accessible
             window.displayPlayNowResults = (data, userLat, userLng, locationName) => {
@@ -245,11 +258,23 @@
                     window.playNowService.setUserLocation(userLat, userLng);
                 }
                 
+                const auth = checkAuth();
+                
                 let html = `
                     <div class="play-now-results" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
-                        <h2 style="color: #ff6b35; margin-bottom: 2rem;">
-                            🎯 Play Now - ${locationName || 'Your Area'}
-                        </h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h2 style="color: #ff6b35; margin: 0;">
+                                🎯 Play Now - ${locationName || 'Your Area'}
+                            </h2>
+                            ${!auth.isLoggedIn ? `
+                                <div style="background: #f39c12; color: white; padding: 0.5rem 1rem; border-radius: 4px;">
+                                    <a href="/login" style="color: white; text-decoration: none;">Login to view game details</a>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Google Maps Container -->
+                        <div id="playNowMap" style="width: 100%; height: 400px; margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"></div>
                 `;
                 
                 // Show happening now games
@@ -269,9 +294,15 @@
                                 <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
                                 <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || game.playersNeeded || 0} ${game.maxPlayers ? `/${game.maxPlayers}` : ''} players</p>
-                                <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                                    Join Now
-                                </button>
+                                ${auth.isLoggedIn ? `
+                                    <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        Join Now
+                                    </button>
+                                ` : `
+                                    <button onclick="requireLogin('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        Login to Join
+                                    </button>
+                                `}
                             </div>
                         `;
                     });
@@ -416,6 +447,11 @@
                 `;
                 
                 mainContent.innerHTML = html;
+                
+                // Initialize Google Maps after HTML is rendered
+                setTimeout(() => {
+                    initializePlayNowMap(userLat, userLng, activities, data.games);
+                }, 100);
             };
             
             // Try geolocation
@@ -452,6 +488,14 @@
                                         <button onclick="playNowForCity(49.1666, -123.1336, 'Richmond')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Richmond</button>
                                         <button onclick="playNowForCity(49.1913, -122.8490, 'Surrey')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Surrey</button>
                                     </div>
+                                    
+                                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd;">
+                                        <p style="margin-bottom: 0.5rem;"><strong>Or enter your location:</strong></p>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <input type="text" id="customLocation" placeholder="Enter city or address" style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                                            <button onclick="searchCustomLocation()" style="padding: 0.75rem 1.5rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button onclick="location.reload()" style="padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer;">
                                     Back to Home
@@ -477,8 +521,44 @@
         // Define joinGame function
         window.joinGame = function(gameId) {
             console.log('Joining game:', gameId);
-            // For now, just show a message - implement full join flow later
-            alert('Join game feature coming soon! Game ID: ' + gameId);
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            if (!token) {
+                requireLogin(gameId);
+                return;
+            }
+            
+            // Make API call to join game
+            fetch(`/api/games/${gameId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Successfully joined the game!');
+                    // Refresh the page or update UI
+                    window.playNow();
+                } else {
+                    alert('Failed to join game: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Error joining game: ' + error.message);
+            });
+        };
+        
+        // Require login function
+        window.requireLogin = function(gameId) {
+            // Store the game ID they wanted to join
+            if (gameId) {
+                sessionStorage.setItem('pendingGameJoin', gameId);
+            }
+            // Redirect to login page
+            window.location.href = '/login.html';
         };
         
         // Define viewCourt function
@@ -519,6 +599,140 @@
         // Define showRulesPage function
         window.showRulesPage = function() {
             window.location.href = '/sport-rules.html';
+        };
+        
+        // Initialize Google Maps for Play Now
+        window.initializePlayNowMap = function(userLat, userLng, activities, allGames) {
+            if (!window.google || !window.google.maps) {
+                console.error('Google Maps not loaded');
+                return;
+            }
+            
+            const mapDiv = document.getElementById('playNowMap');
+            if (!mapDiv) return;
+            
+            const map = new google.maps.Map(mapDiv, {
+                center: { lat: userLat, lng: userLng },
+                zoom: 13,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+            
+            // Add marker for user location
+            new google.maps.Marker({
+                position: { lat: userLat, lng: userLng },
+                map: map,
+                title: 'Your Location',
+                icon: {
+                    url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                }
+            });
+            
+            // Add markers for games
+            const allActivities = [
+                ...(activities.happeningNow || []),
+                ...(activities.startingSoon || []),
+                ...(activities.laterToday || []),
+                ...(activities.openCourts || []),
+                ...(activities.pickupGames || [])
+            ];
+            
+            allActivities.forEach(game => {
+                if (game.lat && game.lng) {
+                    const marker = new google.maps.Marker({
+                        position: { lat: parseFloat(game.lat), lng: parseFloat(game.lng) },
+                        map: map,
+                        title: `${game.sport || 'Sport'} at ${game.venue || 'Location'}`,
+                        icon: {
+                            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                        }
+                    });
+                    
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="padding: 10px;">
+                                <h4>${game.sport || 'Sport'}</h4>
+                                <p>📍 ${game.venue || 'Location'}</p>
+                                <p>🕐 ${game.time || game.startTime || 'Time TBD'}</p>
+                                ${game.distance ? `<p>🚗 ${game.distance} away</p>` : ''}
+                            </div>
+                        `
+                    });
+                    
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+                }
+            });
+            
+            // Fit bounds to show all markers
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend({ lat: userLat, lng: userLng });
+            
+            allActivities.forEach(game => {
+                if (game.lat && game.lng) {
+                    bounds.extend({ lat: parseFloat(game.lat), lng: parseFloat(game.lng) });
+                }
+            });
+            
+            map.fitBounds(bounds);
+        };
+        
+        // Search custom location using Google Places
+        window.searchCustomLocation = async function() {
+            const input = document.getElementById('customLocation');
+            if (!input || !input.value.trim()) {
+                alert('Please enter a location');
+                return;
+            }
+            
+            const location = input.value.trim();
+            
+            // Show loading
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div style="padding: 3rem; text-align: center;">
+                    <h2 style="color: #ff6b35;">Searching for games near ${location}...</h2>
+                    <div style="margin-top: 2rem;">
+                        <div style="width: 60px; height: 60px; border: 4px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Use Google Geocoding API
+            if (window.google && window.google.maps) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: location }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const lat = results[0].geometry.location.lat();
+                        const lng = results[0].geometry.location.lng();
+                        const formattedAddress = results[0].formatted_address;
+                        
+                        // Fetch games for this location
+                        fetch(`/api/play-now?lat=${lat}&lng=${lng}&radius=15`)
+                            .then(r => r.json())
+                            .then(data => {
+                                window.displayPlayNowResults(data, lat, lng, formattedAddress);
+                            })
+                            .catch(err => {
+                                console.error('Play Now API error:', err);
+                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
+                            });
+                    } else {
+                        alert('Location not found. Please try a different search.');
+                        window.playNow(); // Go back to location selection
+                    }
+                });
+            } else {
+                // Fallback: just use Vancouver coordinates
+                alert('Google Maps not loaded. Using Vancouver as default.');
+                window.playNowForCity(49.2827, -123.1207, 'Vancouver');
+            }
         };
         
         // Define switchTab functionality
@@ -600,7 +814,7 @@
         // Deployment verification
         window.checkDeployment = async function() {
             console.log('=== DEPLOYMENT CHECK ===');
-            console.log('Expected version: 2025-01-13-aggressive-cache-bypass');
+            console.log('Expected version: 2025-01-13-maps-login-custom-location');
             
             const banner = document.getElementById('deploymentBanner');
             const status = document.getElementById('deploymentStatus');
@@ -612,7 +826,7 @@
                 const data = await response.json();
                 console.log('Current deployment:', data);
                 
-                if (data.version === '2025-01-13-aggressive-cache-bypass') {
+                if (data.version === '2025-01-13-maps-login-custom-location') {
                     console.log('✅ LATEST VERSION DEPLOYED!');
                     if (status) {
                         status.textContent = '✅ Latest version deployed - Buttons are functional!';

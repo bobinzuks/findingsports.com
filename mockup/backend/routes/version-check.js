@@ -14,7 +14,7 @@ router.get('/check', (req, res) => {
     });
     
     res.json({
-        version: '2025-01-13-aggressive-cache-bypass',
+        version: '2025-01-13-maps-login-custom-location',
         deploymentTime,
         randomId,
         buttonsFunctional: true,
