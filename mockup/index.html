@@ -202,9 +202,9 @@
                 });
         };
         
-        // Enhanced Play Now with full functionality
+        // Enhanced Play Now with full functionality and string distance support
         window.playNow = function() {
-            console.log('Play Now clicked - enhanced version');
+            console.log('Play Now clicked - enhanced version with hotfix');
             
             // Show loading in main content area
             const mainContent = document.querySelector('.main-content');
@@ -220,8 +220,8 @@
                 </div>
             `;
             
-            // Function to display play now results
-            const displayPlayNowResults = (data, userLat, userLng, locationName) => {
+            // Make displayPlayNowResults globally accessible
+            window.displayPlayNowResults = (data, userLat, userLng, locationName) => {
                 console.log('Play Now API response:', data);
                 
                 // Handle different response formats
@@ -255,18 +255,8 @@
                     `;
                     
                     activities.happeningNow.forEach(game => {
-                        let distance = '';
-                        if (game.distance !== undefined && game.distance !== null) {
-                            // Handle both string "1.2 km" and number formats
-                            if (typeof game.distance === 'string') {
-                                distance = game.distance; // Already formatted
-                            } else {
-                                const dist = parseFloat(game.distance);
-                                if (!isNaN(dist)) {
-                                    distance = `${dist.toFixed(1)}km`;
-                                }
-                            }
-                        }
+                        // Safe distance handling
+                        const distance = game.distance || '';
                         html += `
                             <div style="background: white; border: 2px solid #e74c3c; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(231,76,60,0.2);">
                                 <h4 style="color: #e74c3c; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -293,18 +283,7 @@
                     
                     activities.startingSoon.forEach(game => {
                         const timeUntil = game.minutesUntilStart ? `in ${game.minutesUntilStart}min` : 'Soon';
-                        let distance = '';
-                        if (game.distance !== undefined && game.distance !== null) {
-                            // Handle both string "1.2 km" and number formats
-                            if (typeof game.distance === 'string') {
-                                distance = game.distance; // Already formatted
-                            } else {
-                                const dist = parseFloat(game.distance);
-                                if (!isNaN(dist)) {
-                                    distance = `${dist.toFixed(1)}km`;
-                                }
-                            }
-                        }
+                        const distance = game.distance || '';
                         html += `
                             <div style="background: white; border: 2px solid #f39c12; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(243,156,18,0.2);">
                                 <h4 style="color: #f39c12; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -332,18 +311,7 @@
                     
                     activities.laterToday.forEach(game => {
                         const time = game.startTime ? new Date(game.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD';
-                        let distance = '';
-                        if (game.distance !== undefined && game.distance !== null) {
-                            // Handle both string "1.2 km" and number formats
-                            if (typeof game.distance === 'string') {
-                                distance = game.distance; // Already formatted
-                            } else {
-                                const dist = parseFloat(game.distance);
-                                if (!isNaN(dist)) {
-                                    distance = `${dist.toFixed(1)}km`;
-                                }
-                            }
-                        }
+                        const distance = game.distance || '';
                         html += `
                             <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                                 <h4 style="color: #27ae60; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -370,18 +338,7 @@
                     `;
                     
                     activities.pickupGames.forEach(game => {
-                        let distance = '';
-                        if (game.distance !== undefined && game.distance !== null) {
-                            // Handle both string "1.2 km" and number formats
-                            if (typeof game.distance === 'string') {
-                                distance = game.distance; // Already formatted
-                            } else {
-                                const dist = parseFloat(game.distance);
-                                if (!isNaN(dist)) {
-                                    distance = `${dist.toFixed(1)}km`;
-                                }
-                            }
-                        }
+                        const distance = game.distance || '';
                         html += `
                             <div style="background: white; border: 1px solid #3498db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(52,152,219,0.2);">
                                 <h4 style="color: #3498db; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'} - Pickup</h4>
@@ -411,18 +368,7 @@
                     `;
                     
                     activities.openCourts.forEach(court => {
-                        let distance = '';
-                        if (court.distance !== undefined && court.distance !== null) {
-                            // Handle both string "1.2 km" and number formats
-                            if (typeof court.distance === 'string') {
-                                distance = court.distance; // Already formatted
-                            } else {
-                                const dist = parseFloat(court.distance);
-                                if (!isNaN(dist)) {
-                                    distance = `${dist.toFixed(1)}km`;
-                                }
-                            }
-                        }
+                        const distance = court.distance || '';
                         html += `
                             <div style="background: white; border: 1px solid #9b59b6; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(155,89,182,0.2);">
                                 <h4 style="color: #9b59b6; margin: 0 0 0.5rem 0;">${court.venue || court.name || 'Open Court'}</h4>
@@ -482,17 +428,30 @@
                             });
                     },
                     (err) => {
-                        // Location denied - use Vancouver as default
-                        console.log('Location access denied, using Vancouver');
-                        fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=15')
-                            .then(r => r.json())
-                            .then(data => {
-                                displayPlayNowResults(data, 49.2827, -123.1207, 'Vancouver (Default)');
-                            })
-                            .catch(err => {
-                                console.error('Play Now API error:', err);
-                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
-                            });
+                        // Location denied or error
+                        console.log('Location error:', err.message);
+                        
+                        // Show location permission message
+                        mainContent.innerHTML = `
+                            <div style="padding: 3rem; text-align: center; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color: #ff6b35;">📍 Location Access Needed</h2>
+                                <p style="margin: 2rem 0; font-size: 1.1em;">
+                                    To find games near you, please enable location access in your browser.
+                                </p>
+                                <div style="background: #f0f0f0; padding: 2rem; border-radius: 8px; margin: 2rem 0;">
+                                    <p style="margin-bottom: 1rem;"><strong>Or choose a city:</strong></p>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                                        <button onclick="playNowForCity(49.2827, -123.1207, 'Vancouver')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Vancouver</button>
+                                        <button onclick="playNowForCity(49.2487, -122.9808, 'Burnaby')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Burnaby</button>
+                                        <button onclick="playNowForCity(49.1666, -123.1336, 'Richmond')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Richmond</button>
+                                        <button onclick="playNowForCity(49.1913, -122.8490, 'Surrey')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Surrey</button>
+                                    </div>
+                                </div>
+                                <button onclick="location.reload()" style="padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                    Back to Home
+                                </button>
+                            </div>
+                        `;
                     }
                 );
             } else {
@@ -521,6 +480,34 @@
             console.log('Viewing court:', courtId);
             // Open Google Maps directions (placeholder for now)
             alert('Get directions feature coming soon! Court ID: ' + courtId);
+        };
+        
+        // Define playNowForCity function
+        window.playNowForCity = function(lat, lng, cityName) {
+            console.log(`Play Now for ${cityName}:`, lat, lng);
+            const mainContent = document.querySelector('.main-content');
+            if (!mainContent) return;
+            
+            // Show loading
+            mainContent.innerHTML = `
+                <div style="padding: 3rem; text-align: center;">
+                    <h2 style="color: #ff6b35;">Finding games in ${cityName}...</h2>
+                    <div style="margin-top: 2rem;">
+                        <div style="width: 60px; height: 60px; border: 4px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Fetch games for the selected city
+            fetch(`/api/play-now?lat=${lat}&lng=${lng}&radius=15`)
+                .then(r => r.json())
+                .then(data => {
+                    window.displayPlayNowResults(data, lat, lng, cityName);
+                })
+                .catch(err => {
+                    console.error('Play Now API error:', err);
+                    mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
+                });
         };
         
         // Define showRulesPage function
