@@ -245,10 +245,65 @@
             }
         };
         
-        // Define missing switchTab
+        // Define showRulesPage function
+        window.showRulesPage = function() {
+            window.location.href = '/sport-rules.html';
+        };
+        
+        // Define switchTab functionality
         window.switchTab = function(tab) {
             console.log('Switch tab:', tab);
-            alert('Tab switching coming soon!');
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => {
+                if (t.textContent.toLowerCase().includes(tab.toLowerCase().replace('-', ' '))) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // Hide all content sections
+            const mainContent = document.querySelector('.main-content');
+            if (!mainContent) return;
+            
+            // Show appropriate content based on tab
+            switch(tab) {
+                case 'social':
+                case 'social-feed':
+                    // Show social feed content
+                    mainContent.innerHTML = '<div style="padding: 2rem;"><h2>Social Feed</h2><p>Social features coming soon!</p></div>';
+                    break;
+                    
+                case 'upcoming':
+                case 'upcoming-games':
+                    // Show upcoming games
+                    mainContent.innerHTML = '<div style="padding: 2rem;"><h2>Upcoming Games</h2><p>Loading upcoming games...</p></div>';
+                    // Load games
+                    fetch('/api/games')
+                        .then(r => r.json())
+                        .then(data => {
+                            const games = data.games || [];
+                            mainContent.innerHTML = `
+                                <div style="padding: 2rem;">
+                                    <h2>Upcoming Games (${games.length})</h2>
+                                    ${games.map(g => `
+                                        <div style="background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
+                                            <h3>${g.sport || 'Sport'}</h3>
+                                            <p>📍 ${g.venue || 'Location TBD'}</p>
+                                            <p>🕐 ${g.time || 'Time TBD'}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        });
+                    break;
+                    
+                default:
+                    console.log('Unknown tab:', tab);
+            }
         };
         
         // Set button handlers after DOM loads
