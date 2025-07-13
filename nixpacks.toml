@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs-20_x", "python311"]
 
 [phases.install]
-cmds = ["cd mockup/backend && npm install"]
+cmds = ["cd mockup/backend && cp package-minimal.json package.json && npm install --production --no-audit --no-fund"]
 
 [phases.build]
 cmds = ["echo 'No build step required'"]
 
 [start]
-cmd = "cd mockup/backend && node server.js"
+cmd = "cd mockup/backend && node server-minimal.js"

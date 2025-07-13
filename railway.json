@@ -5,7 +5,7 @@
     "buildCommand": "cd mockup/backend && npm install"
   },
   "deploy": {
-    "startCommand": "cd mockup/backend && node server.js",
+    "startCommand": "cd mockup/backend && node server-minimal.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
