@@ -124,5 +124,86 @@ router.post('/search', async (req, res) => {
     }
 });
 
+/**
+ * @api {get} /api/play-now/swarm/status Get swarm status
+ * @apiDescription Get the status of the Play Now Swarm system
+ */
+router.get('/swarm/status', (req, res) => {
+    try {
+        const status = playNowService.getSwarmStatus();
+        const sources = playNowService.getDataSourcesInfo();
+        
+        res.json({
+            swarm: status,
+            dataSources: sources,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Swarm status error:', error);
+        res.status(500).json({
+            error: 'Failed to get swarm status',
+            message: error.message
+        });
+    }
+});
+
+/**
+ * @api {post} /api/play-now/swarm/config Configure swarm
+ * @apiDescription Configure Play Now Swarm settings
+ */
+router.post('/swarm/config', (req, res) => {
+    try {
+        const { enabled, timeout, fallback } = req.body;
+        
+        if (typeof enabled === 'boolean') {
+            playNowService.setSwarmEnabled(enabled);
+        }
+        
+        if (typeof timeout === 'number' && timeout > 0) {
+            playNowService.setSwarmTimeout(timeout);
+        }
+        
+        if (typeof fallback === 'boolean') {
+            playNowService.config.fallbackToMock = fallback;
+        }
+        
+        res.json({
+            message: 'Swarm configuration updated',
+            config: {
+                enabled: playNowService.config.useSwarm,
+                timeout: playNowService.config.swarmTimeout,
+                fallbackToMock: playNowService.config.fallbackToMock
+            }
+        });
+    } catch (error) {
+        console.error('Swarm config error:', error);
+        res.status(500).json({
+            error: 'Failed to update swarm config',
+            message: error.message
+        });
+    }
+});
+
+/**
+ * @api {post} /api/play-now/swarm/cache/clear Clear swarm cache
+ * @apiDescription Clear the Play Now Swarm cache
+ */
+router.post('/swarm/cache/clear', (req, res) => {
+    try {
+        playNowService.clearSwarmCache();
+        
+        res.json({
+            message: 'Swarm cache cleared successfully',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Clear cache error:', error);
+        res.status(500).json({
+            error: 'Failed to clear swarm cache',
+            message: error.message
+        });
+    }
+});
+
 
 module.exports = router;

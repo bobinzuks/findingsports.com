@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const { getInstance: getDataPipeline } = require('./data-aggregation-pipeline');
 const { getInstance: getDataSwarm } = require('./data-aggregation-swarm');
+const { getInstance: getPlayNowSwarm } = require('./play-now-swarm');
 const { localSportsSources } = require('./local-sports-sources');
 
 /**
@@ -12,9 +13,17 @@ class PlayNowService extends EventEmitter {
         super();
         this.dataPipeline = getDataPipeline();
         this.dataSwarm = getDataSwarm();
+        this.playNowSwarm = getPlayNowSwarm();
         
         // Mock data for Vancouver recreation centers
         this.mockSchedules = this.initializeMockSchedules();
+        
+        // Configuration
+        this.config = {
+            useSwarm: true, // Enable swarm by default
+            fallbackToMock: true, // Use mock data if swarm fails
+            swarmTimeout: 5000 // 5 second timeout for swarm
+        };
     }
 
     /**
@@ -201,6 +210,65 @@ class PlayNowService extends EventEmitter {
             radiusKm = 10,
             timeWindowHours = 2,
             includeFuture = true,
+            includeOpenCourts = true,
+            includePickupGames = true,
+            sports = []
+        } = options;
+
+        // Try to use swarm first for real-time data
+        if (this.config.useSwarm) {
+            try {
+                console.log('🐝 Using Play Now Swarm for real-time data...');
+                
+                // Create timeout promise
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Swarm timeout')), this.config.swarmTimeout)
+                );
+                
+                // Race between swarm and timeout
+                const swarmResult = await Promise.race([
+                    this.playNowSwarm.findGamesNow(userLocation, {
+                        radiusKm,
+                        sports,
+                        includeOpenCourts,
+                        includePickupGames
+                    }),
+                    timeoutPromise
+                ]);
+                
+                if (swarmResult && swarmResult.activities) {
+                    console.log('✅ Swarm returned real-time data');
+                    this.emit('data:source', { source: 'swarm', success: true });
+                    return swarmResult.activities;
+                }
+            } catch (error) {
+                console.error('⚠️ Swarm error, falling back to mock data:', error.message);
+                this.emit('data:source', { source: 'swarm', success: false, error: error.message });
+            }
+        }
+
+        // Fallback to mock data
+        if (this.config.fallbackToMock) {
+            console.log('📋 Using mock data');
+            return this.getMockActivities(userLocation, options);
+        }
+
+        // If no fallback, return empty activities
+        return {
+            happeningNow: [],
+            startingSoon: [],
+            laterToday: [],
+            openCourts: [],
+            pickupGames: []
+        };
+    }
+
+    /**
+     * Get mock activities (original implementation)
+     */
+    async getMockActivities(userLocation, options = {}) {
+        const {
+            radiusKm = 10,
             includeOpenCourts = true
         } = options;
 
@@ -493,6 +561,54 @@ class PlayNowService extends EventEmitter {
         } else {
             return `${mins} minutes`;
         }
+    }
+
+    /**
+     * Enable or disable swarm usage
+     */
+    setSwarmEnabled(enabled) {
+        this.config.useSwarm = enabled;
+        console.log(`🐝 Play Now Swarm ${enabled ? 'enabled' : 'disabled'}`);
+    }
+
+    /**
+     * Set swarm timeout
+     */
+    setSwarmTimeout(timeout) {
+        this.config.swarmTimeout = timeout;
+        console.log(`⏱️ Swarm timeout set to ${timeout}ms`);
+    }
+
+    /**
+     * Get swarm status
+     */
+    getSwarmStatus() {
+        return {
+            enabled: this.config.useSwarm,
+            timeout: this.config.swarmTimeout,
+            fallbackEnabled: this.config.fallbackToMock,
+            swarmDetails: this.playNowSwarm.getStatus()
+        };
+    }
+
+    /**
+     * Clear swarm cache
+     */
+    clearSwarmCache() {
+        this.playNowSwarm.clearCache();
+    }
+
+    /**
+     * Get data sources info
+     */
+    getDataSourcesInfo() {
+        const swarmSources = this.dataSwarm.getSourcesByCategory();
+        return {
+            totalSources: this.dataSwarm.sources.size,
+            categories: swarmSources,
+            playNowSwarmAgents: this.playNowSwarm.agents.size,
+            mockDataAvailable: Object.keys(this.mockSchedules).length
+        };
     }
 }
 
