@@ -257,9 +257,14 @@
                     activities.happeningNow.forEach(game => {
                         let distance = '';
                         if (game.distance !== undefined && game.distance !== null) {
-                            const dist = parseFloat(game.distance);
-                            if (!isNaN(dist)) {
-                                distance = `${dist.toFixed(1)}km`;
+                            // Handle both string "1.2 km" and number formats
+                            if (typeof game.distance === 'string') {
+                                distance = game.distance; // Already formatted
+                            } else {
+                                const dist = parseFloat(game.distance);
+                                if (!isNaN(dist)) {
+                                    distance = `${dist.toFixed(1)}km`;
+                                }
                             }
                         }
                         html += `
@@ -267,7 +272,7 @@
                                 <h4 style="color: #e74c3c; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
                                 <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
-                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || game.playersNeeded || 0} ${game.maxPlayers ? `/${game.maxPlayers}` : ''} players</p>
                                 <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
                                     Join Now
                                 </button>
@@ -290,9 +295,14 @@
                         const timeUntil = game.minutesUntilStart ? `in ${game.minutesUntilStart}min` : 'Soon';
                         let distance = '';
                         if (game.distance !== undefined && game.distance !== null) {
-                            const dist = parseFloat(game.distance);
-                            if (!isNaN(dist)) {
-                                distance = `${dist.toFixed(1)}km`;
+                            // Handle both string "1.2 km" and number formats
+                            if (typeof game.distance === 'string') {
+                                distance = game.distance; // Already formatted
+                            } else {
+                                const dist = parseFloat(game.distance);
+                                if (!isNaN(dist)) {
+                                    distance = `${dist.toFixed(1)}km`;
+                                }
                             }
                         }
                         html += `
@@ -301,7 +311,7 @@
                                 <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
                                 <p style="margin: 0.5rem 0;">⏰ Starts ${timeUntil}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
-                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || game.playersNeeded || 0} ${game.maxPlayers ? `/${game.maxPlayers}` : ''} players</p>
                                 <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
                                     Reserve Spot
                                 </button>
@@ -324,9 +334,14 @@
                         const time = game.startTime ? new Date(game.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD';
                         let distance = '';
                         if (game.distance !== undefined && game.distance !== null) {
-                            const dist = parseFloat(game.distance);
-                            if (!isNaN(dist)) {
-                                distance = `${dist.toFixed(1)}km`;
+                            // Handle both string "1.2 km" and number formats
+                            if (typeof game.distance === 'string') {
+                                distance = game.distance; // Already formatted
+                            } else {
+                                const dist = parseFloat(game.distance);
+                                if (!isNaN(dist)) {
+                                    distance = `${dist.toFixed(1)}km`;
+                                }
                             }
                         }
                         html += `
@@ -335,7 +350,7 @@
                                 <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
                                 <p style="margin: 0.5rem 0;">🕐 ${time}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
-                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || game.playersNeeded || 0} ${game.maxPlayers ? `/${game.maxPlayers}` : ''} players</p>
                                 <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
                                     Join Game
                                 </button>
@@ -357,17 +372,26 @@
                     activities.pickupGames.forEach(game => {
                         let distance = '';
                         if (game.distance !== undefined && game.distance !== null) {
-                            const dist = parseFloat(game.distance);
-                            if (!isNaN(dist)) {
-                                distance = `${dist.toFixed(1)}km`;
+                            // Handle both string "1.2 km" and number formats
+                            if (typeof game.distance === 'string') {
+                                distance = game.distance; // Already formatted
+                            } else {
+                                const dist = parseFloat(game.distance);
+                                if (!isNaN(dist)) {
+                                    distance = `${dist.toFixed(1)}km`;
+                                }
                             }
                         }
                         html += `
                             <div style="background: white; border: 1px solid #3498db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(52,152,219,0.2);">
                                 <h4 style="color: #3498db; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'} - Pickup</h4>
                                 <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
-                                <p style="margin: 0.5rem 0;">🕐 ${game.schedule || 'Drop-in anytime'}</p>
+                                <p style="margin: 0.5rem 0;">🕐 ${game.time || game.schedule || 'Drop-in anytime'}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                ${game.playersNeeded ? `<p style="margin: 0.5rem 0;">👥 ${game.playersNeeded} players needed</p>` : ''}
+                                ${game.spotsLeft ? `<p style="margin: 0.5rem 0;">✅ ${game.spotsLeft} spots left</p>` : ''}
+                                ${game.skillLevel ? `<p style="margin: 0.5rem 0;">🎯 ${game.skillLevel}</p>` : ''}
+                                ${game.organizer ? `<p style="margin: 0.5rem 0; font-size: 0.9em; color: #666;">by ${game.organizer}</p>` : ''}
                                 <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
                                     View Details
                                 </button>
@@ -389,17 +413,24 @@
                     activities.openCourts.forEach(court => {
                         let distance = '';
                         if (court.distance !== undefined && court.distance !== null) {
-                            const dist = parseFloat(court.distance);
-                            if (!isNaN(dist)) {
-                                distance = `${dist.toFixed(1)}km`;
+                            // Handle both string "1.2 km" and number formats
+                            if (typeof court.distance === 'string') {
+                                distance = court.distance; // Already formatted
+                            } else {
+                                const dist = parseFloat(court.distance);
+                                if (!isNaN(dist)) {
+                                    distance = `${dist.toFixed(1)}km`;
+                                }
                             }
                         }
                         html += `
                             <div style="background: white; border: 1px solid #9b59b6; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(155,89,182,0.2);">
-                                <h4 style="color: #9b59b6; margin: 0 0 0.5rem 0;">${court.name || 'Open Court'}</h4>
-                                <p style="margin: 0.5rem 0;">📍 ${court.location || 'Location'}</p>
+                                <h4 style="color: #9b59b6; margin: 0 0 0.5rem 0;">${court.venue || court.name || 'Open Court'}</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${court.venue || court.location || 'Location'}</p>
                                 <p style="margin: 0.5rem 0;">🎾 ${court.type || 'Multi-sport'}</p>
                                 ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                ${court.currentPlayers !== undefined ? `<p style="margin: 0.5rem 0;">👥 ${court.currentPlayers} players (${court.busyLevel || 'moderate'})</p>` : ''}
+                                ${court.availability ? `<p style="margin: 0.5rem 0;">✅ ${court.availability}</p>` : ''}
                                 <button onclick="viewCourt('${court.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
                                     Get Directions
                                 </button>
