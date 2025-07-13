@@ -222,6 +222,15 @@
             
             // Function to display play now results
             const displayPlayNowResults = (data, userLat, userLng, locationName) => {
+                console.log('Play Now API response:', data);
+                
+                // Handle different response formats
+                if (!data || typeof data !== 'object') {
+                    console.error('Invalid API response:', data);
+                    mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error: Invalid response from server</h2><button onclick="location.reload()">Try Again</button></div>';
+                    return;
+                }
+                
                 const activities = data.activities || {};
                 const games = data.games || [];
                 
@@ -246,7 +255,13 @@
                     `;
                     
                     activities.happeningNow.forEach(game => {
-                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        let distance = '';
+                        if (game.distance !== undefined && game.distance !== null) {
+                            const dist = parseFloat(game.distance);
+                            if (!isNaN(dist)) {
+                                distance = `${dist.toFixed(1)}km`;
+                            }
+                        }
                         html += `
                             <div style="background: white; border: 2px solid #e74c3c; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(231,76,60,0.2);">
                                 <h4 style="color: #e74c3c; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -273,7 +288,13 @@
                     
                     activities.startingSoon.forEach(game => {
                         const timeUntil = game.minutesUntilStart ? `in ${game.minutesUntilStart}min` : 'Soon';
-                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        let distance = '';
+                        if (game.distance !== undefined && game.distance !== null) {
+                            const dist = parseFloat(game.distance);
+                            if (!isNaN(dist)) {
+                                distance = `${dist.toFixed(1)}km`;
+                            }
+                        }
                         html += `
                             <div style="background: white; border: 2px solid #f39c12; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(243,156,18,0.2);">
                                 <h4 style="color: #f39c12; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -299,9 +320,15 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
                     `;
                     
-                    activities.upcomingToday.forEach(game => {
+                    activities.laterToday.forEach(game => {
                         const time = game.startTime ? new Date(game.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD';
-                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        let distance = '';
+                        if (game.distance !== undefined && game.distance !== null) {
+                            const dist = parseFloat(game.distance);
+                            if (!isNaN(dist)) {
+                                distance = `${dist.toFixed(1)}km`;
+                            }
+                        }
                         html += `
                             <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                                 <h4 style="color: #27ae60; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
@@ -328,7 +355,13 @@
                     `;
                     
                     activities.pickupGames.forEach(game => {
-                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        let distance = '';
+                        if (game.distance !== undefined && game.distance !== null) {
+                            const dist = parseFloat(game.distance);
+                            if (!isNaN(dist)) {
+                                distance = `${dist.toFixed(1)}km`;
+                            }
+                        }
                         html += `
                             <div style="background: white; border: 1px solid #3498db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(52,152,219,0.2);">
                                 <h4 style="color: #3498db; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'} - Pickup</h4>
@@ -354,7 +387,13 @@
                     `;
                     
                     activities.openCourts.forEach(court => {
-                        const distance = court.distance ? `${court.distance.toFixed(1)}km` : '';
+                        let distance = '';
+                        if (court.distance !== undefined && court.distance !== null) {
+                            const dist = parseFloat(court.distance);
+                            if (!isNaN(dist)) {
+                                distance = `${dist.toFixed(1)}km`;
+                            }
+                        }
                         html += `
                             <div style="background: white; border: 1px solid #9b59b6; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(155,89,182,0.2);">
                                 <h4 style="color: #9b59b6; margin: 0 0 0.5rem 0;">${court.name || 'Open Court'}</h4>
