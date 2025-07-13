@@ -202,52 +202,255 @@
                 });
         };
         
-        // Define playNow directly
+        // Enhanced Play Now with full functionality
         window.playNow = function() {
-            console.log('Play Now clicked - inline version');
-            const container = document.querySelector('.container');
-            if (!container) return;
+            console.log('Play Now clicked - enhanced version');
             
-            container.innerHTML = '<div style="padding: 3rem; text-align: center;"><h2>Finding games near you...</h2></div>';
+            // Show loading in main content area
+            const mainContent = document.querySelector('.main-content');
+            if (!mainContent) return;
+            
+            mainContent.innerHTML = `
+                <div style="padding: 3rem; text-align: center;">
+                    <h2 style="color: #ff6b35;">Finding the best games for you...</h2>
+                    <div style="margin-top: 2rem;">
+                        <div style="width: 60px; height: 60px; border: 4px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                    <p style="margin-top: 2rem; color: #666;">Checking your location and finding nearby games...</p>
+                </div>
+            `;
+            
+            // Function to display play now results
+            const displayPlayNowResults = (data, userLat, userLng, locationName) => {
+                const activities = data.activities || {};
+                const games = data.games || [];
+                
+                // Set user location for play now service
+                if (userLat && userLng && window.playNowService) {
+                    window.playNowService.setUserLocation(userLat, userLng);
+                }
+                
+                let html = `
+                    <div class="play-now-results" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+                        <h2 style="color: #ff6b35; margin-bottom: 2rem;">
+                            🎯 Play Now - ${locationName || 'Your Area'}
+                        </h2>
+                `;
+                
+                // Show happening now games
+                if (activities.happeningNow && activities.happeningNow.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 3rem;">
+                            <h3 style="color: #e74c3c; margin-bottom: 1rem;">🔴 Happening Right Now</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    `;
+                    
+                    activities.happeningNow.forEach(game => {
+                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        html += `
+                            <div style="background: white; border: 2px solid #e74c3c; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(231,76,60,0.2);">
+                                <h4 style="color: #e74c3c; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
+                                ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    Join Now
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                }
+                
+                // Show starting soon games
+                if (activities.startingSoon && activities.startingSoon.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 3rem;">
+                            <h3 style="color: #f39c12; margin-bottom: 1rem;">🟡 Starting Soon</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    `;
+                    
+                    activities.startingSoon.forEach(game => {
+                        const timeUntil = game.minutesUntilStart ? `in ${game.minutesUntilStart}min` : 'Soon';
+                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        html += `
+                            <div style="background: white; border: 2px solid #f39c12; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(243,156,18,0.2);">
+                                <h4 style="color: #f39c12; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
+                                <p style="margin: 0.5rem 0;">⏰ Starts ${timeUntil}</p>
+                                ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    Reserve Spot
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                }
+                
+                // Show later today games
+                if (activities.laterToday && activities.laterToday.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 3rem;">
+                            <h3 style="color: #27ae60; margin-bottom: 1rem;">📅 Later Today</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    `;
+                    
+                    activities.upcomingToday.forEach(game => {
+                        const time = game.startTime ? new Date(game.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD';
+                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        html += `
+                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <h4 style="color: #27ae60; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'}</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
+                                <p style="margin: 0.5rem 0;">🕐 ${time}</p>
+                                ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                <p style="margin: 0.5rem 0;">👥 ${game.currentPlayers || 0}/${game.maxPlayers || 20} players</p>
+                                <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    Join Game
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                }
+                
+                // Show pickup games if available
+                if (activities.pickupGames && activities.pickupGames.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 3rem;">
+                            <h3 style="color: #3498db; margin-bottom: 1rem;">🏀 Open Pickup Games</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    `;
+                    
+                    activities.pickupGames.forEach(game => {
+                        const distance = game.distance ? `${game.distance.toFixed(1)}km` : '';
+                        html += `
+                            <div style="background: white; border: 1px solid #3498db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(52,152,219,0.2);">
+                                <h4 style="color: #3498db; margin: 0 0 0.5rem 0;">${game.sport || 'Sport'} - Pickup</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${game.venue || 'Location TBD'}</p>
+                                <p style="margin: 0.5rem 0;">🕐 ${game.schedule || 'Drop-in anytime'}</p>
+                                ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                <button onclick="joinGame('${game.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    View Details
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                }
+                
+                // Show open courts
+                if (activities.openCourts && activities.openCourts.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 3rem;">
+                            <h3 style="color: #9b59b6; margin-bottom: 1rem;">🏸 Open Courts & Fields</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                    `;
+                    
+                    activities.openCourts.forEach(court => {
+                        const distance = court.distance ? `${court.distance.toFixed(1)}km` : '';
+                        html += `
+                            <div style="background: white; border: 1px solid #9b59b6; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 5px rgba(155,89,182,0.2);">
+                                <h4 style="color: #9b59b6; margin: 0 0 0.5rem 0;">${court.name || 'Open Court'}</h4>
+                                <p style="margin: 0.5rem 0;">📍 ${court.location || 'Location'}</p>
+                                <p style="margin: 0.5rem 0;">🎾 ${court.type || 'Multi-sport'}</p>
+                                ${distance ? `<p style="margin: 0.5rem 0;">🚗 ${distance} away</p>` : ''}
+                                <button onclick="viewCourt('${court.id}')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                    Get Directions
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                }
+                
+                // No games found
+                if (!activities.happeningNow?.length && !activities.startingSoon?.length && !activities.laterToday?.length && !activities.pickupGames?.length && !activities.openCourts?.length) {
+                    html += `
+                        <div style="text-align: center; padding: 3rem;">
+                            <p style="font-size: 1.2em; color: #666;">No games found near you right now.</p>
+                            <p style="color: #999; margin-top: 1rem;">Try searching for games or check back later!</p>
+                            <button onclick="searchGames()" style="margin-top: 2rem; padding: 0.75rem 2rem; background: #ff6b35; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Search All Games
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                    <div style="text-align: center; margin-top: 3rem;">
+                        <button onclick="location.reload()" style="padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+                `;
+                
+                mainContent.innerHTML = html;
+            };
             
             // Try geolocation
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        fetch(`/api/play-now?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&radius=10`)
+                        // Success - use user location
+                        fetch(`/api/play-now?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&radius=15`)
                             .then(r => r.json())
                             .then(data => {
-                                const activities = data.activities || {};
-                                let html = '<div style="padding: 2rem;"><h2>Games Near You</h2>';
-                                
-                                if (activities.happeningNow?.length > 0) {
-                                    html += '<h3>🔴 Happening Now</h3>';
-                                    activities.happeningNow.forEach(a => {
-                                        html += `<div style="background: white; padding: 1rem; margin: 0.5rem 0; border-left: 4px solid red;">${a.sport} at ${a.venue}</div>`;
-                                    });
-                                }
-                                
-                                if (activities.startingSoon?.length > 0) {
-                                    html += '<h3>🟡 Starting Soon</h3>';
-                                    activities.startingSoon.forEach(a => {
-                                        html += `<div style="background: white; padding: 1rem; margin: 0.5rem 0; border-left: 4px solid orange;">${a.sport} at ${a.venue}</div>`;
-                                    });
-                                }
-                                
-                                html += '<button onclick="location.reload()" style="margin-top: 2rem; padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px;">Back</button></div>';
-                                container.innerHTML = html;
+                                displayPlayNowResults(data, pos.coords.latitude, pos.coords.longitude, 'Your Location');
+                            })
+                            .catch(err => {
+                                console.error('Play Now API error:', err);
+                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
                             });
                     },
                     (err) => {
-                        // Use Vancouver as default
-                        fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=10')
+                        // Location denied - use Vancouver as default
+                        console.log('Location access denied, using Vancouver');
+                        fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=15')
                             .then(r => r.json())
                             .then(data => {
-                                container.innerHTML = '<div style="padding: 2rem;"><h2>Games in Vancouver</h2><p>Location access denied - showing Vancouver games</p><button onclick="location.reload()">Back</button></div>';
+                                displayPlayNowResults(data, 49.2827, -123.1207, 'Vancouver (Default)');
+                            })
+                            .catch(err => {
+                                console.error('Play Now API error:', err);
+                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
                             });
                     }
                 );
+            } else {
+                // No geolocation support - use Vancouver
+                fetch('/api/play-now?lat=49.2827&lng=-123.1207&radius=15')
+                    .then(r => r.json())
+                    .then(data => {
+                        displayPlayNowResults(data, 49.2827, -123.1207, 'Vancouver (Default)');
+                    })
+                    .catch(err => {
+                        console.error('Play Now API error:', err);
+                        mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
+                    });
             }
+        };
+        
+        // Define joinGame function
+        window.joinGame = function(gameId) {
+            console.log('Joining game:', gameId);
+            // For now, just show a message - implement full join flow later
+            alert('Join game feature coming soon! Game ID: ' + gameId);
+        };
+        
+        // Define viewCourt function
+        window.viewCourt = function(courtId) {
+            console.log('Viewing court:', courtId);
+            // Open Google Maps directions (placeholder for now)
+            alert('Get directions feature coming soon! Court ID: ' + courtId);
         };
         
         // Define showRulesPage function
