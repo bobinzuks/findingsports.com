@@ -147,7 +147,43 @@
         <script src="js/map-debug.js"></script>
         <script src="js/map-init-fix.js"></script>
         <script src="js/app.js"></script>
-        <!-- Comprehensive button handler fix -->
-        <script src="js/button-handler-fix.js"></script>
+        <!-- Immediate button fix -->
+        <script src="js/immediate-button-fix.js"></script>
+        
+        <!-- Inline backup fix -->
+        <script>
+        // Backup inline fix to ensure buttons work
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inline button fix running...');
+            
+            // Force set the onclick handlers
+            const searchBtn = document.querySelector('.search-btn');
+            const playNowBtn = document.querySelector('.play-now-btn');
+            
+            if (searchBtn) {
+                searchBtn.onclick = function() {
+                    console.log('Search button clicked (inline)');
+                    if (window.searchGames) {
+                        window.searchGames();
+                    } else {
+                        alert('Search functionality loading... Please try again in a moment.');
+                    }
+                };
+            }
+            
+            if (playNowBtn) {
+                playNowBtn.onclick = function() {
+                    console.log('Play Now button clicked (inline)');
+                    if (window.playNow) {
+                        window.playNow();
+                    } else {
+                        alert('Play Now functionality loading... Please try again in a moment.');
+                    }
+                };
+            }
+            
+            console.log('Inline button fix complete');
+        });
+        </script>
     </body>
 </html>
