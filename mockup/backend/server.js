@@ -618,6 +618,12 @@ app.get('/api/location/search/:searchId', (req, res) => {
     res.json({ search });
 });
 
+// Catch all handler - serve index.html for client-side routing
+// This MUST be after all API routes but before error handler
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Finding Sports backend running on http://0.0.0.0:${PORT}`);
