@@ -91,6 +91,12 @@ const server = http.createServer((req, res) => {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     
+    // FORCE NO CACHE FOR DEVELOPMENT
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    
     // CORS with origin validation
     const origin = req.headers.origin;
     if (origin && ALLOWED_ORIGINS.includes(origin)) {

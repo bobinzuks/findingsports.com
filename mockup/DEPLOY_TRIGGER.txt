@@ -1,17 +1,25 @@
 Railway Deploy Trigger
-Generated: 2025-01-16 09:45 UTC
-Purpose: Fix games not displaying issue
+Generated: 2025-01-16 15:05 UTC
+Purpose: FORCE COMPLETE ASSET RELOAD - Fix map resizing issue
+
+CRITICAL FIX:
+- Disabled ALL animations causing map resize loops
+- Removed pulsing circle animation (was running every 50ms)
+- Fixed conflicting CSS animations
+- Added aggressive no-cache headers
+- Updated ALL asset timestamps to force reload
 
 Fixed issues:
-- ultra-simple-server.js now correctly serves index.html from parent directory
-- Added static file serving for CSS/JS/images
-- Added fallback test page if index.html not found
-- Better error logging
+- Map container continuous resizing FIXED
+- All pulse animations DISABLED
+- Cache-busting timestamps UPDATED
+- No-cache headers ADDED
 
 Previous features:
 - Google Maps integration showing user and game locations
 - Login requirements for game details
 - Custom location search support
-- Aggressive cache bypass implementation
+- Dark mode toggle
 
-Deploy ID: 1737022000000
+Deploy ID: 1737040000000
+Cache Bust: FORCE_REFRESH_REQUIRED
