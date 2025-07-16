@@ -19,7 +19,13 @@ class PlayNowService extends EventEmitter {
         
         // Real data from North Vancouver Recreation Centers
         this.realSchedules = new Map();
-        this.loadRealData();
+        this.dataLoaded = false;
+        this.loadRealData().then(() => {
+            this.dataLoaded = true;
+            console.log('✅ Real data loaded successfully');
+        }).catch(err => {
+            console.error('❌ Failed to load real data:', err);
+        });
         
         // Mock data as fallback
         this.mockSchedules = this.initializeMockSchedules();
@@ -300,6 +306,12 @@ class PlayNowService extends EventEmitter {
             sports = []
         } = options;
 
+        // Ensure data is loaded
+        if (!this.dataLoaded) {
+            console.log('⏳ Waiting for real data to load...');
+            await this.loadRealData();
+        }
+        
         // Try to use real data first
         if (this.config.useRealData && this.realSchedules.size > 0) {
             try {

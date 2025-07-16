@@ -247,6 +247,9 @@ app.use('/api/v2', require('./routes/api-v2'));
 // Play Now endpoint
 app.use('/api/play-now', require('./routes/play-now'));
 
+// Debug Play Now endpoint
+app.use('/api/debug/play-now', require('./routes/debug-play-now'));
+
 // Venues endpoint
 app.use('/api/venues', require('./routes/venues'));
 
