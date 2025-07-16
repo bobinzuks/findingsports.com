@@ -1,11 +1,17 @@
 Railway Deploy Trigger
-Generated: 2025-01-13 20:05 UTC
-Purpose: Trigger Railway deployment
+Generated: 2025-01-16 09:45 UTC
+Purpose: Fix games not displaying issue
 
-Latest features:
+Fixed issues:
+- ultra-simple-server.js now correctly serves index.html from parent directory
+- Added static file serving for CSS/JS/images
+- Added fallback test page if index.html not found
+- Better error logging
+
+Previous features:
 - Google Maps integration showing user and game locations
 - Login requirements for game details
 - Custom location search support
 - Aggressive cache bypass implementation
 
-Deploy ID: ${Date.now()}
+Deploy ID: 1737022000000
