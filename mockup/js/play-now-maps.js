@@ -117,19 +117,10 @@
             map: map
         });
 
-        // Animate the pulsing circle
-        let radius = 100;
-        let expanding = true;
-        setInterval(() => {
-            if (expanding) {
-                radius += 2;
-                if (radius >= 150) expanding = false;
-            } else {
-                radius -= 2;
-                if (radius <= 100) expanding = true;
-            }
-            pulsingCircle.setRadius(radius);
-        }, 50);
+        // Disable pulsing animation to prevent resize issues
+        // Static circle instead of animated one
+        // Animation was causing continuous map resizing
+        console.log('Pulsing animation disabled for stability');
 
         // Add user marker
         userMarker = new google.maps.Marker({
