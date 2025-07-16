@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="css/styles.css?v=1752417024232" />
         <link rel="stylesheet" href="css/background-enhancement.css?v=1752417024232" />
         <link rel="stylesheet" href="css/play-now.css?v=1752417024232" />
+        <link rel="stylesheet" href="css/play-now-maps.css?v=1752417024232" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -149,6 +150,7 @@
         <script src="https://cdn.socket.io/4.5.4/socket.io.min.js?v=1752417024232"></script>
         <script src="js/config.js?v=1752417024232"></script>
         <script src="js/google-maps.js?v=1752417024232"></script>
+        <script src="js/play-now-maps.js?v=1752417024232"></script>
         <script src="js/api.js?v=1752417024232"></script>
         <script src="js/websocket.js?v=1752417024232"></script>
         <script src="js/venue-search.js?v=1752417024232"></script>
@@ -274,7 +276,7 @@
                         </div>
                         
                         <!-- Google Maps Container -->
-                        <div id="playNowMap" style="width: 100%; height: 400px; margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"></div>
+                        <div id="playNowMap" class="loading" style="width: 100%; height: 400px; margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"></div>
                 `;
                 
                 // Show happening now games
@@ -450,7 +452,14 @@
                 
                 // Initialize Google Maps after HTML is rendered
                 setTimeout(() => {
-                    initializePlayNowMap(userLat, userLng, activities, data.games);
+                    if (window.google && window.google.maps) {
+                        initializePlayNowMap(userLat, userLng, activities, data.games);
+                    } else {
+                        // Wait for Google Maps to load
+                        window.addEventListener('googlemapsloaded', () => {
+                            initializePlayNowMap(userLat, userLng, activities, data.games);
+                        });
+                    }
                 }, 100);
             };
             
