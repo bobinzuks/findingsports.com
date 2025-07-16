@@ -1,0 +1,7 @@
+FORCE DEPLOYMENT: 2025-01-16 23:53:00
+Emergency server deployment trigger
+Build ID: emergency-fix-001
+
+This file triggers a fresh Railway deployment to force the emergency server live.
+
+Status: DEPLOYING EMERGENCY SERVER
