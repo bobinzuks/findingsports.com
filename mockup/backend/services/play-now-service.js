@@ -220,13 +220,28 @@ class PlayNowService extends EventEmitter {
      */
     async loadRealData() {
         try {
-            // Load North Vancouver Recreation drop-in games
-            const nvrcPath = path.join(__dirname, '..', 'data', 'nvrc-dropin-games.json');
-            const nvrcData = await fs.readFile(nvrcPath, 'utf8');
-            const nvrcGames = JSON.parse(nvrcData);
+            // Load all drop-in games data
+            const dataFiles = [
+                'nvrc-dropin-games.json',
+                'vancouver-dropin-games.json'
+            ];
+            
+            let allGames = [];
+            
+            for (const file of dataFiles) {
+                try {
+                    const filePath = path.join(__dirname, '..', 'data', file);
+                    const data = await fs.readFile(filePath, 'utf8');
+                    const games = JSON.parse(data);
+                    allGames = allGames.concat(games);
+                    console.log(`✅ Loaded ${games.length} games from ${file}`);
+                } catch (error) {
+                    console.log(`⚠️ Could not load ${file}:`, error.message);
+                }
+            }
             
             // Convert to our format and store
-            nvrcGames.forEach(game => {
+            allGames.forEach(game => {
                 const venueId = game.venue.name.toLowerCase().replace(/\s+/g, '-');
                 
                 if (!this.realSchedules.has(venueId)) {
@@ -252,15 +267,27 @@ class PlayNowService extends EventEmitter {
                         startHour,
                         endHour
                     },
-                    cost: 8.50, // Standard NVRC drop-in rate
+                    cost: game.centre?.includes('UBC') ? 10.00 : 8.50, // UBC has higher rates
                     ageGroup: game.type.includes('Adult') ? 'Adult (19+)' : 'All Ages',
                     capacity: 30, // Default capacity
-                    source: 'North Vancouver Recreation',
+                    source: game.centre || 'Community Centre',
                     realData: true
                 });
             });
             
-            console.log(`✅ Loaded ${this.realSchedules.size} real venues with ${nvrcGames.length} activities`);
+            console.log(`✅ Loaded ${this.realSchedules.size} real venues with ${allGames.length} activities total`);
+            
+            // Log some sample activities for today
+            const today = new Date().getDay();
+            const todayGames = [];
+            for (const [venueId, venue] of this.realSchedules) {
+                venue.activities.forEach(activity => {
+                    if (activity.schedule.days.includes(today)) {
+                        todayGames.push(`${activity.sport} at ${venue.name}`);
+                    }
+                });
+            }
+            console.log(`🏀 Today's games (${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][today]}):`, todayGames.slice(0, 5));
             
         } catch (error) {
             console.error('Error loading real data:', error);
@@ -526,9 +553,72 @@ class PlayNowService extends EventEmitter {
      * Get real open courts based on venue data
      */
     async getRealOpenCourts(userLocation, radiusKm) {
-        // This would integrate with real facility availability data
-        // For now, return known outdoor courts that are typically available
+        // Real outdoor courts in Vancouver area
         const courts = [
+            // Vancouver Courts
+            {
+                id: 'david-lam-basketball',
+                type: 'basketball',
+                venue: 'David Lam Park',
+                address: 'Pacific Blvd & Drake St, Vancouver',
+                coordinates: { lat: 49.2729, lng: -123.1267 },
+                status: 'open',
+                courts: 2,
+                surface: 'outdoor',
+                lights: 'Until 10 PM',
+                busyTimes: 'Usually busy 6-8 PM',
+                source: 'Vancouver Parks'
+            },
+            {
+                id: 'qe-tennis',
+                type: 'tennis',
+                venue: 'Queen Elizabeth Park',
+                address: '4600 Cambie St, Vancouver',
+                coordinates: { lat: 49.2418, lng: -123.1126 },
+                status: 'open',
+                courts: 17,
+                surface: 'hard court',
+                availability: 'First come, first served',
+                busyTimes: 'Peak: 5-7 PM',
+                source: 'Vancouver Parks'
+            },
+            {
+                id: 'stanley-park-tennis',
+                type: 'tennis',
+                venue: 'Stanley Park Tennis Courts',
+                address: 'Lagoon Dr, Vancouver',
+                coordinates: { lat: 49.2988, lng: -123.1417 },
+                status: 'open',
+                courts: 21,
+                surface: 'hard court',
+                lights: 'Yes (some courts)',
+                source: 'Vancouver Parks'
+            },
+            {
+                id: 'andy-livingstone-basketball',
+                type: 'basketball',
+                venue: 'Andy Livingstone Park',
+                address: '89 Expo Blvd, Vancouver',
+                coordinates: { lat: 49.2846, lng: -123.1026 },
+                status: 'open',
+                courts: 3,
+                surface: 'outdoor',
+                lights: 'Until 11 PM',
+                source: 'Vancouver Parks'
+            },
+            {
+                id: 'china-creek-basketball',
+                type: 'basketball',
+                venue: 'China Creek Park',
+                address: 'E Broadway & Clark Dr, Vancouver',
+                coordinates: { lat: 49.2633, lng: -123.0774 },
+                status: 'open',
+                courts: 2,
+                surface: 'outdoor',
+                lights: 'No',
+                source: 'Vancouver Parks'
+            },
+            // North Vancouver
             {
                 id: 'mahon-park-tennis',
                 type: 'tennis',
@@ -552,6 +642,44 @@ class PlayNowService extends EventEmitter {
                 surface: 'outdoor',
                 lights: 'Until dusk',
                 source: 'North Vancouver Parks'
+            },
+            // Richmond
+            {
+                id: 'minoru-park-tennis',
+                type: 'tennis',
+                venue: 'Minoru Park',
+                address: '7191 Granville Ave, Richmond',
+                coordinates: { lat: 49.1658, lng: -123.1369 },
+                status: 'open',
+                courts: 6,
+                surface: 'hard court',
+                lights: 'Yes',
+                source: 'Richmond Parks'
+            },
+            // Burnaby
+            {
+                id: 'central-park-tennis',
+                type: 'tennis',
+                venue: 'Central Park',
+                address: 'Boundary Rd & Kingsway, Burnaby',
+                coordinates: { lat: 49.2276, lng: -123.0239 },
+                status: 'open',
+                courts: 14,
+                surface: 'hard court',
+                lights: 'Some courts',
+                source: 'Burnaby Parks'
+            },
+            {
+                id: 'confederation-park-basketball',
+                type: 'basketball',
+                venue: 'Confederation Park',
+                address: 'Willingdon Ave & Penzance Dr, Burnaby',
+                coordinates: { lat: 49.2819, lng: -123.0045 },
+                status: 'open',
+                courts: 2,
+                surface: 'outdoor',
+                lights: 'No',
+                source: 'Burnaby Parks'
             }
         ];
         
@@ -580,9 +708,54 @@ class PlayNowService extends EventEmitter {
      * Get real pickup games from community sources
      */
     async getRealPickupGames(userLocation, radiusKm) {
-        // This would integrate with social media APIs, community boards, etc.
-        // For now, return known regular pickup games
+        // Known regular pickup games from various sources
+        const now = new Date();
+        const hour = now.getHours();
+        const dayOfWeek = now.getDay();
+        
         const games = [
+            {
+                id: 'fb-soccer-andy',
+                sport: 'soccer',
+                organizer: 'Vancouver Pickup Soccer',
+                platform: 'Facebook Group',
+                venue: 'Andy Livingstone Park',
+                coordinates: { lat: 49.2846, lng: -123.1026 },
+                status: hour >= 18 && hour < 20 && dayOfWeek === 1 ? 'active' : 'scheduled',
+                time: 'Mondays 6:00 PM - 8:00 PM',
+                playersNeeded: 3,
+                skillLevel: 'Casual/Intermediate',
+                joinMethod: 'Message on Facebook group',
+                source: 'Facebook Groups'
+            },
+            {
+                id: 'meetup-basketball-sunset',
+                sport: 'basketball',
+                organizer: 'Vancouver Basketball Meetup',
+                platform: 'Meetup',
+                venue: 'Sunset Community Centre',
+                coordinates: { lat: 49.2187, lng: -123.1008 },
+                status: hour >= 20 && hour < 22 && dayOfWeek === 2 ? 'active' : 'scheduled',
+                time: 'Tuesdays 8:00 PM',
+                spotsLeft: 2,
+                skillLevel: 'Competitive',
+                joinMethod: 'RSVP on Meetup',
+                source: 'Meetup.com'
+            },
+            {
+                id: 'opensports-volleyball-kits',
+                sport: 'volleyball',
+                organizer: 'OpenSports App',
+                platform: 'OpenSports',
+                venue: 'Kitsilano Beach',
+                coordinates: { lat: 49.2741, lng: -123.1539 },
+                status: 'scheduled',
+                time: 'Wednesdays 6:00 PM',
+                playersNeeded: 4,
+                skillLevel: 'All Levels',
+                joinMethod: 'Join via OpenSports app',
+                source: 'OpenSports'
+            },
             {
                 id: 'lynn-valley-soccer',
                 sport: 'soccer',
@@ -590,12 +763,68 @@ class PlayNowService extends EventEmitter {
                 platform: 'Community Board',
                 venue: 'Lynn Valley Elementary School',
                 coordinates: { lat: 49.3370, lng: -123.0168 },
-                status: 'scheduled',
+                status: hour >= 10 && hour < 12 && dayOfWeek === 0 ? 'active' : 'scheduled',
                 time: 'Sundays 10:00 AM',
                 playersNeeded: 5,
                 skillLevel: 'All Levels',
                 joinMethod: 'Just show up!',
                 source: 'Community Board'
+            },
+            {
+                id: 'spanish-banks-volleyball',
+                sport: 'volleyball',
+                organizer: 'Spanish Banks Volleyball Meetup',
+                platform: 'Meetup',
+                venue: 'Spanish Banks Beach',
+                coordinates: { lat: 49.2765, lng: -123.2177 },
+                status: hour >= 14 && hour < 17 && dayOfWeek === 6 ? 'active' : 'scheduled',
+                time: 'Saturdays 2:00 PM',
+                playersNeeded: 8,
+                skillLevel: 'All Levels',
+                joinMethod: 'RSVP on Meetup.com',
+                source: 'Meetup.com'
+            },
+            {
+                id: 'trout-lake-basketball',
+                sport: 'basketball',
+                organizer: 'East Van Ballers',
+                platform: 'WhatsApp Group',
+                venue: 'Trout Lake Park',
+                coordinates: { lat: 49.2558, lng: -123.0655 },
+                status: hour >= 17 && hour < 19 ? 'active' : 'scheduled',
+                time: 'Weekdays 5:00 PM - 7:00 PM',
+                playersNeeded: 3,
+                skillLevel: 'Intermediate',
+                joinMethod: 'Join WhatsApp group',
+                source: 'WhatsApp Groups'
+            },
+            {
+                id: 'qe-tennis-group',
+                sport: 'tennis',
+                organizer: 'QE Park Tennis Group',
+                platform: 'WhatsApp Group',
+                venue: 'Queen Elizabeth Park Tennis Courts',
+                coordinates: { lat: 49.2418, lng: -123.1126 },
+                status: hour >= 17 && hour < 20 ? 'active' : 'scheduled',
+                time: 'Daily 5:00 PM - Sunset',
+                playersNeeded: 2,
+                skillLevel: 'Intermediate+',
+                joinMethod: 'Show up or join WhatsApp group',
+                source: 'WhatsApp Groups'
+            },
+            {
+                id: 'richmond-badminton-club',
+                sport: 'badminton',
+                organizer: 'Richmond Badminton Club',
+                platform: 'Facebook Group',
+                venue: 'Richmond Olympic Oval',
+                coordinates: { lat: 49.1747, lng: -123.1507 },
+                status: 'scheduled',
+                time: 'Thursdays 7:00 PM',
+                playersNeeded: 4,
+                skillLevel: 'All Levels',
+                joinMethod: 'Message on Facebook',
+                source: 'Facebook Groups'
             }
         ];
         
@@ -855,6 +1084,32 @@ class PlayNowService extends EventEmitter {
                 spotsLeft: 2,
                 skillLevel: 'Competitive',
                 joinMethod: 'Join via OpenSports app'
+            },
+            {
+                id: 'meetup-volleyball-spanish',
+                sport: 'volleyball',
+                organizer: 'Spanish Banks Volleyball Meetup',
+                platform: 'Meetup',
+                venue: 'Spanish Banks Beach',
+                coordinates: { lat: 49.2765, lng: -123.2177 },
+                status: 'scheduled',
+                time: 'Saturdays 2:00 PM',
+                playersNeeded: 8,
+                skillLevel: 'All Levels',
+                joinMethod: 'RSVP on Meetup.com'
+            },
+            {
+                id: 'pickup-tennis-qe',
+                sport: 'tennis',
+                organizer: 'QE Park Tennis Group',
+                platform: 'WhatsApp Group',
+                venue: 'Queen Elizabeth Park Tennis Courts',
+                coordinates: { lat: 49.2418, lng: -123.1126 },
+                status: 'active',
+                time: 'Daily 5:00 PM - Sunset',
+                playersNeeded: 2,
+                skillLevel: 'Intermediate+',
+                joinMethod: 'Show up or join WhatsApp group'
             }
         ];
 
