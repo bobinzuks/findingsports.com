@@ -26,12 +26,20 @@ try {
     console.error('❌ Server startup failed:', error);
     console.error(error.stack);
     
-    // Try minimal server as fallback
-    console.log('🔄 Attempting minimal server startup...');
+    // Try emergency server as fallback
+    console.log('🚨 Starting emergency server...');
     try {
-        require('./server-minimal.js');
-    } catch (minimalError) {
-        console.error('❌ Minimal server also failed:', minimalError);
-        process.exit(1);
+        require('./emergency-server.js');
+    } catch (emergencyError) {
+        console.error('❌ Emergency server also failed:', emergencyError);
+        
+        // Last resort - minimal server
+        console.log('🔄 Attempting minimal server...');
+        try {
+            require('./server-minimal.js');
+        } catch (minimalError) {
+            console.error('❌ All servers failed!');
+            process.exit(1);
+        }
     }
 }

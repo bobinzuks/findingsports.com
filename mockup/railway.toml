@@ -6,7 +6,7 @@ builder = "nixpacks"
 buildCommand = "cd backend && npm install && cd .. && node update-asset-versions.js"
 
 [deploy]
-startCommand = "cd backend && node start.js"
+startCommand = "cd backend && node emergency-server.js"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "always"
