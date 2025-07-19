@@ -1,19 +1,19 @@
 // Leagues page component
 window.LeaguesPage = {
-    // Initialize the Leagues page
-    async initialize() {
-        // Load leagues data
-        await this.loadLeagues();
-    },
+  // Initialize the Leagues page
+  async initialize() {
+    // Load leagues data
+    await this.loadLeagues();
+  },
 
-    // Render the Leagues page content
-    render() {
-        const contentWrapper = document.querySelector('.content-wrapper');
-        if (!contentWrapper) {
-            return;
-        }
+  // Render the Leagues page content
+  render() {
+    const contentWrapper = document.querySelector('.content-wrapper');
+    if (!contentWrapper) {
+      return;
+    }
 
-        contentWrapper.innerHTML = `
+    contentWrapper.innerHTML = `
             <!-- Leagues Section -->
             <section class="leagues-section">
                 <div class="leagues-header">
@@ -70,8 +70,8 @@ window.LeaguesPage = {
                 </div>
 
                 ${
-    !window.isGuest ?
-        `
+  !window.isGuest ?
+    `
                     <div class="create-league-section">
                         <h3>Don't see a league you like?</h3>
                         <button class="create-league-btn" onclick="window.LeaguesPage.createLeague()">
@@ -79,206 +79,206 @@ window.LeaguesPage = {
                         </button>
                     </div>
                 ` :
-        ''
+    ''
 }
             </section>
         `;
 
-        // Set up event listeners
-        this.setupEventListeners();
-
-        // Load initial data
-        this.loadActiveLeagues();
-    },
-
     // Set up event listeners
-    setupEventListeners() {
-        // Add any additional event listeners here
-    },
+    this.setupEventListeners();
 
-    // Switch between tabs
-    switchTab(tab) {
-        // Update active tab
-        document.querySelectorAll('.league-tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+    // Load initial data
+    this.loadActiveLeagues();
+  },
 
-        // Load appropriate content
-        switch (tab) {
-        case 'active':
-            this.loadActiveLeagues();
-            break;
-        case 'upcoming':
-            this.loadUpcomingSeasons();
-            break;
-        case 'tournaments':
-            this.loadTournaments();
-            break;
-        }
-    },
+  // Set up event listeners
+  setupEventListeners() {
+    // Add any additional event listeners here
+  },
 
-    // Load leagues data
-    async loadLeagues() {
-        try {
-            // In a real implementation, this would fetch from API
-            // For now, we'll use demo data
-            this.loadActiveLeagues();
-        } catch (error) {
-            console.error('Failed to load leagues:', error);
-        }
-    },
+  // Switch between tabs
+  switchTab(tab) {
+    // Update active tab
+    document.querySelectorAll('.league-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
 
-    // Load active leagues
-    loadActiveLeagues() {
-        const leagues = [
-            {
-                id: 1,
-                name: 'Vancouver Basketball League',
-                sport: 'basketball',
-                location: 'vancouver',
-                skillLevel: 'intermediate',
-                format: '5v5',
-                schedule: 'Thursdays 7-9pm',
-                duration: '12 weeks',
-                startDate: '2025-02-01',
-                teams: 8,
-                spotsAvailable: true,
-                price: '$120/season',
-                venue: 'Kitsilano Community Centre'
-            },
-            {
-                id: 2,
-                name: 'Burnaby Soccer League - Division 2',
-                sport: 'soccer',
-                location: 'burnaby',
-                skillLevel: 'competitive',
-                format: '11v11',
-                schedule: 'Sundays 2-4pm',
-                duration: '16 weeks',
-                startDate: '2025-03-15',
-                teams: 12,
-                spotsAvailable: false,
-                price: '$200/season',
-                venue: 'Burnaby Lake Sports Complex'
-            },
-            {
-                id: 3,
-                name: 'Richmond Co-ed Volleyball',
-                sport: 'volleyball',
-                location: 'richmond',
-                skillLevel: 'beginner',
-                format: '6v6 Co-ed',
-                schedule: 'Wednesdays 6-8pm',
-                duration: '10 weeks',
-                startDate: '2025-01-20',
-                teams: 6,
-                spotsAvailable: true,
-                price: '$85/season',
-                venue: 'Richmond Olympic Oval'
-            },
-            {
-                id: 4,
-                name: 'Surrey Tennis League',
-                sport: 'tennis',
-                location: 'surrey',
-                skillLevel: 'all',
-                format: 'Singles/Doubles',
-                schedule: 'Flexible',
-                duration: '8 weeks',
-                startDate: '2025-02-10',
-                teams: 24,
-                spotsAvailable: true,
-                price: '$60/season',
-                venue: 'Various Surrey courts'
-            }
-        ];
+    // Load appropriate content
+    switch (tab) {
+    case 'active':
+      this.loadActiveLeagues();
+      break;
+    case 'upcoming':
+      this.loadUpcomingSeasons();
+      break;
+    case 'tournaments':
+      this.loadTournaments();
+      break;
+    }
+  },
 
-        this.displayLeagues(leagues, 'active');
-    },
+  // Load leagues data
+  async loadLeagues() {
+    try {
+      // In a real implementation, this would fetch from API
+      // For now, we'll use demo data
+      this.loadActiveLeagues();
+    } catch (error) {
+      console.error('Failed to load leagues:', error);
+    }
+  },
 
-    // Load upcoming seasons
-    loadUpcomingSeasons() {
-        const upcomingLeagues = [
-            {
-                id: 5,
-                name: 'Spring Basketball League',
-                sport: 'basketball',
-                location: 'vancouver',
-                skillLevel: 'all',
-                format: '3v3',
-                schedule: 'TBD',
-                duration: '8 weeks',
-                startDate: '2025-04-01',
-                registrationOpens: '2025-03-01',
-                price: '$90/season',
-                venue: 'Various Vancouver gyms'
-            },
-            {
-                id: 6,
-                name: 'Summer Beach Volleyball',
-                sport: 'volleyball',
-                location: 'vancouver',
-                skillLevel: 'intermediate',
-                format: '4v4',
-                schedule: 'Weekends',
-                duration: '6 weeks',
-                startDate: '2025-06-15',
-                registrationOpens: '2025-05-15',
-                price: '$70/season',
-                venue: 'English Bay Beach Courts'
-            }
-        ];
+  // Load active leagues
+  loadActiveLeagues() {
+    const leagues = [
+      {
+        id: 1,
+        name: 'Vancouver Basketball League',
+        sport: 'basketball',
+        location: 'vancouver',
+        skillLevel: 'intermediate',
+        format: '5v5',
+        schedule: 'Thursdays 7-9pm',
+        duration: '12 weeks',
+        startDate: '2025-02-01',
+        teams: 8,
+        spotsAvailable: true,
+        price: '$120/season',
+        venue: 'Kitsilano Community Centre'
+      },
+      {
+        id: 2,
+        name: 'Burnaby Soccer League - Division 2',
+        sport: 'soccer',
+        location: 'burnaby',
+        skillLevel: 'competitive',
+        format: '11v11',
+        schedule: 'Sundays 2-4pm',
+        duration: '16 weeks',
+        startDate: '2025-03-15',
+        teams: 12,
+        spotsAvailable: false,
+        price: '$200/season',
+        venue: 'Burnaby Lake Sports Complex'
+      },
+      {
+        id: 3,
+        name: 'Richmond Co-ed Volleyball',
+        sport: 'volleyball',
+        location: 'richmond',
+        skillLevel: 'beginner',
+        format: '6v6 Co-ed',
+        schedule: 'Wednesdays 6-8pm',
+        duration: '10 weeks',
+        startDate: '2025-01-20',
+        teams: 6,
+        spotsAvailable: true,
+        price: '$85/season',
+        venue: 'Richmond Olympic Oval'
+      },
+      {
+        id: 4,
+        name: 'Surrey Tennis League',
+        sport: 'tennis',
+        location: 'surrey',
+        skillLevel: 'all',
+        format: 'Singles/Doubles',
+        schedule: 'Flexible',
+        duration: '8 weeks',
+        startDate: '2025-02-10',
+        teams: 24,
+        spotsAvailable: true,
+        price: '$60/season',
+        venue: 'Various Surrey courts'
+      }
+    ];
 
-        this.displayLeagues(upcomingLeagues, 'upcoming');
-    },
+    this.displayLeagues(leagues, 'active');
+  },
 
-    // Load tournaments
-    loadTournaments() {
-        const tournaments = [
-            {
-                id: 7,
-                name: 'March Madness Basketball Tournament',
-                sport: 'basketball',
-                location: 'vancouver',
-                skillLevel: 'competitive',
-                format: '5v5 Single Elimination',
-                dates: 'March 15-17, 2025',
-                teams: 16,
-                registrationDeadline: '2025-03-01',
-                price: '$250/team',
-                venue: 'UBC War Memorial Gym',
-                prizes: '1st: $1000, 2nd: $500, 3rd: $250'
-            },
-            {
-                id: 8,
-                name: 'Canada Day Soccer Cup',
-                sport: 'soccer',
-                location: 'burnaby',
-                skillLevel: 'all',
-                format: '7v7 Round Robin',
-                dates: 'July 1, 2025',
-                teams: 32,
-                registrationDeadline: '2025-06-15',
-                price: '$150/team',
-                venue: 'Swangard Stadium',
-                prizes: 'Trophies and medals'
-            }
-        ];
+  // Load upcoming seasons
+  loadUpcomingSeasons() {
+    const upcomingLeagues = [
+      {
+        id: 5,
+        name: 'Spring Basketball League',
+        sport: 'basketball',
+        location: 'vancouver',
+        skillLevel: 'all',
+        format: '3v3',
+        schedule: 'TBD',
+        duration: '8 weeks',
+        startDate: '2025-04-01',
+        registrationOpens: '2025-03-01',
+        price: '$90/season',
+        venue: 'Various Vancouver gyms'
+      },
+      {
+        id: 6,
+        name: 'Summer Beach Volleyball',
+        sport: 'volleyball',
+        location: 'vancouver',
+        skillLevel: 'intermediate',
+        format: '4v4',
+        schedule: 'Weekends',
+        duration: '6 weeks',
+        startDate: '2025-06-15',
+        registrationOpens: '2025-05-15',
+        price: '$70/season',
+        venue: 'English Bay Beach Courts'
+      }
+    ];
 
-        this.displayTournaments(tournaments);
-    },
+    this.displayLeagues(upcomingLeagues, 'upcoming');
+  },
 
-    // Display leagues
-    displayLeagues(leagues, type) {
-        const content = document.getElementById('leaguesContent');
-        if (!content) {
-            return;
-        }
+  // Load tournaments
+  loadTournaments() {
+    const tournaments = [
+      {
+        id: 7,
+        name: 'March Madness Basketball Tournament',
+        sport: 'basketball',
+        location: 'vancouver',
+        skillLevel: 'competitive',
+        format: '5v5 Single Elimination',
+        dates: 'March 15-17, 2025',
+        teams: 16,
+        registrationDeadline: '2025-03-01',
+        price: '$250/team',
+        venue: 'UBC War Memorial Gym',
+        prizes: '1st: $1000, 2nd: $500, 3rd: $250'
+      },
+      {
+        id: 8,
+        name: 'Canada Day Soccer Cup',
+        sport: 'soccer',
+        location: 'burnaby',
+        skillLevel: 'all',
+        format: '7v7 Round Robin',
+        dates: 'July 1, 2025',
+        teams: 32,
+        registrationDeadline: '2025-06-15',
+        price: '$150/team',
+        venue: 'Swangard Stadium',
+        prizes: 'Trophies and medals'
+      }
+    ];
 
-        content.innerHTML = `
+    this.displayTournaments(tournaments);
+  },
+
+  // Display leagues
+  displayLeagues(leagues, type) {
+    const content = document.getElementById('leaguesContent');
+    if (!content) {
+      return;
+    }
+
+    content.innerHTML = `
             <div class="leagues-grid">
                 ${leagues
-        .map(
-            league => `
+    .map(
+      league => `
                     <div class="league-card">
                         <div class="league-header">
                             <h3 class="league-name">${league.name}</h3>
@@ -318,22 +318,22 @@ window.LeaguesPage = {
 
                         <div class="league-actions">
                             ${(() => {
-        if (type === 'active') {
-            if (league.spotsAvailable) {
-                return `
+    if (type === 'active') {
+      if (league.spotsAvailable) {
+        return `
                                     <button class="join-league-btn" onclick="window.LeaguesPage.joinLeague(${league.id})">
                                         Join League
                                     </button>
                                 `;
-            } else {
-                return `
+      } else {
+        return `
                                     <button class="join-league-btn disabled" disabled>
                                         League Full
                                     </button>
                                 `;
-            }
-        } else if (type === 'upcoming') {
-            return `
+      }
+    } else if (type === 'upcoming') {
+      return `
                                 <div class="registration-info">
                                     Registration opens: ${new Date(league.registrationOpens).toLocaleDateString()}
                                 </div>
@@ -341,10 +341,10 @@ window.LeaguesPage = {
                                     Notify Me
                                 </button>
                             `;
-        } else {
-            return '';
-        }
-    })()}
+    } else {
+      return '';
+    }
+  })()}
                             
                             <button class="info-btn" onclick="window.LeaguesPage.showLeagueInfo(${league.id})">
                                 More Info
@@ -352,24 +352,24 @@ window.LeaguesPage = {
                         </div>
                     </div>
                 `
-        )
-        .join('')}
+    )
+    .join('')}
             </div>
         `;
-    },
+  },
 
-    // Display tournaments
-    displayTournaments(tournaments) {
-        const content = document.getElementById('leaguesContent');
-        if (!content) {
-            return;
-        }
+  // Display tournaments
+  displayTournaments(tournaments) {
+    const content = document.getElementById('leaguesContent');
+    if (!content) {
+      return;
+    }
 
-        content.innerHTML = `
+    content.innerHTML = `
             <div class="tournaments-grid">
                 ${tournaments
-        .map(
-            tournament => `
+    .map(
+      tournament => `
                     <div class="tournament-card">
                         <div class="tournament-header">
                             <h3 class="tournament-name">${tournament.name}</h3>
@@ -398,14 +398,14 @@ window.LeaguesPage = {
                                 <span class="detail-value price">${tournament.price}</span>
                             </div>
                             ${
-    tournament.prizes ?
-        `
+  tournament.prizes ?
+    `
                                 <div class="detail-row">
                                     <span class="detail-label">Prizes:</span>
                                     <span class="detail-value">${tournament.prizes}</span>
                                 </div>
                             ` :
-        ''
+    ''
 }
                         </div>
 
@@ -419,93 +419,93 @@ window.LeaguesPage = {
                         </div>
                     </div>
                 `
-        )
-        .join('')}
+    )
+    .join('')}
             </div>
         `;
-    },
+  },
 
-    // Filter leagues
-    filterLeagues() {
-        const location = document.getElementById('leagueLocationFilter').value;
-        const sport = document.getElementById('leagueSportFilter').value;
-        const skill = document.getElementById('leagueSkillFilter').value;
+  // Filter leagues
+  filterLeagues() {
+    const location = document.getElementById('leagueLocationFilter').value;
+    const sport = document.getElementById('leagueSportFilter').value;
+    const skill = document.getElementById('leagueSkillFilter').value;
 
-        // In a real implementation, this would filter the data
-        console.log('Filtering leagues:', { location, sport, skill });
+    // In a real implementation, this would filter the data
+    console.log('Filtering leagues:', { location, sport, skill });
 
-        // For now, just reload the current tab
-        const activeTab = document.querySelector('.league-tab.active');
-        let tabType;
-        if (activeTab.textContent.includes('Active')) {
-            tabType = 'active';
-        } else if (activeTab.textContent.includes('Upcoming')) {
-            tabType = 'upcoming';
-        } else {
-            tabType = 'tournaments';
-        }
-        this.switchTab(tabType);
-    },
-
-    // Join a league
-    joinLeague(leagueId) {
-        if (window.isGuest) {
-            if (confirm('Sign in to join this league?')) {
-                sessionStorage.setItem('joinLeagueAfterLogin', leagueId);
-                window.location.href = '/login-google.html';
-            }
-        } else {
-            console.log('Joining league:', leagueId);
-            alert('You have been added to the league waitlist. The organizer will contact you soon.');
-        }
-    },
-
-    // Register for tournament
-    registerForTournament(tournamentId) {
-        if (window.isGuest) {
-            if (confirm('Sign in to register for this tournament?')) {
-                sessionStorage.setItem('registerTournamentAfterLogin', tournamentId);
-                window.location.href = '/login-google.html';
-            }
-        } else {
-            console.log('Registering for tournament:', tournamentId);
-            alert('Registration form will open here.');
-        }
-    },
-
-    // Show league info
-    showLeagueInfo(leagueId) {
-        console.log('Showing league info:', leagueId);
-        alert('Detailed league information would be displayed here.');
-    },
-
-    // Notify when registration opens
-    notifyMe(leagueId) {
-        if (window.isGuest) {
-            if (confirm('Sign in to get notified?')) {
-                window.location.href = '/login-google.html';
-            }
-        } else {
-            console.log('Setting notification for league:', leagueId);
-            alert('You will be notified when registration opens.');
-        }
-    },
-
-    // Create a new league
-    createLeague() {
-        console.log('Creating new league');
-        alert('League creation form would open here.');
-    },
-
-    // Format skill level
-    formatSkillLevel(level) {
-        const levels = {
-            all: 'All Levels',
-            beginner: 'Beginner',
-            intermediate: 'Intermediate',
-            advanced: 'Advanced',
-            competitive: 'Competitive'
-        };
-        return levels[level] || level;
+    // For now, just reload the current tab
+    const activeTab = document.querySelector('.league-tab.active');
+    let tabType;
+    if (activeTab.textContent.includes('Active')) {
+      tabType = 'active';
+    } else if (activeTab.textContent.includes('Upcoming')) {
+      tabType = 'upcoming';
+    } else {
+      tabType = 'tournaments';
     }
+    this.switchTab(tabType);
+  },
+
+  // Join a league
+  joinLeague(leagueId) {
+    if (window.isGuest) {
+      if (confirm('Sign in to join this league?')) {
+        sessionStorage.setItem('joinLeagueAfterLogin', leagueId);
+        window.location.href = '/login-google.html';
+      }
+    } else {
+      console.log('Joining league:', leagueId);
+      alert('You have been added to the league waitlist. The organizer will contact you soon.');
+    }
+  },
+
+  // Register for tournament
+  registerForTournament(tournamentId) {
+    if (window.isGuest) {
+      if (confirm('Sign in to register for this tournament?')) {
+        sessionStorage.setItem('registerTournamentAfterLogin', tournamentId);
+        window.location.href = '/login-google.html';
+      }
+    } else {
+      console.log('Registering for tournament:', tournamentId);
+      alert('Registration form will open here.');
+    }
+  },
+
+  // Show league info
+  showLeagueInfo(leagueId) {
+    console.log('Showing league info:', leagueId);
+    alert('Detailed league information would be displayed here.');
+  },
+
+  // Notify when registration opens
+  notifyMe(leagueId) {
+    if (window.isGuest) {
+      if (confirm('Sign in to get notified?')) {
+        window.location.href = '/login-google.html';
+      }
+    } else {
+      console.log('Setting notification for league:', leagueId);
+      alert('You will be notified when registration opens.');
+    }
+  },
+
+  // Create a new league
+  createLeague() {
+    console.log('Creating new league');
+    alert('League creation form would open here.');
+  },
+
+  // Format skill level
+  formatSkillLevel(level) {
+    const levels = {
+      all: 'All Levels',
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+      competitive: 'Competitive'
+    };
+    return levels[level] || level;
+  }
 };

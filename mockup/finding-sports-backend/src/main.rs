@@ -2,6 +2,7 @@ use axum::{
     routing::{get, post},
     Router,
     extract::State,
+    middleware,
 };
 use async_graphql::{http::GraphiQLSource, Schema};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
@@ -14,6 +15,7 @@ pub mod config;
 pub mod models;
 pub mod handlers;
 pub mod services;
+pub mod middleware as app_middleware;
 
 use config::Config;
 use handlers::{QueryRoot, MutationRoot, SubscriptionRoot};
@@ -73,11 +75,27 @@ async fn main() -> anyhow::Result<()> {
         config: config.clone(),
     };
 
+    // Build moderation routes
+    let moderation_routes = Router::new()
+        .route("/moderators", get(handlers::list_moderators))
+        .route("/moderators/:user_id/promote", post(handlers::promote_moderator))
+        .route("/moderators/:user_id/demote", post(handlers::demote_moderator))
+        .route("/moderation/reports", get(handlers::get_reports))
+        .route("/moderation/reports/:report_id/resolve", post(handlers::resolve_report))
+        .route("/moderation/actions", post(handlers::perform_moderation_action))
+        .route("/moderation/logs", get(handlers::get_moderation_logs))
+        .route("/reports", post(handlers::create_report))
+        .layer(middleware::from_fn_with_state(
+            (db_pool.clone(), auth_service.clone()),
+            app_middleware::auth::optional_auth_middleware,
+        ));
+
     // Build router
     let app = Router::new()
         .route("/", get(graphiql))
         .route("/graphql", post(graphql_handler))
         .route("/health", get(health_check))
+        .nest("/api", moderation_routes)
         .layer(CorsLayer::permissive())
         .with_state(app_state);
 

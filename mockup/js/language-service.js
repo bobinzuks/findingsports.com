@@ -1,54 +1,54 @@
 // Language Translation Service
 window.LanguageService = {
-    currentLanguage: 'en',
-    supportedLanguages: {
-        en: 'English',
-        es: 'Español',
-        fr: 'Français',
-        zh: '中文',
-        hi: 'हिंदी',
-        ar: 'العربية',
-        pt: 'Português',
-        ru: 'Русский',
-        ja: '日本語',
-        ko: '한국어'
-    },
+  currentLanguage: 'en',
+  supportedLanguages: {
+    en: 'English',
+    es: 'Español',
+    fr: 'Français',
+    zh: '中文',
+    hi: 'हिंदी',
+    ar: 'العربية',
+    pt: 'Português',
+    ru: 'Русский',
+    ja: '日本語',
+    ko: '한국어'
+  },
 
-    // Translation cache
-    translationCache: new Map(),
+  // Translation cache
+  translationCache: new Map(),
 
-    // Initialize language service
-    initialize() {
-        // Get saved language preference
-        this.currentLanguage = localStorage.getItem('preferredLanguage') || navigator.language.split('-')[0] || 'en';
-
-        // Add language selector to header
-        this.addLanguageSelector();
-
-        // Apply translations if not English
-        if (this.currentLanguage !== 'en') {
-            this.translatePage();
-        }
-    },
+  // Initialize language service
+  initialize() {
+    // Get saved language preference
+    this.currentLanguage = localStorage.getItem('preferredLanguage') || navigator.language.split('-')[0] || 'en';
 
     // Add language selector to header
-    addLanguageSelector() {
-        const headerRight = document.querySelector('.header-right, .user-menu');
-        if (!headerRight) {
-            console.error('Header right section not found');
-            return;
-        }
+    this.addLanguageSelector();
 
-        // Create language selector
-        const languageSelector = document.createElement('div');
-        languageSelector.className = 'language-selector';
-        languageSelector.style.cssText = `
+    // Apply translations if not English
+    if (this.currentLanguage !== 'en') {
+      this.translatePage();
+    }
+  },
+
+  // Add language selector to header
+  addLanguageSelector() {
+    const headerRight = document.querySelector('.header-right, .user-menu');
+    if (!headerRight) {
+      console.error('Header right section not found');
+      return;
+    }
+
+    // Create language selector
+    const languageSelector = document.createElement('div');
+    languageSelector.className = 'language-selector';
+    languageSelector.style.cssText = `
             position: relative;
             display: inline-block;
             margin-right: 20px;
         `;
 
-        languageSelector.innerHTML = `
+    languageSelector.innerHTML = `
             <button class="language-btn" onclick="window.LanguageService.toggleLanguageDropdown()" style="
                 background: transparent;
                 border: 1px solid rgba(255, 255, 255, 0.3);
@@ -97,193 +97,193 @@ window.LanguageService = {
             </div>
         `;
 
-        // Insert before other header elements
-        headerRight.insertBefore(languageSelector, headerRight.firstChild);
+    // Insert before other header elements
+    headerRight.insertBefore(languageSelector, headerRight.firstChild);
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.language-selector')) {
-                const dropdown = document.querySelector('.language-dropdown');
-                if (dropdown) { dropdown.style.display = 'none'; }
-            }
-        });
-    },
-
-    // Toggle language dropdown
-    toggleLanguageDropdown() {
-        const dropdown = document.querySelector('.language-dropdown');
-        if (dropdown) {
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-        }
-    },
-
-    // Change language
-    async changeLanguage(lang) {
-        if (lang === this.currentLanguage) { return; }
-
-        this.currentLanguage = lang;
-        localStorage.setItem('preferredLanguage', lang);
-
-        // Update button text
-        const langBtn = document.querySelector('.current-lang');
-        if (langBtn) {
-            langBtn.textContent = this.supportedLanguages[lang];
-        }
-
-        // Hide dropdown
+    // Close dropdown when clicking outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.language-selector')) {
         const dropdown = document.querySelector('.language-dropdown');
         if (dropdown) { dropdown.style.display = 'none'; }
+      }
+    });
+  },
 
-        // Show loading indicator
-        this.showTranslationLoading();
+  // Toggle language dropdown
+  toggleLanguageDropdown() {
+    const dropdown = document.querySelector('.language-dropdown');
+    if (dropdown) {
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+  },
 
-        // Translate page
-        await this.translatePage();
+  // Change language
+  async changeLanguage(lang) {
+    if (lang === this.currentLanguage) { return; }
 
-        // Hide loading indicator
-        this.hideTranslationLoading();
-    },
+    this.currentLanguage = lang;
+    localStorage.setItem('preferredLanguage', lang);
 
-    // Translate entire page
-    async translatePage() {
-        if (this.currentLanguage === 'en') {
-            // Reload page to restore original English content
-            location.reload();
-            return;
-        }
+    // Update button text
+    const langBtn = document.querySelector('.current-lang');
+    if (langBtn) {
+      langBtn.textContent = this.supportedLanguages[lang];
+    }
 
-        // Get all text nodes to translate
-        const textElements = this.getTranslatableElements();
+    // Hide dropdown
+    const dropdown = document.querySelector('.language-dropdown');
+    if (dropdown) { dropdown.style.display = 'none'; }
 
-        // Translate in batches
-        const batchSize = 10;
-        for (let i = 0; i < textElements.length; i += batchSize) {
-            const batch = textElements.slice(i, i + batchSize);
-            await Promise.all(batch.map(el => this.translateElement(el)));
-        }
-    },
+    // Show loading indicator
+    this.showTranslationLoading();
 
-    // Get all translatable elements
-    getTranslatableElements() {
-        const elements = [];
-        const selector = 'h1, h2, h3, h4, h5, h6, p, span, button, label, option, .tab, .channel-item, .message-text, .tagline';
+    // Translate page
+    await this.translatePage();
 
-        document.querySelectorAll(selector).forEach(el => {
-            // Skip if element has children (to avoid duplicating translations)
-            if (el.children.length === 0 && el.textContent.trim()) {
-                elements.push(el);
-            }
-        });
+    // Hide loading indicator
+    this.hideTranslationLoading();
+  },
 
-        // Also translate placeholders
-        document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
-            elements.push({ element: el, isPlaceholder: true });
-        });
+  // Translate entire page
+  async translatePage() {
+    if (this.currentLanguage === 'en') {
+      // Reload page to restore original English content
+      location.reload();
+      return;
+    }
 
-        return elements;
-    },
+    // Get all text nodes to translate
+    const textElements = this.getTranslatableElements();
 
-    // Translate a single element
-    async translateElement(item) {
-        const el = item.element || item;
-        const text = item.isPlaceholder ? el.placeholder : el.textContent.trim();
+    // Translate in batches
+    const batchSize = 10;
+    for (let i = 0; i < textElements.length; i += batchSize) {
+      const batch = textElements.slice(i, i + batchSize);
+      await Promise.all(batch.map(el => this.translateElement(el)));
+    }
+  },
 
-        if (!text) { return; }
+  // Get all translatable elements
+  getTranslatableElements() {
+    const elements = [];
+    const selector = 'h1, h2, h3, h4, h5, h6, p, span, button, label, option, .tab, .channel-item, .message-text, .tagline';
 
-        // Check cache first
-        const cacheKey = `${text}_${this.currentLanguage}`;
-        if (this.translationCache.has(cacheKey)) {
-            if (item.isPlaceholder) {
-                el.placeholder = this.translationCache.get(cacheKey);
-            } else {
-                el.textContent = this.translationCache.get(cacheKey);
-            }
-            return;
-        }
+    document.querySelectorAll(selector).forEach(el => {
+      // Skip if element has children (to avoid duplicating translations)
+      if (el.children.length === 0 && el.textContent.trim()) {
+        elements.push(el);
+      }
+    });
 
-        // Translate using Google Translate API (free tier)
-        try {
-            const translated = await this.translateText(text, this.currentLanguage);
-            this.translationCache.set(cacheKey, translated);
+    // Also translate placeholders
+    document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+      elements.push({ element: el, isPlaceholder: true });
+    });
 
-            if (item.isPlaceholder) {
-                el.placeholder = translated;
-            } else {
-                el.textContent = translated;
-            }
-        } catch (error) {
-            console.error('Translation error:', error);
-        }
-    },
+    return elements;
+  },
 
-    // Translate text using Google Translate API
-    async translateText(text, targetLang) {
-        // For demo purposes, we'll use a simple translation mapping
-        // In production, you would use Google Translate API or similar
-        const translations = {
-            es: {
-                'Finding Sports': 'Encontrar Deportes',
-                'Wherever, whenever': 'Donde sea, cuando sea',
-                Search: 'Buscar',
-                'Play Now': 'Jugar Ahora',
-                'Social Feed': 'Feed Social',
-                'Upcoming Games': 'Próximos Juegos',
-                'Sport Rules': 'Reglas del Deporte',
-                'Any sport': 'Cualquier deporte',
-                Basketball: 'Baloncesto',
-                Soccer: 'Fútbol',
-                Volleyball: 'Voleibol',
-                Tennis: 'Tenis',
-                Hockey: 'Hockey'
-            },
-            fr: {
-                'Finding Sports': 'Trouver des Sports',
-                'Wherever, whenever': 'Où que ce soit, quand vous voulez',
-                Search: 'Rechercher',
-                'Play Now': 'Jouer Maintenant',
-                'Social Feed': 'Fil Social',
-                'Upcoming Games': 'Jeux à Venir',
-                'Sport Rules': 'Règles du Sport',
-                'Any sport': 'Tous les sports',
-                Basketball: 'Basketball',
-                Soccer: 'Football',
-                Volleyball: 'Volleyball',
-                Tennis: 'Tennis',
-                Hockey: 'Hockey'
-            },
-            zh: {
-                'Finding Sports': '寻找体育',
-                'Wherever, whenever': '随时随地',
-                Search: '搜索',
-                'Play Now': '立即玩',
-                'Social Feed': '社交动态',
-                'Upcoming Games': '即将到来的游戏',
-                'Sport Rules': '运动规则',
-                'Any sport': '任何运动',
-                Basketball: '篮球',
-                Soccer: '足球',
-                Volleyball: '排球',
-                Tennis: '网球',
-                Hockey: '曲棍球'
-            }
-        };
+  // Translate a single element
+  async translateElement(item) {
+    const el = item.element || item;
+    const text = item.isPlaceholder ? el.placeholder : el.textContent.trim();
 
-        // Return translated text if available, otherwise return original
-        if (translations[targetLang] && translations[targetLang][text]) {
-            return translations[targetLang][text];
-        }
+    if (!text) { return; }
 
-        // For production, you would make an API call here
-        // return await this.callTranslationAPI(text, targetLang);
+    // Check cache first
+    const cacheKey = `${text}_${this.currentLanguage}`;
+    if (this.translationCache.has(cacheKey)) {
+      if (item.isPlaceholder) {
+        el.placeholder = this.translationCache.get(cacheKey);
+      } else {
+        el.textContent = this.translationCache.get(cacheKey);
+      }
+      return;
+    }
 
-        return text; // Return original if no translation available
-    },
+    // Translate using Google Translate API (free tier)
+    try {
+      const translated = await this.translateText(text, this.currentLanguage);
+      this.translationCache.set(cacheKey, translated);
 
-    // Show translation loading indicator
-    showTranslationLoading() {
-        const loader = document.createElement('div');
-        loader.id = 'translation-loader';
-        loader.style.cssText = `
+      if (item.isPlaceholder) {
+        el.placeholder = translated;
+      } else {
+        el.textContent = translated;
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+    }
+  },
+
+  // Translate text using Google Translate API
+  async translateText(text, targetLang) {
+    // For demo purposes, we'll use a simple translation mapping
+    // In production, you would use Google Translate API or similar
+    const translations = {
+      es: {
+        'Finding Sports': 'Encontrar Deportes',
+        'Wherever, whenever': 'Donde sea, cuando sea',
+        Search: 'Buscar',
+        'Play Now': 'Jugar Ahora',
+        'Social Feed': 'Feed Social',
+        'Upcoming Games': 'Próximos Juegos',
+        'Sport Rules': 'Reglas del Deporte',
+        'Any sport': 'Cualquier deporte',
+        Basketball: 'Baloncesto',
+        Soccer: 'Fútbol',
+        Volleyball: 'Voleibol',
+        Tennis: 'Tenis',
+        Hockey: 'Hockey'
+      },
+      fr: {
+        'Finding Sports': 'Trouver des Sports',
+        'Wherever, whenever': 'Où que ce soit, quand vous voulez',
+        Search: 'Rechercher',
+        'Play Now': 'Jouer Maintenant',
+        'Social Feed': 'Fil Social',
+        'Upcoming Games': 'Jeux à Venir',
+        'Sport Rules': 'Règles du Sport',
+        'Any sport': 'Tous les sports',
+        Basketball: 'Basketball',
+        Soccer: 'Football',
+        Volleyball: 'Volleyball',
+        Tennis: 'Tennis',
+        Hockey: 'Hockey'
+      },
+      zh: {
+        'Finding Sports': '寻找体育',
+        'Wherever, whenever': '随时随地',
+        Search: '搜索',
+        'Play Now': '立即玩',
+        'Social Feed': '社交动态',
+        'Upcoming Games': '即将到来的游戏',
+        'Sport Rules': '运动规则',
+        'Any sport': '任何运动',
+        Basketball: '篮球',
+        Soccer: '足球',
+        Volleyball: '排球',
+        Tennis: '网球',
+        Hockey: '曲棍球'
+      }
+    };
+
+    // Return translated text if available, otherwise return original
+    if (translations[targetLang] && translations[targetLang][text]) {
+      return translations[targetLang][text];
+    }
+
+    // For production, you would make an API call here
+    // return await this.callTranslationAPI(text, targetLang);
+
+    return text; // Return original if no translation available
+  },
+
+  // Show translation loading indicator
+  showTranslationLoading() {
+    const loader = document.createElement('div');
+    loader.id = 'translation-loader';
+    loader.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
@@ -298,7 +298,7 @@ window.LanguageService = {
             align-items: center;
             gap: 15px;
         `;
-        loader.innerHTML = `
+    loader.innerHTML = `
             <div class="spinner" style="
                 width: 30px;
                 height: 30px;
@@ -314,21 +314,21 @@ window.LanguageService = {
                 }
             </style>
         `;
-        document.body.appendChild(loader);
-    },
+    document.body.appendChild(loader);
+  },
 
-    // Hide translation loading indicator
-    hideTranslationLoading() {
-        const loader = document.getElementById('translation-loader');
-        if (loader) { loader.remove(); }
-    }
+  // Hide translation loading indicator
+  hideTranslationLoading() {
+    const loader = document.getElementById('translation-loader');
+    if (loader) { loader.remove(); }
+  }
 };
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.LanguageService.initialize();
-    });
-} else {
+  document.addEventListener('DOMContentLoaded', () => {
     window.LanguageService.initialize();
+  });
+} else {
+  window.LanguageService.initialize();
 }

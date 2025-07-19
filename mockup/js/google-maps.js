@@ -2,94 +2,94 @@
 
 // Dark theme styles for Google Maps
 const darkMapStyles = [
-    { elementType: 'geometry', stylers: [{ color: '#212121' }] },
-    { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
-    {
-        featureType: 'administrative',
-        elementType: 'geometry',
-        stylers: [{ color: '#757575' }]
-    },
-    {
-        featureType: 'administrative.country',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#9e9e9e' }]
-    },
-    {
-        featureType: 'administrative.land_parcel',
-        stylers: [{ visibility: 'off' }]
-    },
-    {
-        featureType: 'administrative.locality',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#bdbdbd' }]
-    },
-    {
-        featureType: 'poi',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#757575' }]
-    },
-    {
-        featureType: 'poi.park',
-        elementType: 'geometry',
-        stylers: [{ color: '#181818' }]
-    },
-    {
-        featureType: 'poi.park',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#616161' }]
-    },
-    {
-        featureType: 'poi.park',
-        elementType: 'labels.text.stroke',
-        stylers: [{ color: '#1b1b1b' }]
-    },
-    {
-        featureType: 'road',
-        elementType: 'geometry.fill',
-        stylers: [{ color: '#2c2c2c' }]
-    },
-    {
-        featureType: 'road',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#8a8a8a' }]
-    },
-    {
-        featureType: 'road.arterial',
-        elementType: 'geometry',
-        stylers: [{ color: '#373737' }]
-    },
-    {
-        featureType: 'road.highway',
-        elementType: 'geometry',
-        stylers: [{ color: '#3c3c3c' }]
-    },
-    {
-        featureType: 'road.highway.controlled_access',
-        elementType: 'geometry',
-        stylers: [{ color: '#4e4e4e' }]
-    },
-    {
-        featureType: 'road.local',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#616161' }]
-    },
-    {
-        featureType: 'transit',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#757575' }]
-    },
-    {
-        featureType: 'water',
-        elementType: 'geometry',
-        stylers: [{ color: '#000000' }]
-    },
-    {
-        featureType: 'water',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#3d3d3d' }]
-    }
+  { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+  { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry',
+    stylers: [{ color: '#757575' }]
+  },
+  {
+    featureType: 'administrative.country',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9e9e9e' }]
+  },
+  {
+    featureType: 'administrative.land_parcel',
+    stylers: [{ visibility: 'off' }]
+  },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#bdbdbd' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#757575' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#181818' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#616161' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#1b1b1b' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.fill',
+    stylers: [{ color: '#2c2c2c' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#8a8a8a' }]
+  },
+  {
+    featureType: 'road.arterial',
+    elementType: 'geometry',
+    stylers: [{ color: '#373737' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#3c3c3c' }]
+  },
+  {
+    featureType: 'road.highway.controlled_access',
+    elementType: 'geometry',
+    stylers: [{ color: '#4e4e4e' }]
+  },
+  {
+    featureType: 'road.local',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#616161' }]
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#757575' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#000000' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#3d3d3d' }]
+  }
 ];
 
 // Google Maps instance and markers
@@ -100,13 +100,13 @@ let userLocationMarker = null;
 
 // Initialize Google Maps
 window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
-    // Check if Google Maps API is loaded
-    if (typeof google === 'undefined' || !google.maps) {
-        console.log('Google Maps API not loaded yet, waiting...');
-        // Show loading message
-        const mapElement = document.getElementById(mapElementId);
-        if (mapElement) {
-            mapElement.innerHTML = `
+  // Check if Google Maps API is loaded
+  if (typeof google === 'undefined' || !google.maps) {
+    console.log('Google Maps API not loaded yet, waiting...');
+    // Show loading message
+    const mapElement = document.getElementById(mapElementId);
+    if (mapElement) {
+      mapElement.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1a1a1a; color: #757575;">
                     <div style="text-align: center;">
                         <p>Loading map...</p>
@@ -116,53 +116,53 @@ window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
                     </div>
                 </div>
             `;
-            
-            // Add spinning animation
-            const style = document.createElement('style');
-            style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-            document.head.appendChild(style);
-        }
-        
-        // Wait for Google Maps to load and retry
-        window.addEventListener('googlemapsloaded', () => {
-            window.initializeGoogleMap(userLocation, mapElementId);
-        });
-        return;
+
+      // Add spinning animation
+      const style = document.createElement('style');
+      style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(style);
     }
 
+    // Wait for Google Maps to load and retry
+    window.addEventListener('googlemapsloaded', () => {
+      window.initializeGoogleMap(userLocation, mapElementId);
+    });
+    return;
+  }
+
+  try {
+    const mapElement = document.getElementById(mapElementId);
+    if (!mapElement) {
+      console.error('Map element not found:', mapElementId);
+      return;
+    }
+
+    // Use detected location or default to Vancouver
+    const defaultCenter = userLocation ?
+      { lat: userLocation[0], lng: userLocation[1] } :
+      { lat: 49.2827, lng: -123.1207 };
+    const defaultZoom = userLocation ? 13 : 12;
+
+    // Initialize map with error handling for API activation
     try {
-        const mapElement = document.getElementById(mapElementId);
-        if (!mapElement) {
-            console.error('Map element not found:', mapElementId);
-            return;
-        }
-
-        // Use detected location or default to Vancouver
-        const defaultCenter = userLocation ?
-            { lat: userLocation[0], lng: userLocation[1] } :
-            { lat: 49.2827, lng: -123.1207 };
-        const defaultZoom = userLocation ? 13 : 12;
-
-        // Initialize map with error handling for API activation
-        try {
-            googleMap = new google.maps.Map(mapElement, {
-                center: defaultCenter,
-                zoom: defaultZoom,
-                styles: darkMapStyles,
-                disableDefaultUI: false,
-                zoomControl: true,
-                mapTypeControl: false,
-                scaleControl: true,
-                streetViewControl: false,
-                rotateControl: false,
-                fullscreenControl: true,
-                gestureHandling: 'cooperative'
-            });
-        } catch (apiError) {
-            console.error('Google Maps API Error:', apiError);
-            // Show helpful message for API activation error
-            if (apiError.message && apiError.message.includes('ApiNotActivatedMapError')) {
-                mapElement.innerHTML = `
+      googleMap = new google.maps.Map(mapElement, {
+        center: defaultCenter,
+        zoom: defaultZoom,
+        styles: darkMapStyles,
+        disableDefaultUI: false,
+        zoomControl: true,
+        mapTypeControl: false,
+        scaleControl: true,
+        streetViewControl: false,
+        rotateControl: false,
+        fullscreenControl: true,
+        gestureHandling: 'cooperative'
+      });
+    } catch (apiError) {
+      console.error('Google Maps API Error:', apiError);
+      // Show helpful message for API activation error
+      if (apiError.message && apiError.message.includes('ApiNotActivatedMapError')) {
+        mapElement.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1a1a1a; color: #757575; padding: 20px;">
                         <div style="text-align: center; max-width: 400px;">
                             <h3 style="color: #ff6b35; margin-bottom: 10px;">Maps API Setup Required</h3>
@@ -177,137 +177,137 @@ window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
                         </div>
                     </div>
                 `;
-                return;
-            }
-            throw apiError;
-        }
-
-        // Initialize info window
-        infoWindow = new google.maps.InfoWindow();
-
-        // Add user location marker if available
-        if (userLocation && window.locationService?.userLocation) {
-            addUserLocationMarker({
-                lat: userLocation[0],
-                lng: userLocation[1]
-            });
-        }
-
-        // Store map instance globally
-        window.googleMap = googleMap;
-        window.map = googleMap; // For compatibility
-
-        console.log('Google Maps initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize Google Maps:', error);
-        handleMapError(mapElementId);
+        return;
+      }
+      throw apiError;
     }
+
+    // Initialize info window
+    infoWindow = new google.maps.InfoWindow();
+
+    // Add user location marker if available
+    if (userLocation && window.locationService?.userLocation) {
+      addUserLocationMarker({
+        lat: userLocation[0],
+        lng: userLocation[1]
+      });
+    }
+
+    // Store map instance globally
+    window.googleMap = googleMap;
+    window.map = googleMap; // For compatibility
+
+    console.log('Google Maps initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize Google Maps:', error);
+    handleMapError(mapElementId);
+  }
 };
 
 // Add user location marker
 function addUserLocationMarker(position) {
-    if (userLocationMarker) {
-        userLocationMarker.setMap(null);
-    }
+  if (userLocationMarker) {
+    userLocationMarker.setMap(null);
+  }
 
-    userLocationMarker = new google.maps.Marker({
-        position,
-        map: googleMap,
-        title: 'Your Location',
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#2196F3',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3
-        },
-        zIndex: 1000
-    });
+  userLocationMarker = new google.maps.Marker({
+    position,
+    map: googleMap,
+    title: 'Your Location',
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 8,
+      fillColor: '#2196F3',
+      fillOpacity: 1,
+      strokeColor: '#ffffff',
+      strokeWeight: 3
+    },
+    zIndex: 1000
+  });
 
-    // Add pulsing effect using CSS
-    const pulsingDiv = document.createElement('div');
-    pulsingDiv.className = 'user-location-pulse';
+  // Add pulsing effect using CSS
+  const pulsingDiv = document.createElement('div');
+  pulsingDiv.className = 'user-location-pulse';
 
-    const overlay = new google.maps.OverlayView();
-    overlay.onAdd = function () {
-        const panes = this.getPanes();
-        panes.overlayLayer.appendChild(pulsingDiv);
-    };
+  const overlay = new google.maps.OverlayView();
+  overlay.onAdd = function () {
+    const panes = this.getPanes();
+    panes.overlayLayer.appendChild(pulsingDiv);
+  };
 
-    overlay.draw = function () {
-        const projection = this.getProjection();
-        const pos = projection.fromLatLngToDivPixel(position);
-        pulsingDiv.style.left = `${pos.x - 20}px`;
-        pulsingDiv.style.top = `${pos.y - 20}px`;
-    };
+  overlay.draw = function () {
+    const projection = this.getProjection();
+    const pos = projection.fromLatLngToDivPixel(position);
+    pulsingDiv.style.left = `${pos.x - 20}px`;
+    pulsingDiv.style.top = `${pos.y - 20}px`;
+  };
 
-    overlay.setMap(googleMap);
+  overlay.setMap(googleMap);
 }
 
 // Clear all markers
 window.clearGoogleMarkers = function () {
-    googleMarkers.forEach(marker => {
-        marker.setMap(null);
-    });
-    googleMarkers = [];
+  googleMarkers.forEach(marker => {
+    marker.setMap(null);
+  });
+  googleMarkers = [];
 };
 
 // Add game marker
 window.addGoogleGameMarker = function (game) {
-    let position;
+  let position;
 
-    if (game.coords) {
-        position = { lat: game.coords[0], lng: game.coords[1] };
-    } else if (game.venue?.coordinates) {
-        position = {
-            lat: game.venue.coordinates.lat,
-            lng: game.venue.coordinates.lng
-        };
-    } else {
-        return; // No coordinates available
-    }
-
-    // Sport-specific colors
-    const sportColors = {
-        basketball: '#FF6B35',
-        soccer: '#4CAF50',
-        volleyball: '#2196F3',
-        tennis: '#9C27B0',
-        hockey: '#00BCD4',
-        default: '#757575'
+  if (game.coords) {
+    position = { lat: game.coords[0], lng: game.coords[1] };
+  } else if (game.venue?.coordinates) {
+    position = {
+      lat: game.venue.coordinates.lat,
+      lng: game.venue.coordinates.lng
     };
+  } else {
+    return; // No coordinates available
+  }
 
-    const color = sportColors[game.type || game.sport] || sportColors.default;
+  // Sport-specific colors
+  const sportColors = {
+    basketball: '#FF6B35',
+    soccer: '#4CAF50',
+    volleyball: '#2196F3',
+    tennis: '#9C27B0',
+    hockey: '#00BCD4',
+    default: '#757575'
+  };
 
-    const marker = new google.maps.Marker({
-        position,
-        map: googleMap,
-        title: game.title || game.type || 'Game',
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: color,
-            fillOpacity: 0.9,
-            strokeColor: '#ffffff',
-            strokeWeight: 2
-        }
-    });
+  const color = sportColors[game.type || game.sport] || sportColors.default;
 
-    // Create info window content
-    const attendeesText = game.attendees !== undefined ?
-        `${game.attendees}/${game.maxAttendees || 20} players` :
-        'Open game';
+  const marker = new google.maps.Marker({
+    position,
+    map: googleMap,
+    title: game.title || game.type || 'Game',
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: color,
+      fillOpacity: 0.9,
+      strokeColor: '#ffffff',
+      strokeWeight: 2
+    }
+  });
 
-    const timeStr = game.startTime ?
-        new Date(game.startTime).toLocaleString('en-US', {
-            weekday: 'short',
-            hour: 'numeric',
-            minute: '2-digit'
-        }) :
-        'Time TBD';
+  // Create info window content
+  const attendeesText = game.attendees !== undefined ?
+    `${game.attendees}/${game.maxAttendees || 20} players` :
+    'Open game';
 
-    const content = `
+  const timeStr = game.startTime ?
+    new Date(game.startTime).toLocaleString('en-US', {
+      weekday: 'short',
+      hour: 'numeric',
+      minute: '2-digit'
+    }) :
+    'Time TBD';
+
+  const content = `
         <div style="padding: 10px; min-width: 200px;">
             <h4 style="margin: 0 0 8px 0; color: ${color};">${game.title || game.type}</h4>
             <p style="margin: 4px 0; color: #333;">📍 ${game.venue?.name || game.location || 'Unknown venue'}</p>
@@ -321,45 +321,45 @@ window.addGoogleGameMarker = function (game) {
         </div>
     `;
 
-    marker.addListener('click', () => {
-        infoWindow.setContent(content);
-        infoWindow.open(googleMap, marker);
-    });
+  marker.addListener('click', () => {
+    infoWindow.setContent(content);
+    infoWindow.open(googleMap, marker);
+  });
 
-    googleMarkers.push(marker);
-    return marker;
+  googleMarkers.push(marker);
+  return marker;
 };
 
 // Fit map to show all markers
 window.fitMapToMarkers = function () {
-    if (!googleMap || googleMarkers.length === 0) { return; }
+  if (!googleMap || googleMarkers.length === 0) { return; }
 
-    const bounds = new google.maps.LatLngBounds();
+  const bounds = new google.maps.LatLngBounds();
 
-    // Include game markers
-    googleMarkers.forEach(marker => {
-        bounds.extend(marker.getPosition());
-    });
+  // Include game markers
+  googleMarkers.forEach(marker => {
+    bounds.extend(marker.getPosition());
+  });
 
-    // Include user location if available
-    if (userLocationMarker) {
-        bounds.extend(userLocationMarker.getPosition());
-    }
+  // Include user location if available
+  if (userLocationMarker) {
+    bounds.extend(userLocationMarker.getPosition());
+  }
 
-    googleMap.fitBounds(bounds);
+  googleMap.fitBounds(bounds);
 
-    // Don't zoom in too much for single markers
-    const zoom = googleMap.getZoom();
-    if (zoom > 15) {
-        googleMap.setZoom(15);
-    }
+  // Don't zoom in too much for single markers
+  const zoom = googleMap.getZoom();
+  if (zoom > 15) {
+    googleMap.setZoom(15);
+  }
 };
 
 // Handle map errors
 function handleMapError(mapElementId) {
-    const mapElement = document.getElementById(mapElementId);
-    if (mapElement) {
-        mapElement.innerHTML = `
+  const mapElement = document.getElementById(mapElementId);
+  if (mapElement) {
+    mapElement.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1a1a1a; color: #757575;">
                 <div style="text-align: center;">
                     <p style="font-size: 1.2em; margin-bottom: 10px;">Unable to load map</p>
@@ -371,41 +371,41 @@ function handleMapError(mapElementId) {
                 </div>
             </div>
         `;
-    }
+  }
 }
 
 // Load Google Maps API (now handled in index.html)
 window.loadGoogleMapsAPI = function (apiKey) {
-    return new Promise((resolve, reject) => {
-        // Check if already loaded
-        if (typeof google !== 'undefined' && google.maps) {
-            resolve();
-            return;
-        }
-        
-        // Check if already loading (script added in index.html)
-        if (window.googleMapsLoaded) {
-            resolve();
-            return;
-        }
-        
-        // Wait for it to load
-        window.addEventListener('googlemapsloaded', resolve);
-        
-        // Set a timeout
-        setTimeout(() => {
-            if (typeof google === 'undefined' || !google.maps) {
-                reject(new Error('Google Maps API failed to load'));
-            }
-        }, 10000); // 10 second timeout
-    });
+  return new Promise((resolve, reject) => {
+    // Check if already loaded
+    if (typeof google !== 'undefined' && google.maps) {
+      resolve();
+      return;
+    }
+
+    // Check if already loading (script added in index.html)
+    if (window.googleMapsLoaded) {
+      resolve();
+      return;
+    }
+
+    // Wait for it to load
+    window.addEventListener('googlemapsloaded', resolve);
+
+    // Set a timeout
+    setTimeout(() => {
+      if (typeof google === 'undefined' || !google.maps) {
+        reject(new Error('Google Maps API failed to load'));
+      }
+    }, 10000); // 10 second timeout
+  });
 };
 
 // Export for use in other modules
 window.googleMapsModule = {
-    initializeMap: window.initializeGoogleMap,
-    clearMarkers: window.clearGoogleMarkers,
-    addGameMarker: window.addGoogleGameMarker,
-    fitToMarkers: window.fitMapToMarkers,
-    loadAPI: window.loadGoogleMapsAPI
+  initializeMap: window.initializeGoogleMap,
+  clearMarkers: window.clearGoogleMarkers,
+  addGameMarker: window.addGoogleGameMarker,
+  fitToMarkers: window.fitMapToMarkers,
+  loadAPI: window.loadGoogleMapsAPI
 };

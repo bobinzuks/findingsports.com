@@ -53,7 +53,16 @@ const sessions = new Map();
 })();
 
 // Environment variables (set these in Railway)
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+// SECURITY: JWT_SECRET is REQUIRED for secure authentication
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('🚨 FATAL SECURITY ERROR: JWT_SECRET environment variable is REQUIRED in production!');
+    process.exit(1);
+  } else {
+    console.warn('⚠️  WARNING: JWT_SECRET not set. Using development fallback (INSECURE for production)');
+  }
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-finding-sports-insecure-development-only';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 

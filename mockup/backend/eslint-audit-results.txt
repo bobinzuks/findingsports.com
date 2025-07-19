@@ -1,0 +1,16 @@
+
+Oops! Something went wrong! :(
+
+ESLint: 8.57.1
+
+No files matching the pattern "src/" were found.
+Please check for typing mistakes in the pattern.
+
+
+Oops! Something went wrong! :(
+
+ESLint: 8.57.1
+
+No files matching the pattern "mockup/js/" were found.
+Please check for typing mistakes in the pattern.
+

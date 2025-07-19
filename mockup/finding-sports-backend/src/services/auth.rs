@@ -15,6 +15,7 @@ pub struct Claims {
     pub sub: Uuid,
     pub email: String,
     pub username: String,
+    pub role: String,
     pub exp: i64,
     pub iat: i64,
 }
@@ -54,6 +55,7 @@ impl AuthService {
             sub: user.id,
             email: user.email.clone(),
             username: user.username.clone(),
+            role: format!("{:?}", user.role).to_lowercase(),
             exp: exp.timestamp(),
             iat: now.timestamp(),
         };

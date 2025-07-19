@@ -32,39 +32,39 @@ const intelligentCache = getIntelligentCache();
 
 // Start data aggregation services
 if (process.env.NODE_ENV !== 'production') {
-    // Use in-memory queue for development
-    setTimeout(() => {
-        console.log('🚀 Starting enhanced data aggregation services...');
-        
-        // Start legacy pipeline for backwards compatibility
-        dataPipeline.start();
-        
-        // Initialize new swarm system
-        console.log('🐝 Initializing 100+ source data aggregation swarm...');
-        console.log(`📊 Registered sources: ${dataSwarm.sources.size}`);
-        console.log(`🧠 Site methods database: ${siteMethodsManager.methods.size} methods`);
-        console.log(`💾 Intelligent cache initialized with ${intelligentCache.config.defaultTTL}s TTL`);
-        
-        // Warm up cache with popular searches
-        setTimeout(async () => {
-            try {
-                console.log('🔥 Warming up cache with popular searches...');
-                const warmupItems = [
-                    {
-                        key: 'games:basketball:any:any:10:today:drop-in',
-                        fetcher: () => dataSwarm.collectFromAllSources({ sports: ['basketball'] }),
-                        options: { ttl: 3600, priority: 'high' }
-                    }
-                ];
-                await intelligentCache.warmUp(warmupItems);
-            } catch (error) {
-                console.error('Cache warmup failed:', error);
-            }
-        }, 10000);
-        
-        // Initialize legacy swarm after pipeline starts
-        // DISABLED: Missing puppeteer-extra dependency
-        /*
+  // Use in-memory queue for development
+  setTimeout(() => {
+    console.log('🚀 Starting enhanced data aggregation services...');
+
+    // Start legacy pipeline for backwards compatibility
+    dataPipeline.start();
+
+    // Initialize new swarm system
+    console.log('🐝 Initializing 100+ source data aggregation swarm...');
+    console.log(`📊 Registered sources: ${dataSwarm.sources.size}`);
+    console.log(`🧠 Site methods database: ${siteMethodsManager.methods.size} methods`);
+    console.log(`💾 Intelligent cache initialized with ${intelligentCache.config.defaultTTL}s TTL`);
+
+    // Warm up cache with popular searches
+    setTimeout(async () => {
+      try {
+        console.log('🔥 Warming up cache with popular searches...');
+        const warmupItems = [
+          {
+            key: 'games:basketball:any:any:10:today:drop-in',
+            fetcher: () => dataSwarm.collectFromAllSources({ sports: ['basketball'] }),
+            options: { ttl: 3600, priority: 'high' }
+          }
+        ];
+        await intelligentCache.warmUp(warmupItems);
+      } catch (error) {
+        console.error('Cache warmup failed:', error);
+      }
+    }, 10000);
+
+    // Initialize legacy swarm after pipeline starts
+    // DISABLED: Missing puppeteer-extra dependency
+    /*
         setTimeout(async () => {
             try {
                 console.log('🏀 Initializing legacy 10-Agent Sports Scraping Swarm...');
@@ -76,7 +76,7 @@ if (process.env.NODE_ENV !== 'production') {
             }
         }, 5000);
         */
-    }, 2000);
+  }, 2000);
 }
 
 // Initialize location agent service
@@ -86,16 +86,20 @@ locationAgentService.setWebSocketService(webSocketService);
 // Initialize BC location service
 const bcLocationService = require('./services/bc-locations');
 
+// Initialize scheduler service
+const schedulerService = require('./services/scheduler');
+schedulerService.start();
+
 // Import cache control middleware
 const noCacheMiddleware = require('./middleware/no-cache');
 const aggressiveCacheBypass = require('./middleware/aggressive-cache-bypass');
 
 // Middleware
 app.use(
-    cors({
-        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
-        credentials: true
-    })
+  cors({
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
+    credentials: true
+  })
 );
 app.use(express.json());
 
@@ -104,74 +108,74 @@ app.use(aggressiveCacheBypass);
 
 // For production, force even more aggressive no-cache
 if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-    console.log('🚫 Production mode: Forcing aggressive no-cache for all responses');
-    app.use((req, res, next) => {
-        res.set({
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'Surrogate-Control': 'no-store'
-        });
-        next();
+  console.log('🚫 Production mode: Forcing aggressive no-cache for all responses');
+  app.use((req, res, next) => {
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
     });
+    next();
+  });
 }
 
 // IMPORTANT: Serve static files from mockup directory
 app.use(express.static(path.join(__dirname, '..'), {
-    etag: false, // Disable ETags
-    lastModified: false, // Disable Last-Modified
-    maxAge: 0, // No caching
-    setHeaders: (res, path) => {
-        // Force no-cache for all static files
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        
-        // Add deployment timestamp
-        res.setHeader('X-Deployment-Time', new Date().toISOString());
-        
-        // Special handling for deleted files - return 404
-        if (path.includes('immediate-button-fix.js') || path.includes('google-auth-fix.js')) {
-            res.status(404).send('File removed in latest deployment');
-        }
-        
-        // Force complete cache bypass for Railway CDN
-        res.setHeader('X-Railway-CDN-Bypass', 'true');
-        res.setHeader('X-Accel-Expires', '0');
-        res.setHeader('Surrogate-Control', 'no-store, max-age=0');
+  etag: false, // Disable ETags
+  lastModified: false, // Disable Last-Modified
+  maxAge: 0, // No caching
+  setHeaders: (res, path) => {
+    // Force no-cache for all static files
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    // Add deployment timestamp
+    res.setHeader('X-Deployment-Time', new Date().toISOString());
+
+    // Special handling for deleted files - return 404
+    if (path.includes('immediate-button-fix.js') || path.includes('google-auth-fix.js')) {
+      res.status(404).send('File removed in latest deployment');
     }
+
+    // Force complete cache bypass for Railway CDN
+    res.setHeader('X-Railway-CDN-Bypass', 'true');
+    res.setHeader('X-Accel-Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store, max-age=0');
+  }
 }));
 
 // Health check endpoint for Railway
 app.get('/api/health', (req, res) => {
-    res.setHeader('Cache-Control', 'no-cache');
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        deployment_version: process.env.BUILD_VERSION || 'unknown',
-        environment: process.env.NODE_ENV || 'development',
-        cache_disabled: true,
-        railway_environment: !!process.env.RAILWAY_ENVIRONMENT
-    });
+  res.setHeader('Cache-Control', 'no-cache');
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    deployment_version: process.env.BUILD_VERSION || 'unknown',
+    environment: process.env.NODE_ENV || 'development',
+    cache_disabled: true,
+    railway_environment: !!process.env.RAILWAY_ENVIRONMENT
+  });
 });
 
 // Cache debugging endpoint
 app.get('/api/cache-test', (req, res) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('X-Test-Timestamp', Date.now().toString());
-    
-    res.json({
-        message: 'Cache test endpoint',
-        timestamp: new Date().toISOString(),
-        random: Math.random(),
-        headers_sent: {
-            'cache-control': res.getHeader('Cache-Control'),
-            'pragma': res.getHeader('Pragma'),
-            'expires': res.getHeader('Expires')
-        }
-    });
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('X-Test-Timestamp', Date.now().toString());
+
+  res.json({
+    message: 'Cache test endpoint',
+    timestamp: new Date().toISOString(),
+    random: Math.random(),
+    headers_sent: {
+      'cache-control': res.getHeader('Cache-Control'),
+      'pragma': res.getHeader('Pragma'),
+      'expires': res.getHeader('Expires')
+    }
+  });
 });
 
 // In-memory database (replace with real database in production)
@@ -185,27 +189,38 @@ global.users = users;
 // Demo accounts should never be hardcoded in production code
 
 // Environment variables (set these in Railway)
-// JWT_SECRET must be set in production environment
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-    console.error('WARNING: JWT_SECRET not set in production! Using default (INSECURE)');
-    // DO NOT EXIT - this crashes the server!
+// SECURITY: JWT_SECRET is REQUIRED for secure authentication
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('🚨 FATAL SECURITY ERROR: JWT_SECRET environment variable is REQUIRED in production!');
+    console.error('🚨 Server cannot start without JWT_SECRET. Set it in Railway environment variables.');
+    console.error('🚨 Example: JWT_SECRET=your-super-secret-256-bit-key-here');
+    process.exit(1); // FAIL SECURELY - do not start without proper secrets
+  } else {
+    console.warn('⚠️  WARNING: JWT_SECRET not set. Using development fallback (INSECURE for production)');
+    console.warn('⚠️  Set JWT_SECRET environment variable for security');
+  }
 }
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-finding-sports-insecure-development-only';
 // Using a test client ID for development - replace with your own in production
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '386932037035-k8v833noqjk7m4t641js92fvjmm5ri71.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Helper functions
 function generateToken(user) {
-    return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({
+    id: user.id,
+    email: user.email,
+    role: user.role || 'user'
+  }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 function verifyToken(token) {
-    try {
-        return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-        return null;
-    }
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
 }
 
 // Import auth middleware
@@ -213,24 +228,24 @@ const { authenticateToken, authenticateAdmin } = require('./middleware/auth');
 
 // Helper function to handle location search parameters
 function handleLocationSearch(location, searchParams) {
-    const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
-    if (!normalizedLocation) {
-        searchParams.location = location;
-        return;
-    }
-
-    // Get coordinates for the location
-    const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
-    if (locationCoords && (!searchParams.lat || !searchParams.lng)) {
-        searchParams.lat = locationCoords.lat;
-        searchParams.lng = locationCoords.lng;
-        searchParams.radius = searchParams.radius || 50; // Default 50km radius
-    }
-
-    // Expand search to include nearby BC locations
-    const expandedLocations = bcLocationService.expandLocationSearch(normalizedLocation, 100);
-    searchParams.locations = expandedLocations;
+  const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
+  if (!normalizedLocation) {
     searchParams.location = location;
+    return;
+  }
+
+  // Get coordinates for the location
+  const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
+  if (locationCoords && (!searchParams.lat || !searchParams.lng)) {
+    searchParams.lat = locationCoords.lat;
+    searchParams.lng = locationCoords.lng;
+    searchParams.radius = searchParams.radius || 50; // Default 50km radius
+  }
+
+  // Expand search to include nearby BC locations
+  const expandedLocations = bcLocationService.expandLocationSearch(normalizedLocation, 100);
+  searchParams.locations = expandedLocations;
+  searchParams.location = location;
 }
 
 // Routes
@@ -240,6 +255,9 @@ app.use('/api/user-games', require('./routes/user-games'));
 
 // Venue request routes
 app.use('/api/venue-requests', require('./routes/venue-requests'));
+
+// Game chat routes
+app.use('/api/games', require('./routes/game-chat'));
 
 // API v2 - Enhanced swarm endpoints
 app.use('/api/v2', require('./routes/api-v2'));
@@ -259,474 +277,562 @@ app.use('/api/sports', require('./routes/sports'));
 // Version check endpoint - Railway CDN can't cache this by design
 app.use('/api/version', require('./routes/version-check'));
 
+// Moderation endpoints
+app.use('/api', require('./routes/moderation'));
+
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Config endpoint for frontend
 app.get('/api/config', (req, res) => {
-    res.json({
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE',
-        environment: process.env.NODE_ENV || 'development'
-    });
+  // SECURITY: Never expose API keys directly. Google Maps API key must be set via environment variable.
+  if (!process.env.GOOGLE_MAPS_API_KEY) {
+    console.error('🚨 SECURITY ERROR: GOOGLE_MAPS_API_KEY environment variable is required but not set!');
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(500).json({ 
+        error: 'Server configuration error: Missing required API keys',
+        details: 'Contact administrator to configure Google Maps API key'
+      });
+    }
+    // Development fallback with clear warning
+    console.warn('⚠️  WARNING: Using placeholder API key in development. Set GOOGLE_MAPS_API_KEY environment variable.');
+  }
+
+  res.json({
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || null,
+    environment: process.env.NODE_ENV || 'development',
+    hasGoogleMapsKey: Boolean(process.env.GOOGLE_MAPS_API_KEY)
+  });
 });
 
 // Traditional login
 app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Find user by email
-    let user = null;
-    for (const [id, u] of users) {
-        if (u.email === email) {
-            user = u;
-            break;
-        }
+  // Find user by email
+  let user = null;
+  for (const [id, u] of users) {
+    if (u.email === email) {
+      user = u;
+      break;
     }
+  }
 
-    if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  // Check password
+  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!validPassword) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  // Generate token
+  const token = generateToken(user);
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      picture: user.picture,
+      onboarded: user.onboarded,
+      role: user.role,
+      permissions: user.permissions,
+      isAdmin: user.role === 'admin'
     }
-
-    // Check password
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-    if (!validPassword) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Generate token
-    const token = generateToken(user);
-
-    res.json({
-        token,
-        user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            name: user.name,
-            picture: user.picture,
-            onboarded: user.onboarded
-        }
-    });
+  });
 });
 
 // Traditional registration
 app.post('/api/auth/register', async (req, res) => {
-    const { email, password, username, name } = req.body;
+  const { email, password, username, name } = req.body;
 
-    // Check if user exists
+  // Check if user exists
+  for (const [id, u] of users) {
+    if (u.email === email) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    if (u.username === username) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+  }
+
+  // Hash password
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // Create user
+  const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const user = {
+    id: userId,
+    email,
+    username,
+    name: name || username,
+    passwordHash,
+    provider: 'local',
+    role: 'user', // Default role
+    permissions: {},
+    bannedUntil: null,
+    banReason: null,
+    warningCount: 0,
+    createdAt: new Date().toISOString(),
+    onboarded: false,
+    preferences: {}
+  };
+
+  users.set(userId, user);
+
+  // Generate token
+  const token = generateToken(user);
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      onboarded: false,
+      role: user.role,
+      permissions: user.permissions,
+      isAdmin: false
+    },
+    isNewUser: true
+  });
+});
+
+// Google OAuth login
+app.post('/api/auth/google', async (req, res) => {
+  const { credential } = req.body;
+
+  try {
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    console.log('Google auth payload:', { email: payload.email, name: payload.name });
+
+    // Find or create user
+    let user = null;
     for (const [id, u] of users) {
-        if (u.email === email) {
-            return res.status(400).json({ error: 'Email already registered' });
+      if (u.googleId === payload.sub || u.email === payload.email) {
+        user = u;
+        // Update Google ID if needed
+        if (!u.googleId) {
+          u.googleId = payload.sub;
         }
-        if (u.username === username) {
-            return res.status(400).json({ error: 'Username already taken' });
-        }
+        break;
+      }
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const user = {
+    let isNewUser = false;
+    if (!user) {
+      // Create new user
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      user = {
         id: userId,
-        email,
-        username,
-        name: name || username,
-        passwordHash,
-        provider: 'local',
+        email: payload.email,
+        username: payload.email.split('@')[0],
+        name: payload.name,
+        picture: payload.picture,
+        googleId: payload.sub,
+        provider: 'google',
+        emailVerified: payload.email_verified,
+        role: 'user', // Default role
+        permissions: {},
+        bannedUntil: null,
+        banReason: null,
+        warningCount: 0,
         createdAt: new Date().toISOString(),
         onboarded: false,
         preferences: {}
-    };
-
-    users.set(userId, user);
+      };
+      users.set(userId, user);
+      isNewUser = true;
+    }
 
     // Generate token
     const token = generateToken(user);
 
     res.json({
-        token,
-        user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            name: user.name,
-            onboarded: false
-        },
-        isNewUser: true
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        name: user.name,
+        picture: user.picture,
+        onboarded: user.onboarded,
+        role: user.role,
+        permissions: user.permissions,
+        isAdmin: user.role === 'admin'
+      },
+      isNewUser
     });
-});
-
-// Google OAuth login
-app.post('/api/auth/google', async (req, res) => {
-    const { credential } = req.body;
-
-    try {
-        // Verify Google token
-        const ticket = await googleClient.verifyIdToken({
-            idToken: credential,
-            audience: GOOGLE_CLIENT_ID
-        });
-
-        const payload = ticket.getPayload();
-        console.log('Google auth payload:', { email: payload.email, name: payload.name });
-
-        // Find or create user
-        let user = null;
-        for (const [id, u] of users) {
-            if (u.googleId === payload.sub || u.email === payload.email) {
-                user = u;
-                // Update Google ID if needed
-                if (!u.googleId) {
-                    u.googleId = payload.sub;
-                }
-                break;
-            }
-        }
-
-        let isNewUser = false;
-        if (!user) {
-            // Create new user
-            const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            user = {
-                id: userId,
-                email: payload.email,
-                username: payload.email.split('@')[0],
-                name: payload.name,
-                picture: payload.picture,
-                googleId: payload.sub,
-                provider: 'google',
-                emailVerified: payload.email_verified,
-                createdAt: new Date().toISOString(),
-                onboarded: false,
-                preferences: {}
-            };
-            users.set(userId, user);
-            isNewUser = true;
-        }
-
-        // Generate token
-        const token = generateToken(user);
-
-        res.json({
-            token,
-            user: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                name: user.name,
-                picture: user.picture,
-                onboarded: user.onboarded
-            },
-            isNewUser
-        });
-    } catch (error) {
-        console.error('Google auth error:', error);
-        res.status(401).json({
-            error: 'Authentication failed',
-            message: error.message,
-            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-    }
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(401).json({
+      error: 'Authentication failed',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
 // Google OAuth callback (for authorization code flow)
 app.post('/api/auth/google/callback', async (req, res) => {
-    const { code, redirectUri } = req.body;
+  const { code, redirectUri } = req.body;
 
-    try {
-        // For now, we're using the simpler credential-based flow
-        // This endpoint is here for future OAuth2 code flow implementation
-        res.status(501).json({
-            error: 'OAuth code flow not implemented',
-            message: 'Please use the Google Sign-In button instead'
-        });
-    } catch (error) {
-        console.error('OAuth callback error:', error);
-        res.status(500).json({
-            error: 'OAuth callback failed',
-            message: error.message
-        });
-    }
+  try {
+    // For now, we're using the simpler credential-based flow
+    // This endpoint is here for future OAuth2 code flow implementation
+    res.status(501).json({
+      error: 'OAuth code flow not implemented',
+      message: 'Please use the Google Sign-In button instead'
+    });
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    res.status(500).json({
+      error: 'OAuth callback failed',
+      message: error.message
+    });
+  }
+});
+
+// Validate authentication
+app.post('/api/auth/validate', authenticateToken, (req, res) => {
+  // Check if user is banned
+  if (req.user.bannedUntil && new Date(req.user.bannedUntil) > new Date()) {
+    return res.json({
+      valid: false,
+      user: {
+        bannedUntil: req.user.bannedUntil,
+        banReason: req.user.banReason
+      }
+    });
+  }
+
+  res.json({
+    valid: true,
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+      username: req.user.username,
+      name: req.user.name,
+      picture: req.user.picture,
+      role: req.user.role,
+      permissions: req.user.permissions,
+      bannedUntil: req.user.bannedUntil,
+      banReason: req.user.banReason
+    },
+    isAdmin: req.user.role === 'admin',
+    permissions: req.user.permissions || []
+  });
 });
 
 // Get current user
 app.get('/api/auth/me', authenticateToken, (req, res) => {
-    res.json({
-        user: {
-            id: req.user.id,
-            email: req.user.email,
-            username: req.user.username,
-            name: req.user.name,
-            picture: req.user.picture,
-            onboarded: req.user.onboarded,
-            preferences: req.user.preferences
-        }
-    });
+  res.json({
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+      username: req.user.username,
+      name: req.user.name,
+      picture: req.user.picture,
+      onboarded: req.user.onboarded,
+      preferences: req.user.preferences,
+      role: req.user.role
+    }
+  });
 });
 
 // Update user preferences (onboarding)
 app.post('/api/users/preferences', authenticateToken, (req, res) => {
-    const { location, sports, mcpServers, timePreferences } = req.body;
+  const { location, sports, mcpServers, timePreferences } = req.body;
 
-    // Update user preferences
-    req.user.preferences = {
-        location,
-        sports,
-        mcpServers,
-        timePreferences,
-        updatedAt: new Date().toISOString()
-    };
-    req.user.onboarded = true;
+  // Update user preferences
+  req.user.preferences = {
+    location,
+    sports,
+    mcpServers,
+    timePreferences,
+    updatedAt: new Date().toISOString()
+  };
+  req.user.onboarded = true;
 
-    res.json({
-        success: true,
-        preferences: req.user.preferences
-    });
+  res.json({
+    success: true,
+    preferences: req.user.preferences
+  });
 });
 
 // Get user preferences
 app.get('/api/users/preferences', authenticateToken, (req, res) => {
-    res.json({
-        preferences: req.user.preferences || {},
-        onboarded: req.user.onboarded || false
-    });
+  res.json({
+    preferences: req.user.preferences || {},
+    onboarded: req.user.onboarded || false
+  });
 });
 
 // Logout (optional - JWT is stateless)
 app.post('/api/auth/logout', authenticateToken, (req, res) => {
-    // In a real app, you might want to blacklist the token
-    res.json({ success: true });
+  // In a real app, you might want to blacklist the token
+  res.json({ success: true });
 });
 
 // Debug endpoint to check scraping status
 app.get('/api/debug/scraping-status', (req, res) => {
-    const stats = dataPipeline.getStats();
-    const wsStats = webSocketService.getStats();
+  const stats = dataPipeline.getStats();
+  const wsStats = webSocketService.getStats();
 
-    res.json({
-        dataAggregation: stats,
-        webSocket: wsStats,
-        swarmStatus: null, // getSwarmStatus ? getSwarmStatus() : null,
-        uptime: process.uptime(),
-        memoryUsage: process.memoryUsage()
-    });
+  res.json({
+    dataAggregation: stats,
+    webSocket: wsStats,
+    swarmStatus: null, // getSwarmStatus ? getSwarmStatus() : null,
+    uptime: process.uptime(),
+    memoryUsage: process.memoryUsage()
+  });
 });
 
 // Debug endpoint to manually trigger scraping
 app.post('/api/debug/trigger-scraping', async (req, res) => {
-    try {
-        console.log('Manually triggering data collection...');
-        await dataPipeline.runInitialCollection();
-        res.json({ success: true, message: 'Scraping jobs queued' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+  try {
+    console.log('Manually triggering data collection...');
+    await dataPipeline.runInitialCollection();
+    res.json({ success: true, message: 'Scraping jobs queued' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Games API - PUBLIC ACCESS FOR VIEWING
 app.get('/api/games', async (req, res) => {
-    const { location, sport, lat, lng, radius, date } = req.query;
+  const { location, sport, lat, lng, radius, date } = req.query;
 
-    try {
-        const searchParams = {
-            sport,
-            lat: lat ? parseFloat(lat) : undefined,
-            lng: lng ? parseFloat(lng) : undefined,
-            radius: radius ? parseInt(radius, 10) : undefined,
-            date
-        };
+  try {
+    const searchParams = {
+      sport,
+      lat: lat ? parseFloat(lat) : undefined,
+      lng: lng ? parseFloat(lng) : undefined,
+      radius: radius ? parseInt(radius, 10) : undefined,
+      date
+    };
 
-        // Handle BC location expansion
-        if (location) {
-            handleLocationSearch(location, searchParams);
-        }
-
-        // Get aggregated games
-        const aggregatedGames = await dataPipeline.searchGames(searchParams);
-
-        // Filter games by BC location if needed
-        let filteredGames = aggregatedGames;
-        if (location && !lat && !lng) {
-            const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
-            if (normalizedLocation) {
-                // Get coordinates for the location and use them for filtering
-                const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
-                if (locationCoords) {
-                    // Update search params with location coordinates
-                    searchParams.lat = locationCoords.lat;
-                    searchParams.lng = locationCoords.lng;
-                    searchParams.radius = searchParams.radius || 50; // Default 50km radius
-                    
-                    // Re-search with coordinates
-                    filteredGames = await dataPipeline.searchGames(searchParams);
-                } else {
-                    // If no coordinates found, still try to filter by location
-                    filteredGames = aggregatedGames.filter(game =>
-                        bcLocationService.isGameNearLocation(game, normalizedLocation, 75)
-                    );
-                }
-            }
-        }
-
-        // Always return aggregated data (even if empty)
-        return res.json({
-            games: filteredGames,
-            source: 'aggregated',
-            searchInfo: {
-                originalLocation: location,
-                normalizedLocation: bcLocationService.normalizeLocationQuery(location),
-                expandedSearch: searchParams.locations?.length > 1
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching aggregated games:', error);
-        // Return empty array on error instead of demo data
-        return res.json({ games: [], source: 'error' });
+    // Handle BC location expansion
+    if (location) {
+      handleLocationSearch(location, searchParams);
     }
+
+    // Get aggregated games
+    const aggregatedGames = await dataPipeline.searchGames(searchParams);
+
+    // Filter games by BC location if needed
+    let filteredGames = aggregatedGames;
+    if (location && !lat && !lng) {
+      const normalizedLocation = bcLocationService.normalizeLocationQuery(location);
+      if (normalizedLocation) {
+        // Get coordinates for the location and use them for filtering
+        const locationCoords = bcLocationService.getCoordinates(normalizedLocation);
+        if (locationCoords) {
+          // Update search params with location coordinates
+          searchParams.lat = locationCoords.lat;
+          searchParams.lng = locationCoords.lng;
+          searchParams.radius = searchParams.radius || 50; // Default 50km radius
+
+          // Re-search with coordinates
+          filteredGames = await dataPipeline.searchGames(searchParams);
+        } else {
+          // If no coordinates found, still try to filter by location
+          filteredGames = aggregatedGames.filter(game =>
+            bcLocationService.isGameNearLocation(game, normalizedLocation, 75)
+          );
+        }
+      }
+    }
+
+    // Always return aggregated data (even if empty)
+    return res.json({
+      games: filteredGames,
+      source: 'aggregated',
+      searchInfo: {
+        originalLocation: location,
+        normalizedLocation: bcLocationService.normalizeLocationQuery(location),
+        expandedSearch: searchParams.locations?.length > 1
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching aggregated games:', error);
+    // Return empty array on error instead of demo data
+    return res.json({ games: [], source: 'error' });
+  }
 });
 
 // Join game - REQUIRES AUTH
 app.post('/api/games/:gameId/join', authenticateToken, (req, res) => {
-    const { gameId } = req.params;
+  const { gameId } = req.params;
 
-    // In a real app, this would update the database
-    // Notify other users in real-time
-    webSocketService.notifyGameJoin(gameId, {
-        id: req.user.id,
-        name: req.user.name || req.user.username
-    });
+  // In a real app, this would update the database
+  // Notify other users in real-time
+  webSocketService.notifyGameJoin(gameId, {
+    id: req.user.id,
+    name: req.user.name || req.user.username
+  });
 
-    res.json({
-        success: true,
-        gameId,
-        message: 'Successfully joined the game!'
-    });
+  res.json({
+    success: true,
+    gameId,
+    message: 'Successfully joined the game!'
+  });
 });
 
 // Create game - REQUIRES AUTH
-app.post('/api/games', authenticateToken, (req, res) => {
-    const gameData = req.body;
+app.post('/api/games', authenticateToken, async (req, res) => {
+  const gameData = req.body;
+  const chatRoomService = require('./services/chat-room-service');
 
-    const newGame = {
-        id: Date.now(),
-        ...gameData,
-        host: {
-            id: req.user.id,
-            name: req.user.name || req.user.username
-        },
-        attendees: 1,
-        createdAt: new Date().toISOString()
-    };
+  const newGame = {
+    id: Date.now().toString(),
+    ...gameData,
+    host: {
+      id: req.user.id,
+      name: req.user.name || req.user.username
+    },
+    attendees: 1,
+    createdAt: new Date().toISOString(),
+    endTime: gameData.endTime || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // Default 2 hours
+  };
+
+  try {
+    // Create chat room for the game
+    const chatRoom = await chatRoomService.createGameChatRoom(newGame, req.user.id);
+
+    // Auto-join creator to the chat room
+    await chatRoomService.joinChatRoom(chatRoom.id, req.user.id);
 
     // Notify users in this location about new game
     if (gameData.location) {
-        webSocketService.notifyNewGame(gameData.location.toLowerCase(), newGame);
+      webSocketService.notifyNewGame(gameData.location.toLowerCase(), newGame);
     }
 
     res.json({
-        success: true,
-        game: newGame
+      success: true,
+      game: newGame,
+      chatRoom: {
+        id: chatRoom.id,
+        name: chatRoom.name
+      }
     });
+  } catch (error) {
+    console.error('Error creating game:', error);
+    res.status(500).json({ error: 'Failed to create game' });
+  }
 });
 
 // Note: Catch-all route moved to after swarm initialization
 
 // WebSocket stats endpoint
 app.get('/api/ws/stats', (req, res) => {
-    res.json(webSocketService.getStats());
+  res.json(webSocketService.getStats());
 });
 
 // Data aggregation stats endpoint
 app.get('/api/data/stats', (req, res) => {
-    try {
-        res.json(dataPipeline.getStats());
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to get stats' });
-    }
+  try {
+    res.json(dataPipeline.getStats());
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get stats' });
+  }
 });
 
 // Get available facilities
 app.get('/api/facilities', async (req, res) => {
-    try {
-        const facilities = Array.from(dataPipeline.facilitiesDatabase.values());
-        res.json({ facilities });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch facilities' });
-    }
+  try {
+    const facilities = Array.from(dataPipeline.facilitiesDatabase.values());
+    res.json({ facilities });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch facilities' });
+  }
 });
 
 // BC location endpoints
 app.get('/api/locations/bc', (req, res) => {
-    const locations = bcLocationService.getAllLocations();
-    res.json({ locations });
+  const locations = bcLocationService.getAllLocations();
+  res.json({ locations });
 });
 
 app.get('/api/locations/suggestions', (req, res) => {
-    const { q } = req.query;
-    const suggestions = bcLocationService.getLocationSuggestions(q);
-    res.json({ suggestions });
+  const { q } = req.query;
+  const suggestions = bcLocationService.getLocationSuggestions(q);
+  res.json({ suggestions });
 });
 
 app.get('/api/locations/nearby/:location', (req, res) => {
-    const { location } = req.params;
-    const { radius } = req.query;
-    const nearby = bcLocationService.getNearbyLocations(location, radius ? parseInt(radius, 10) : 100);
-    res.json({ nearby });
+  const { location } = req.params;
+  const { radius } = req.query;
+  const nearby = bcLocationService.getNearbyLocations(location, radius ? parseInt(radius, 10) : 100);
+  res.json({ nearby });
 });
 
 // Field status endpoint
 app.get('/api/fields/status', async (req, res) => {
-    try {
-        const fields = Array.from(dataPipeline.facilitiesDatabase.values()).filter(
-            facility => facility.type && facility.type.includes('field')
-        );
+  try {
+    const fields = Array.from(dataPipeline.facilitiesDatabase.values()).filter(
+      facility => facility.type && facility.type.includes('field')
+    );
 
-        res.json({
-            success: true,
-            fields,
-            lastUpdated: new Date()
-        });
-    } catch (error) {
-        console.error('Error fetching field status:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch field status'
-        });
-    }
+    res.json({
+      success: true,
+      fields,
+      lastUpdated: new Date()
+    });
+  } catch (error) {
+    console.error('Error fetching field status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch field status'
+    });
+  }
 });
 
 // Location-based agent search endpoints
 app.post('/api/location/check', (req, res) => {
-    locationAgentService.checkLocation(req, res);
+  locationAgentService.checkLocation(req, res);
 });
 
 app.get('/api/location/search/:searchId', (req, res) => {
-    const search = locationAgentService.getSearchStatus(req.params.searchId);
-    if (!search) {
-        return res.status(404).json({ error: 'Search not found' });
-    }
-    res.json({ search });
+  const search = locationAgentService.getSearchStatus(req.params.searchId);
+  if (!search) {
+    return res.status(404).json({ error: 'Search not found' });
+  }
+  res.json({ search });
 });
 
 // Catch all handler - serve index.html for client-side routing
 // This MUST be after all API routes but before error handler
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Finding Sports backend running on http://0.0.0.0:${PORT}`);
-    console.log('WebSocket server enabled');
-    console.log('Environment:', {
-        port: PORT,
-        nodeEnv: process.env.NODE_ENV,
-        hasJwtSecret: Boolean(process.env.JWT_SECRET),
-        hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
-        corsOrigin: process.env.CORS_ORIGIN || 'all'
-    });
+  console.log(`Finding Sports backend running on http://0.0.0.0:${PORT}`);
+  console.log('WebSocket server enabled');
+  console.log('Environment:', {
+    port: PORT,
+    nodeEnv: process.env.NODE_ENV,
+    hasJwtSecret: Boolean(process.env.JWT_SECRET),
+    hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
+    corsOrigin: process.env.CORS_ORIGIN || 'all'
+  });
 });

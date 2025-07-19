@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderation Test - Finding Sports</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/social-feed-enhanced.css">
+    <link rel="stylesheet" href="css/moderation.css">
+    <style>
+        body {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .test-btn.primary { background: #ff6b35; color: white; }
+        .test-btn.secondary { background: #17a2b8; color: white; }
+        .test-btn.warning { background: #ffc107; color: #333; }
+        .test-btn.danger { background: #dc3545; color: white; }
+        .test-chat {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .status-info {
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Moderation Features Test Page</h1>
+    
+    <div class="test-section">
+        <h2>User Role Simulation</h2>
+        <div class="test-controls">
+            <button class="test-btn primary" onclick="simulateRole('user')">Simulate Regular User</button>
+            <button class="test-btn secondary" onclick="simulateRole('moderator')">Simulate Moderator</button>
+            <button class="test-btn danger" onclick="simulateRole('admin')">Simulate Admin</button>
+        </div>
+        <div class="status-info">
+            Current Role: <strong id="current-role">user</strong><br>
+            Permissions: <span id="current-permissions">Basic chat access</span>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Chat Room</h2>
+        <div id="test-chat" class="test-chat">
+            <!-- Test messages will appear here -->
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <input type="text" id="test-message-input" placeholder="Type a message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            <button class="test-btn primary" onclick="sendTestMessage()">Send</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Moderation Actions Test</h2>
+        <div class="test-controls">
+            <button class="test-btn warning" onclick="testBannedWord()">Test Banned Word Filter</button>
+            <button class="test-btn secondary" onclick="testReportMessage()">Test Report Message</button>
+            <button class="test-btn danger" onclick="testDeleteMessage()">Test Delete Message</button>
+            <button class="test-btn warning" onclick="testMuteUser()">Test Mute User</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Quick Links</h2>
+        <div class="test-controls">
+            <a href="/moderator-dashboard.html" class="test-btn secondary" style="text-decoration: none; display: inline-block;">Open Moderator Dashboard</a>
+            <a href="/" class="test-btn primary" style="text-decoration: none; display: inline-block;">Back to Main Site</a>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/moderation.js"></script>
+    <script>
+        // Test data
+        let testMessages = [
+            {
+                id: 'msg-1',
+                author: { id: 'user-1', name: 'John Doe', avatar: 'https://via.placeholder.com/32x32?text=JD' },
+                content: 'Hey everyone! Looking forward to the game tonight!',
+                timestamp: Date.now() - 300000
+            },
+            {
+                id: 'msg-2',
+                author: { id: 'user-2', name: 'Jane Smith', avatar: 'https://via.placeholder.com/32x32?text=JS', isModerator: true },
+                content: 'Remember to bring water bottles! It\'s going to be hot.',
+                timestamp: Date.now() - 240000
+            },
+            {
+                id: 'msg-3',
+                author: { id: 'user-3', name: 'Bad User', avatar: 'https://via.placeholder.com/32x32?text=BU' },
+                content: 'This is a potentially problematic message that might need moderation.',
+                timestamp: Date.now() - 180000
+            }
+        ];
+        
+        // Initialize test environment
+        function initTest() {
+            // Set up fake auth state
+            window.authState = {
+                isAuthenticated: true,
+                user: {
+                    id: 'test-user',
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    avatar: 'https://via.placeholder.com/32x32?text=TU'
+                },
+                token: 'fake-token'
+            };
+            
+            // Initialize moderation with test data
+            window.moderation.currentUserRole = 'user';
+            window.moderation.bannedWords = ['spam', 'badword', 'inappropriate'];
+            
+            // Render test messages
+            renderTestMessages();
+        }
+        
+        function simulateRole(role) {
+            window.moderation.currentUserRole = role;
+            document.getElementById('current-role').textContent = role;
+            
+            // Update permissions
+            let permissions = [];
+            switch(role) {
+                case 'admin':
+                    permissions = ['All permissions'];
+                    window.moderation.permissions = [
+                        {permission: 'delete', resource: 'message'},
+                        {permission: 'mute', resource: 'user'},
+                        {permission: 'ban', resource: 'user'},
+                        {permission: 'warn', resource: 'user'},
+                        {permission: 'review', resource: 'report'},
+                        {permission: 'resolve', resource: 'report'}
+                    ];
+                    break;
+                case 'moderator':
+                    permissions = ['Delete messages', 'Mute users', 'Warn users', 'Review reports'];
+                    window.moderation.permissions = [
+                        {permission: 'delete', resource: 'message'},
+                        {permission: 'mute', resource: 'user'},
+                        {permission: 'warn', resource: 'user'},
+                        {permission: 'review', resource: 'report'},
+                        {permission: 'resolve', resource: 'report'}
+                    ];
+                    break;
+                default:
+                    permissions = ['Basic chat access', 'Report messages'];
+                    window.moderation.permissions = [
+                        {permission: 'read', resource: 'chat'},
+                        {permission: 'write', resource: 'chat'},
+                        {permission: 'report', resource: 'message'}
+                    ];
+            }
+            
+            document.getElementById('current-permissions').textContent = permissions.join(', ');
+            
+            // Re-render messages to show/hide moderation controls
+            renderTestMessages();
+        }
+        
+        function renderTestMessages() {
+            const chatContainer = document.getElementById('test-chat');
+            chatContainer.innerHTML = testMessages.map(msg => `
+                <div class="chat-message" data-message-id="${msg.id}" data-user-id="${msg.author.id}" style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                        <img src="${msg.author.avatar}" alt="${msg.author.name}" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <strong>${msg.author.name}</strong>
+                        ${msg.author.isModerator ? '<span class="mod-badge">MOD</span>' : ''}
+                        <span style="color: #666; font-size: 0.8em;">${formatTime(msg.timestamp)}</span>
+                        <div style="margin-left: auto; display: flex; gap: 10px;">
+                            <button onclick="reportMessage('${msg.id}')" style="background: none; border: none; cursor: pointer; color: #666; font-size: 0.8em;">Report</button>
+                            ${(window.moderation.currentUserRole === 'moderator' || window.moderation.currentUserRole === 'admin') ? 
+                                `<button onclick="deleteMessage('${msg.id}', 'Test deletion')" style="background: none; border: none; cursor: pointer; color: #dc3545; font-size: 0.8em;">Delete</button>
+                                 <button onclick="muteUser('${msg.author.id}', 5, 'Test mute')" style="background: none; border: none; cursor: pointer; color: #17a2b8; font-size: 0.8em;">Mute</button>` : ''}
+                        </div>
+                    </div>
+                    <div style="margin-left: 42px;">${msg.content}</div>
+                </div>
+            `).join('');
+        }
+        
+        function sendTestMessage() {
+            const input = document.getElementById('test-message-input');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            // Check for banned words
+            const check = window.checkMessageContent(content);
+            if (!check.valid) {
+                alert(check.reason);
+                return;
+            }
+            
+            // Add message
+            const newMessage = {
+                id: 'msg-' + Date.now(),
+                author: {
+                    id: window.authState.user.id,
+                    name: window.authState.user.name,
+                    avatar: window.authState.user.avatar,
+                    isModerator: window.moderation.currentUserRole === 'moderator',
+                    isAdmin: window.moderation.currentUserRole === 'admin'
+                },
+                content: content,
+                timestamp: Date.now()
+            };
+            
+            testMessages.push(newMessage);
+            renderTestMessages();
+            input.value = '';
+            
+            // Scroll to bottom
+            const chatContainer = document.getElementById('test-chat');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function testBannedWord() {
+            document.getElementById('test-message-input').value = 'This message contains spam content';
+            alert('Try sending this message - it contains a banned word "spam"');
+        }
+        
+        function testReportMessage() {
+            const messageId = testMessages[2].id; // Report the "problematic" message
+            window.reportMessage(messageId, 'inappropriate_content', 'This is a test report');
+            alert('Report submitted (simulated). In a real system, this would be sent to the server.');
+        }
+        
+        function testDeleteMessage() {
+            if (!window.hasPermission('delete', 'message')) {
+                alert('You need moderator or admin permissions to delete messages');
+                return;
+            }
+            const messageId = testMessages[2].id;
+            // Simulate deletion
+            const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageEl) {
+                messageEl.style.opacity = '0.5';
+                messageEl.querySelector('div:last-child').innerHTML = '<em>This message has been deleted by a moderator</em>';
+            }
+            alert('Message deleted (simulated)');
+        }
+        
+        function testMuteUser() {
+            if (!window.hasPermission('mute', 'user')) {
+                alert('You need moderator or admin permissions to mute users');
+                return;
+            }
+            alert('User muted for 5 minutes (simulated). In a real system, they would not be able to send messages.');
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+        
+        // Initialize on load
+        initTest();
+    </script>
+</body>
+</html>

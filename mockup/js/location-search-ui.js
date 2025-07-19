@@ -1,96 +1,96 @@
 // Location search UI handler
 class LocationSearchUI {
-    constructor() {
-        this.currentSearch = null;
-        this.modal = null;
+  constructor() {
+    this.currentSearch = null;
+    this.modal = null;
+  }
+
+  async checkUserLocation() {
+    // Get user's location
+    const location = await this.detectLocation();
+
+    // Check if we have data for this location
+    const response = await fetch('/api/location/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
+      },
+      body: JSON.stringify(location)
+    });
+
+    const data = await response.json();
+    console.log('Location check response:', data);
+
+    if (data.status === 'searching') {
+      this.showSearchProgress(data);
+      this.trackSearch(data.searchId);
+    } else if (data.status === 'ready') {
+      // Location has games, show them
+      console.log(`Found ${data.games.length} games for ${location.city}`);
     }
 
-    async checkUserLocation() {
-        // Get user's location
-        const location = await this.detectLocation();
+    return data;
+  }
 
-        // Check if we have data for this location
-        const response = await fetch('/api/location/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
-            },
-            body: JSON.stringify(location)
+  async detectLocation() {
+    // Try HTML5 geolocation first
+    if ('geolocation' in navigator) {
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout: 5000,
+            enableHighAccuracy: false
+          });
         });
 
-        const data = await response.json();
-        console.log('Location check response:', data);
+        // Reverse geocode to get city name
+        const { latitude, longitude } = position.coords;
 
-        if (data.status === 'searching') {
-            this.showSearchProgress(data);
-            this.trackSearch(data.searchId);
-        } else if (data.status === 'ready') {
-            // Location has games, show them
-            console.log(`Found ${data.games.length} games for ${location.city}`);
-        }
+        // For demo, use approximate city based on coords
+        const city = this.getCityFromCoords(latitude, longitude);
 
-        return data;
+        return {
+          lat: latitude,
+          lng: longitude,
+          ...city
+        };
+      } catch (error) {
+        console.log('Geolocation failed:', error);
+      }
     }
 
-    async detectLocation() {
-        // Try HTML5 geolocation first
-        if ('geolocation' in navigator) {
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 5000,
-                        enableHighAccuracy: false
-                    });
-                });
+    // Fall back to IP-based or ask user
+    return this.askUserLocation();
+  }
 
-                // Reverse geocode to get city name
-                const { latitude, longitude } = position.coords;
+  getCityFromCoords(lat, lng) {
+    // Simple approximation for demo
+    // In production, use reverse geocoding API
 
-                // For demo, use approximate city based on coords
-                const city = this.getCityFromCoords(latitude, longitude);
-
-                return {
-                    lat: latitude,
-                    lng: longitude,
-                    ...city
-                };
-            } catch (error) {
-                console.log('Geolocation failed:', error);
-            }
-        }
-
-        // Fall back to IP-based or ask user
-        return this.askUserLocation();
+    // Canadian cities
+    if (lat > 48 && lat < 50 && lng > -124 && lng < -122) {
+      return { city: 'Vancouver', region: 'BC', country: 'CA' };
+    } else if (lat > 50 && lat < 52 && lng > -115 && lng < -113) {
+      return { city: 'Calgary', region: 'AB', country: 'CA' };
+    } else if (lat > 42 && lat < 44 && lng > -80 && lng < -78) {
+      return { city: 'Toronto', region: 'ON', country: 'CA' };
+    } else if (lat > 46 && lat < 48 && lng > -123 && lng < -121) {
+      // US cities
+      return { city: 'Seattle', region: 'WA', country: 'US' };
+    } else if (lat > 36 && lat < 38 && lng > -123 && lng < -121) {
+      return { city: 'San Francisco', region: 'CA', country: 'US' };
     }
 
-    getCityFromCoords(lat, lng) {
-        // Simple approximation for demo
-        // In production, use reverse geocoding API
+    // Default
+    return { city: 'Unknown', region: 'Unknown', country: 'Unknown' };
+  }
 
-        // Canadian cities
-        if (lat > 48 && lat < 50 && lng > -124 && lng < -122) {
-            return { city: 'Vancouver', region: 'BC', country: 'CA' };
-        } else if (lat > 50 && lat < 52 && lng > -115 && lng < -113) {
-            return { city: 'Calgary', region: 'AB', country: 'CA' };
-        } else if (lat > 42 && lat < 44 && lng > -80 && lng < -78) {
-            return { city: 'Toronto', region: 'ON', country: 'CA' };
-        } else if (lat > 46 && lat < 48 && lng > -123 && lng < -121) {
-            // US cities
-            return { city: 'Seattle', region: 'WA', country: 'US' };
-        } else if (lat > 36 && lat < 38 && lng > -123 && lng < -121) {
-            return { city: 'San Francisco', region: 'CA', country: 'US' };
-        }
-
-        // Default
-        return { city: 'Unknown', region: 'Unknown', country: 'Unknown' };
-    }
-
-    askUserLocation() {
-        // Show location prompt
-        const modal = document.createElement('div');
-        modal.className = 'location-prompt-modal';
-        modal.innerHTML = `
+  askUserLocation() {
+    // Show location prompt
+    const modal = document.createElement('div');
+    modal.className = 'location-prompt-modal';
+    modal.innerHTML = `
             <div class="location-prompt">
                 <h2>Where are you looking for sports?</h2>
                 <p>Help us find drop-in games in your area</p>
@@ -120,61 +120,61 @@ class LocationSearchUI {
             </div>
         `;
 
-        document.body.appendChild(modal);
-        return new Promise(resolve => {
-            window.locationResolve = resolve;
-        });
+    document.body.appendChild(modal);
+    return new Promise(resolve => {
+      window.locationResolve = resolve;
+    });
+  }
+
+  selectLocation(city, region, country) {
+    const location = { city, region, country };
+    document.querySelector('.location-prompt-modal')?.remove();
+
+    if (window.locationResolve) {
+      window.locationResolve(location);
     }
 
-    selectLocation(city, region, country) {
-        const location = { city, region, country };
-        document.querySelector('.location-prompt-modal')?.remove();
+    // Trigger search
+    this.checkLocationWithData(location);
+  }
 
-        if (window.locationResolve) {
-            window.locationResolve(location);
-        }
+  submitLocation() {
+    const city = document.getElementById('cityInput').value;
+    const region = document.getElementById('regionInput').value;
+    const country = document.getElementById('countryInput').value;
 
-        // Trigger search
-        this.checkLocationWithData(location);
+    if (city && region) {
+      this.selectLocation(city, region, country);
+    }
+  }
+
+  async checkLocationWithData(location) {
+    const response = await fetch('/api/location/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
+      },
+      body: JSON.stringify(location)
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'searching') {
+      this.showSearchProgress(data);
+      this.trackSearch(data.searchId);
+    }
+  }
+
+  showSearchProgress(searchData) {
+    // Remove any existing modal
+    if (this.modal) {
+      this.modal.remove();
     }
 
-    submitLocation() {
-        const city = document.getElementById('cityInput').value;
-        const region = document.getElementById('regionInput').value;
-        const country = document.getElementById('countryInput').value;
-
-        if (city && region) {
-            this.selectLocation(city, region, country);
-        }
-    }
-
-    async checkLocationWithData(location) {
-        const response = await fetch('/api/location/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
-            },
-            body: JSON.stringify(location)
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'searching') {
-            this.showSearchProgress(data);
-            this.trackSearch(data.searchId);
-        }
-    }
-
-    showSearchProgress(searchData) {
-        // Remove any existing modal
-        if (this.modal) {
-            this.modal.remove();
-        }
-
-        this.modal = document.createElement('div');
-        this.modal.className = 'search-progress-modal';
-        this.modal.innerHTML = `
+    this.modal = document.createElement('div');
+    this.modal.className = 'search-progress-modal';
+    this.modal.innerHTML = `
             <div class="search-content">
                 <div class="search-header">
                     <h2>Searching for Drop-in Sports</h2>
@@ -266,115 +266,115 @@ class LocationSearchUI {
             </div>
         `;
 
-        document.body.appendChild(this.modal);
+    document.body.appendChild(this.modal);
 
-        // Animate agent icons
-        this.animateAgents();
+    // Animate agent icons
+    this.animateAgents();
 
-        // Listen for progress updates
-        this.currentSearch = searchData.searchId;
-        if (window.wsClient) {
-            window.wsClient.on('location_search_progress', data => {
-                if (data.searchId === this.currentSearch) {
-                    this.updateProgress(data);
-                }
-            });
-
-            window.wsClient.on('location_search_complete', data => {
-                if (data.searchId === this.currentSearch) {
-                    this.showSearchComplete(data);
-                }
-            });
+    // Listen for progress updates
+    this.currentSearch = searchData.searchId;
+    if (window.wsClient) {
+      window.wsClient.on('location_search_progress', data => {
+        if (data.searchId === this.currentSearch) {
+          this.updateProgress(data);
         }
+      });
+
+      window.wsClient.on('location_search_complete', data => {
+        if (data.searchId === this.currentSearch) {
+          this.showSearchComplete(data);
+        }
+      });
+    }
+  }
+
+  animateAgents() {
+    const agents = this.modal.querySelectorAll('.agent-icon');
+    agents.forEach((agent, index) => {
+      agent.style.animationDelay = `${index * 0.2}s`;
+    });
+  }
+
+  updateProgress(progressData) {
+    if (!this.modal) {
+      return;
     }
 
-    animateAgents() {
-        const agents = this.modal.querySelectorAll('.agent-icon');
-        agents.forEach((agent, index) => {
-            agent.style.animationDelay = `${index * 0.2}s`;
-        });
-    }
+    // Update each stage
+    Object.entries(progressData.stages).forEach(([stageName, stageData]) => {
+      const stageEl = this.modal.querySelector(`[data-stage="${stageName}"]`);
+      if (stageEl) {
+        const progressFill = stageEl.querySelector('.stage-progress-fill');
+        const statusText = stageEl.querySelector('.stage-status');
 
-    updateProgress(progressData) {
-        if (!this.modal) {
-            return;
+        progressFill.style.width = `${stageData.progress}%`;
+        statusText.textContent = `${stageData.progress}%`;
+
+        if (stageData.status === 'completed') {
+          stageEl.classList.add('completed');
+          statusText.textContent = '✓';
+        } else if (stageData.status === 'in_progress') {
+          stageEl.classList.add('active');
         }
 
-        // Update each stage
-        Object.entries(progressData.stages).forEach(([stageName, stageData]) => {
-            const stageEl = this.modal.querySelector(`[data-stage="${stageName}"]`);
-            if (stageEl) {
-                const progressFill = stageEl.querySelector('.stage-progress-fill');
-                const statusText = stageEl.querySelector('.stage-status');
+        // Update message if available
+        if (stageData.message && stageData.message.includes('Found')) {
+          const match = stageData.message.match(/Found (\d+)/);
+          if (match) {
+            this.modal.querySelector('.venue-count').textContent = match[1];
+          }
+        }
+      }
+    });
 
-                progressFill.style.width = `${stageData.progress}%`;
-                statusText.textContent = `${stageData.progress}%`;
+    // Update overall progress
+    const overallFill = this.modal.querySelector('.overall-progress-fill');
+    const progressText = this.modal.querySelector('.progress-text');
 
-                if (stageData.status === 'completed') {
-                    stageEl.classList.add('completed');
-                    statusText.textContent = '✓';
-                } else if (stageData.status === 'in_progress') {
-                    stageEl.classList.add('active');
-                }
+    overallFill.style.width = `${progressData.progress}%`;
 
-                // Update message if available
-                if (stageData.message && stageData.message.includes('Found')) {
-                    const match = stageData.message.match(/Found (\d+)/);
-                    if (match) {
-                        this.modal.querySelector('.venue-count').textContent = match[1];
-                    }
-                }
+    if (progressData.progress < 100) {
+      progressText.textContent = `${Math.round(progressData.progress)}% complete...`;
+    } else {
+      progressText.textContent = 'Search complete! Loading results...';
+    }
+  }
+
+  async trackSearch(searchId) {
+    // Poll for updates if WebSocket not available
+    if (!window.wsClient || !window.wsClient.connected) {
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/location/search/${searchId}`);
+          const data = await response.json();
+
+          if (data.search) {
+            this.updateProgress({
+              progress: data.search.progress || 0,
+              stages: data.search.stages
+            });
+
+            if (data.search.progress >= 100) {
+              clearInterval(pollInterval);
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
             }
-        });
-
-        // Update overall progress
-        const overallFill = this.modal.querySelector('.overall-progress-fill');
-        const progressText = this.modal.querySelector('.progress-text');
-
-        overallFill.style.width = `${progressData.progress}%`;
-
-        if (progressData.progress < 100) {
-            progressText.textContent = `${Math.round(progressData.progress)}% complete...`;
-        } else {
-            progressText.textContent = 'Search complete! Loading results...';
+          }
+        } catch (error) {
+          console.error('Poll error:', error);
         }
+      }, 2000);
+    }
+  }
+
+  showSearchComplete(data) {
+    if (!this.modal) {
+      return;
     }
 
-    async trackSearch(searchId) {
-        // Poll for updates if WebSocket not available
-        if (!window.wsClient || !window.wsClient.connected) {
-            const pollInterval = setInterval(async () => {
-                try {
-                    const response = await fetch(`/api/location/search/${searchId}`);
-                    const data = await response.json();
-
-                    if (data.search) {
-                        this.updateProgress({
-                            progress: data.search.progress || 0,
-                            stages: data.search.stages
-                        });
-
-                        if (data.search.progress >= 100) {
-                            clearInterval(pollInterval);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 2000);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Poll error:', error);
-                }
-            }, 2000);
-        }
-    }
-
-    showSearchComplete(data) {
-        if (!this.modal) {
-            return;
-        }
-
-        const content = this.modal.querySelector('.search-content');
-        content.innerHTML = `
+    const content = this.modal.querySelector('.search-content');
+    content.innerHTML = `
             <div class="search-complete">
                 <div class="success-icon" style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;">COMPLETE</div>
                 <h2>Search Complete!</h2>
@@ -384,10 +384,10 @@ class LocationSearchUI {
             </div>
         `;
 
-        setTimeout(() => {
-            location.reload();
-        }, 3000);
-    }
+    setTimeout(() => {
+      location.reload();
+    }, 3000);
+  }
 }
 
 // Create global instance
