@@ -1,0 +1,378 @@
+/* Tab Reveal UX Enhancements - Progressive Disclosure & Visual Indicators */
+
+/* Enhanced Navigation Tabs with Visual Hierarchy */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    background: linear-gradient(180deg, rgba(26, 26, 26, 0.8) 0%, rgba(26, 26, 26, 0) 100%);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+/* Tab Indicator Bar */
+.tabs::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(250, 245, 233, 0.1);
+}
+
+/* Enhanced Tab Styling */
+.tab {
+    padding: 0.75rem 2rem;
+    background-color: #1a1a1a;
+    border: 2px solid transparent;
+    color: #faf5e9;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    
+    /* Subtle shadow for depth */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Tab Hover State */
+.tab:hover:not(.active) {
+    background-color: #2a2a2a;
+    border-color: rgba(244, 197, 66, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Active Tab with Enhanced Visual Feedback */
+.tab.active {
+    color: #000000;
+    background-color: #f4c542;
+    border-color: #f4c542;
+    box-shadow: 0 0 20px 3px rgba(244, 197, 66, 0.6),
+                0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    font-weight: 600;
+}
+
+/* Active Tab Indicator */
+.tab.active::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #f4c542, transparent);
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+/* New Content Indicator Badge */
+.tab[data-new-content="true"]::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: #ff6b35;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 1);
+    animation: pulse-badge 2s infinite;
+}
+
+/* Tab Badge for Notifications */
+.tab-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ff6b35;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: badge-appear 0.3s ease-out;
+}
+
+/* Content Transition Container */
+.tab-content-wrapper {
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+/* Content Sections with Smooth Transitions */
+.tab-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+.tab-content.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+}
+
+/* Social Feed Specific Enhancements */
+#socialSection {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#socialSection.reveal {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Progressive Disclosure Animation */
+.social-feed-container {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0.2s;
+}
+
+.social-post {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.social-post:nth-child(1) { animation-delay: 0.1s; }
+.social-post:nth-child(2) { animation-delay: 0.2s; }
+.social-post:nth-child(3) { animation-delay: 0.3s; }
+.social-post:nth-child(4) { animation-delay: 0.4s; }
+.social-post:nth-child(5) { animation-delay: 0.5s; }
+
+/* Loading Skeleton for Social Feed */
+.social-feed-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.skeleton-post {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-post::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-header {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #3a3a3a;
+}
+
+.skeleton-text {
+    flex: 1;
+}
+
+.skeleton-line {
+    height: 12px;
+    background: #3a3a3a;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 80%; }
+.skeleton-line.long { width: 100%; }
+
+/* Tab Press Animation */
+.tab:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* Accessibility Focus States */
+.tab:focus {
+    outline: 2px solid #f4c542;
+    outline-offset: 2px;
+}
+
+.tab:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Tab Tooltip for Accessibility */
+.tab[aria-label]::before {
+    content: attr(aria-label);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: #333;
+    color: #faf5e9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.tab[aria-label]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Animations */
+@keyframes shimmer {
+    0% { transform: translateX(-50%) scaleX(0); }
+    50% { transform: translateX(-50%) scaleX(1); }
+    100% { transform: translateX(-50%) scaleX(0); }
+}
+
+@keyframes pulse-badge {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 107, 53, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0);
+    }
+}
+
+@keyframes badge-appear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes skeleton-loading {
+    to {
+        left: 100%;
+    }
+}
+
+/* Mobile Responsive Tabs */
+@media (max-width: 768px) {
+    .tabs {
+        gap: 0.5rem;
+        padding: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    .tab-badge {
+        top: -2px;
+        right: -2px;
+        font-size: 0.625rem;
+        padding: 1px 4px;
+        min-width: 14px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .tab {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    
+    .tab:hover:not(.active) {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    }
+    
+    .skeleton-post {
+        background: #1a1a1a;
+    }
+    
+    .skeleton-avatar,
+    .skeleton-line {
+        background: #2a2a2a;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .tab {
+        border-width: 3px;
+    }
+    
+    .tab.active {
+        outline: 3px solid #f4c542;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .tab,
+    .tab-content,
+    #socialSection,
+    .social-post {
+        animation: none;
+        transition: opacity 0.2s ease;
+    }
+    
+    .skeleton-post::before {
+        animation: none;
+    }
+}

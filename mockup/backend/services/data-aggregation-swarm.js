@@ -45,6 +45,8 @@ class DataAggregationSwarm extends EventEmitter {
   initializeKnownSources() {
     // Import local sports sources
     const { localSportsSources } = require('./local-sports-sources');
+    const { alternativeAPISources } = require('./alternative-api-sources');
+    const { webScrapingSources } = require('./web-scraping-sources');
 
     // Register all local sports sources
     localSportsSources.forEach(source => {
@@ -52,6 +54,26 @@ class DataAggregationSwarm extends EventEmitter {
         ...source,
         reliability: source.reliability || 0.85,
         priority: source.gameType === 'drop-in' ? 'high' : 'normal'
+      });
+    });
+
+    // Register alternative API sources
+    alternativeAPISources.forEach(source => {
+      this.registerSource({
+        ...source,
+        reliability: source.reliability || 0.90,
+        priority: 'medium',
+        requiresAuth: source.method.requiresAuth
+      });
+    });
+
+    // Register web scraping sources
+    webScrapingSources.forEach(source => {
+      this.registerSource({
+        ...source,
+        reliability: source.reliability || 0.75,
+        priority: source.gameType === 'drop-in' ? 'high' : 'normal',
+        requiresScraper: true
       });
     });
 
@@ -413,6 +435,23 @@ class DataAggregationSwarm extends EventEmitter {
   async collectFromAPI(siteId, method) {
     const fetch = require('node-fetch');
 
+    // Special handling for working Vancouver Open Data API
+    if (siteId === 'vancouver-opendata-facilities') {
+      const { getInstance } = require('./working-api-client');
+      const client = getInstance();
+      const facilities = await client.getVancouverFacilities();
+      
+      // Convert to activities format
+      return facilities.map(facility => ({
+        venue: facility.name,
+        address: facility.address,
+        coordinates: facility.location,
+        type: 'facility',
+        sport: 'multiple',
+        note: `Community centre - check schedule at ${facility.url || 'facility website'}`
+      }));
+    }
+
     const response = await fetch(method.endpoint, {
       headers: method.auth ? { 'Authorization': method.auth } : {}
     });
@@ -627,11 +666,24 @@ class DataAggregationSwarm extends EventEmitter {
     const seen = new Map();
 
     return games.filter(game => {
-      const key = `${game.venue?.name || ''}-${game.sport}-${new Date(game.startTime).toISOString()}`;
+      // Handle missing or invalid startTime
+      let timeKey = '';
+      if (game.startTime) {
+        try {
+          const date = new Date(game.startTime);
+          if (!isNaN(date.getTime())) {
+            timeKey = date.toISOString();
+          }
+        } catch (e) {
+          // Invalid date, use empty string
+        }
+      }
+      
+      const key = `${game.venue?.name || ''}-${game.sport || ''}-${timeKey}`;
       if (seen.has(key)) {
         // Keep the one with higher reliability
         const existing = seen.get(key);
-        if (game.reliability > existing.reliability) {
+        if ((game.reliability || 0) > (existing.reliability || 0)) {
           seen.set(key, game);
           return true;
         }

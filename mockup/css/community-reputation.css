@@ -1,0 +1,513 @@
+/* Community Reputation System Styles */
+
+/* Reputation Display */
+.reputation-summary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.reputation-score {
+  text-align: center;
+}
+
+.score-value {
+  display: block;
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.score-label {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 5px;
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.badge-icon {
+  font-size: 24px;
+}
+
+.badge-label {
+  font-weight: 500;
+}
+
+.reputation-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.rep-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.category-icon {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.category-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.category-label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Endorsement Modal */
+.endorse-modal .modal-content {
+  max-width: 500px;
+}
+
+.endorse-skills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.skill-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.skill-btn:hover {
+  border-color: #4CAF50;
+  background: #f5f5f5;
+}
+
+.skill-btn.selected {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+}
+
+.skill-icon {
+  font-size: 20px;
+}
+
+#endorse-message {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Ice Breaker Section */
+.ice-breaker-section {
+  background: #f9f9f9;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.ice-breaker-section h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.prompts-carousel {
+  position: relative;
+  height: 250px;
+  margin: 20px 0;
+}
+
+.prompt-card {
+  position: absolute;
+  width: 100%;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+}
+
+.prompt-card.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.prompt-category {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.prompt-text {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.prompt-response {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: none;
+  font-family: inherit;
+  margin-bottom: 15px;
+}
+
+.prompt-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-skip {
+  padding: 8px 20px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-skip:hover {
+  background: #f5f5f5;
+}
+
+.btn-share {
+  padding: 8px 30px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-share:hover {
+  background: #45a049;
+}
+
+.prompts-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background: #4CAF50;
+  width: 24px;
+  border-radius: 4px;
+}
+
+.ice-breaker-complete {
+  text-align: center;
+  padding: 40px;
+}
+
+/* Team Formation */
+.team-formation-modal .modal-content {
+  max-width: 600px;
+}
+
+.team-formation-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.team-formation-modal label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.team-formation-modal input,
+.team-formation-modal select,
+.team-formation-modal textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.time-slots label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}
+
+/* Team Recommendations */
+.team-recommendations {
+  margin-bottom: 30px;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.team-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.team-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.team-sport {
+  background: #4CAF50;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.team-info {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.team-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.team-members-preview {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.team-members-preview img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -10px;
+}
+
+.team-members-preview img:first-child {
+  margin-left: 0;
+}
+
+.team-members-preview .more {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.btn-join-team {
+  width: 100%;
+  padding: 10px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-join-team:hover {
+  background: #1976D2;
+}
+
+/* Social Graph Visualization */
+#social-graph-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.social-graph {
+  width: 100%;
+  height: 400px;
+}
+
+.social-graph .edge {
+  stroke: #ddd;
+  stroke-width: 2;
+}
+
+.social-graph .edge.endorsement {
+  stroke: #4CAF50;
+}
+
+.social-graph .edge.team_joined {
+  stroke: #2196F3;
+}
+
+.social-graph .edge.game_played {
+  stroke: #FF9800;
+}
+
+.social-graph .node circle {
+  fill: #2196F3;
+  stroke: white;
+  stroke-width: 3;
+}
+
+.social-graph .node.self circle {
+  fill: #4CAF50;
+}
+
+.social-graph .node.indirect circle {
+  fill: #9E9E9E;
+  opacity: 0.7;
+}
+
+.social-graph .node text {
+  font-size: 12px;
+  fill: #333;
+}
+
+.social-graph .reputation-text {
+  font-size: 10px;
+  fill: #666;
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background: #333;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transform: translateX(400px);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.notification.show {
+  transform: translateX(0);
+}
+
+.notification.success {
+  background: #4CAF50;
+}
+
+.notification.error {
+  background: #f44336;
+}
+
+.notification.info {
+  background: #2196F3;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .reputation-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .reputation-breakdown {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .endorse-skills {
+    grid-template-columns: 1fr;
+  }
+  
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .time-slots {
+    grid-template-columns: 1fr;
+  }
+  
+  .team-info {
+    flex-wrap: wrap;
+  }
+  
+  .social-graph {
+    height: 300px;
+  }
+}

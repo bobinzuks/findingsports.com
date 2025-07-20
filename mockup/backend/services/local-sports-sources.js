@@ -146,22 +146,22 @@ const localSportsSources = [
     }
   },
 
-  // OpenSports App Data
-  {
-    siteId: 'opensports-pickup',
-    domain: 'opensports.net',
-    name: 'OpenSports Pickup Games',
-    sport: 'multiple',
-    gameType: 'pickup',
-    method: {
-      type: 'api',
-      endpoint: 'https://api.opensports.net/v1/games',
-      params: {
-        type: 'pickup',
-        open: true
-      }
-    }
-  },
+  // OpenSports App Data - DISABLED (API no longer exists)
+  // {
+  //   siteId: 'opensports-pickup',
+  //   domain: 'opensports.net',
+  //   name: 'OpenSports Pickup Games',
+  //   sport: 'multiple',
+  //   gameType: 'pickup',
+  //   method: {
+  //     type: 'api',
+  //     endpoint: 'https://api.opensports.net/v1/games',
+  //     params: {
+  //       type: 'pickup',
+  //       open: true
+  //     }
+  //   }
+  // },
 
   // Meetup Sports Groups
   {
@@ -290,22 +290,22 @@ const localSportsSources = [
     }
   },
 
-  // Basketball Courts
-  {
-    siteId: 'courts-of-the-world',
-    domain: 'courtsoftheworld.com',
-    name: 'Courts of the World',
-    sport: 'basketball',
-    gameType: 'open-court',
-    method: {
-      type: 'api',
-      endpoint: 'https://courtsoftheworld.com/api/courts',
-      params: {
-        city: 'Vancouver',
-        type: 'outdoor'
-      }
-    }
-  },
+  // Basketball Courts - DISABLED (API returns invalid JSON)
+  // {
+  //   siteId: 'courts-of-the-world',
+  //   domain: 'courtsoftheworld.com',
+  //   name: 'Courts of the World',
+  //   sport: 'basketball',
+  //   gameType: 'open-court',
+  //   method: {
+  //     type: 'api',
+  //     endpoint: 'https://courtsoftheworld.com/api/courts',
+  //     params: {
+  //       city: 'Vancouver',
+  //       type: 'outdoor'
+  //     }
+  //   }
+  // },
 
   // Volleyball Courts
   {
@@ -338,31 +338,31 @@ const localSportsSources = [
     }
   },
 
-  // Local Sports Apps
-  {
-    siteId: 'javelin-app',
-    domain: 'javelin-app.com',
-    name: 'Javelin Sports App',
-    sport: 'multiple',
-    gameType: 'pickup',
-    method: {
-      type: 'api',
-      endpoint: 'https://api.javelin-app.com/games',
-      note: 'Local pickup games app'
-    }
-  },
+  // Local Sports Apps - DISABLED (APIs no longer exist)
+  // {
+  //   siteId: 'javelin-app',
+  //   domain: 'javelin-app.com',
+  //   name: 'Javelin Sports App',
+  //   sport: 'multiple',
+  //   gameType: 'pickup',
+  //   method: {
+  //     type: 'api',
+  //     endpoint: 'https://api.javelin-app.com/games',
+  //     note: 'Local pickup games app'
+  //   }
+  // },
 
-  {
-    siteId: 'playsportsapp',
-    domain: 'playsportsapp.com',
-    name: 'PlaySports App',
-    sport: 'multiple',
-    gameType: 'pickup',
-    method: {
-      type: 'api',
-      endpoint: 'https://api.playsportsapp.com/pickup-games'
-    }
-  },
+  // {
+  //   siteId: 'playsportsapp',
+  //   domain: 'playsportsapp.com',
+  //   name: 'PlaySports App',
+  //   sport: 'multiple',
+  //   gameType: 'pickup',
+  //   method: {
+  //     type: 'api',
+  //     endpoint: 'https://api.playsportsapp.com/pickup-games'
+  //   }
+  // },
 
   // Community Boards & Local Sites
   {
@@ -381,19 +381,19 @@ const localSportsSources = [
     }
   },
 
-  // Weather-Dependent Field Status
-  {
-    siteId: 'rainout-line',
-    domain: 'rainoutline.com',
-    name: 'Rainout Line Field Status',
-    sport: 'multiple',
-    gameType: 'open-field',
-    method: {
-      type: 'api',
-      endpoint: 'https://rainoutline.com/api/vancouver',
-      note: 'Real-time field conditions'
-    }
-  },
+  // Weather-Dependent Field Status - DISABLED (404 error)
+  // {
+  //   siteId: 'rainout-line',
+  //   domain: 'rainoutline.com',
+  //   name: 'Rainout Line Field Status',
+  //   sport: 'multiple',
+  //   gameType: 'open-field',
+  //   method: {
+  //     type: 'api',
+  //     endpoint: 'https://rainoutline.com/api/vancouver',
+  //     note: 'Real-time field conditions'
+  //   }
+  // },
 
   // School Gyms Open Hours
   {

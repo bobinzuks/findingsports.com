@@ -175,24 +175,30 @@ window.PlayNowPage = {
 
     // Filter activities by sport if needed
     let filteredActivities = {
-      happeningNow: activities.happeningNow,
-      startingSoon: activities.startingSoon,
-      openCourts: activities.openCourts,
-      pickupGames: activities.pickupGames
+      happeningNow: activities.happeningNow || [],
+      startingSoon: activities.startingSoon || [],
+      laterToday: activities.laterToday || [],
+      upcoming: activities.upcoming || [],
+      openCourts: activities.openCourts || [],
+      pickupGames: activities.pickupGames || []
     };
 
     if (sportFilter !== 'any') {
       filteredActivities = {
-        happeningNow: activities.happeningNow.filter(a => a.sport === sportFilter),
-        startingSoon: activities.startingSoon.filter(a => a.sport === sportFilter),
-        openCourts: activities.openCourts.filter(a => a.type === sportFilter),
-        pickupGames: activities.pickupGames.filter(a => a.sport === sportFilter)
+        happeningNow: (activities.happeningNow || []).filter(a => a.sport === sportFilter),
+        startingSoon: (activities.startingSoon || []).filter(a => a.sport === sportFilter),
+        laterToday: (activities.laterToday || []).filter(a => a.sport === sportFilter),
+        upcoming: (activities.upcoming || []).filter(a => a.sport === sportFilter),
+        openCourts: (activities.openCourts || []).filter(a => a.type === sportFilter),
+        pickupGames: (activities.pickupGames || []).filter(a => a.sport === sportFilter)
       };
     }
 
     const totalFiltered =
             filteredActivities.happeningNow.length +
             filteredActivities.startingSoon.length +
+            filteredActivities.laterToday.length +
+            filteredActivities.upcoming.length +
             filteredActivities.openCourts.length +
             filteredActivities.pickupGames.length;
 
@@ -244,6 +250,42 @@ window.PlayNowPage = {
       html += '</div></div>';
     }
 
+    // Later Today
+    if (filteredActivities.laterToday && filteredActivities.laterToday.length > 0) {
+      html += `
+                <div class="activity-section later-today">
+                    <h3 class="section-header">
+                        <span class="status-icon">🟠</span>
+                        Later Today (${filteredActivities.laterToday.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+
+      filteredActivities.laterToday.forEach(activity => {
+        html += this.createActivityCard(activity, 'later-today');
+      });
+
+      html += '</div></div>';
+    }
+
+    // Upcoming (Next 7 Days)
+    if (filteredActivities.upcoming && filteredActivities.upcoming.length > 0) {
+      html += `
+                <div class="activity-section upcoming">
+                    <h3 class="section-header">
+                        <span class="status-icon">📅</span>
+                        Upcoming This Week (${filteredActivities.upcoming.length})
+                    </h3>
+                    <div class="activity-list">
+            `;
+
+      filteredActivities.upcoming.forEach(activity => {
+        html += this.createActivityCard(activity, 'upcoming');
+      });
+
+      html += '</div></div>';
+    }
+
     // Open Courts
     if (filteredActivities.openCourts.length > 0) {
       html += `
@@ -287,9 +329,18 @@ window.PlayNowPage = {
   // Create activity card for drop-in activities
   createActivityCard(activity, type) {
     const sportEmoji = this.getSportEmoji(activity.sport);
-    const timeInfo = type === 'happening-now' ?
-      `Started ${activity.startedAgo}` :
-      `Starts in ${activity.startsIn}`;
+    let timeInfo;
+    if (type === 'happening-now') {
+      timeInfo = `Started ${activity.startedAgo}`;
+    } else if (type === 'starting-soon') {
+      timeInfo = `Starts in ${activity.startsIn}`;
+    } else if (type === 'later-today') {
+      timeInfo = `Later today at ${activity.timeString}`;
+    } else if (type === 'upcoming') {
+      timeInfo = activity.dayName ? `${activity.dayName} at ${activity.timeString}` : activity.dateString;
+    } else {
+      timeInfo = activity.timeString;
+    }
 
     return `
             <div class="activity-card ${type}" onclick="window.showActivityDetails(${JSON.stringify(activity).replace(/"/g, '&quot;')})">
@@ -481,10 +532,12 @@ window.PlayNowPage = {
 
     // Add markers for all activity types
     const allActivities = [
-      ...activities.happeningNow,
-      ...activities.startingSoon,
-      ...activities.openCourts,
-      ...activities.pickupGames
+      ...(activities.happeningNow || []),
+      ...(activities.startingSoon || []),
+      ...(activities.laterToday || []),
+      ...(activities.upcoming || []),
+      ...(activities.openCourts || []),
+      ...(activities.pickupGames || [])
     ];
 
     allActivities.forEach(activity => {

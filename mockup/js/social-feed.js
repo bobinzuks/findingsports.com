@@ -12,9 +12,13 @@ window.SocialFeedPage = {
   userLocation: null,
   userSport: null,
   currentLanguage: 'en',
+  i18n: null, // Reference to i18n service
 
   // Initialize the Social Feed page
   async initialize() {
+    // Get reference to i18n service
+    this.i18n = window.I18nService || window.i18n;
+    
     // Initialize WebSocket for real-time chat if not already connected
     if (window.wsClient && !window.wsClient.connected) {
       window.wsClient.connect();
@@ -31,6 +35,27 @@ window.SocialFeedPage = {
 
     // Load initial feed data
     await this.loadFeed();
+    
+    // Initialize mobile enhancements if on mobile
+    if (window.SocialFeedMobile && window.SocialFeedMobile.isMobile()) {
+      window.SocialFeedMobile.initialize();
+    }
+    
+    // Initialize onboarding for first-time users
+    if (window.OnboardingSystem) {
+      window.OnboardingSystem.initialize();
+    }
+    
+    // Initialize gamification system if logged in
+    if (!window.isGuest && window.Gamification) {
+      await window.Gamification.initialize();
+      window.Gamification.currentUserId = this.currentUserId;
+    }
+    
+    // Check if this is the first visit
+    if (!localStorage.getItem('firstVisit')) {
+      localStorage.setItem('firstVisit', new Date().toISOString());
+    }
   },
 
   // Auto-detect user location and sport preferences
@@ -254,6 +279,29 @@ window.SocialFeedPage = {
           } else {
             message.reactions.push({ emoji, count: 1, users: [userId] });
           }
+          
+          // Award points to message author for receiving positive reaction
+          if (window.Gamification && message.author.userId === this.currentUserId && 
+              ['👍', '❤️', '🙏', '💯'].includes(emoji)) {
+            window.Gamification.awardPoints(
+              { type: 'receive_reaction', emoji },
+              window.Gamification.POINTS.RECEIVE_REACTION,
+              'Received a positive reaction'
+            );
+            
+            // Check if message is now "helpful" (5+ positive reactions)
+            const positiveCount = message.reactions
+              .filter(r => ['👍', '❤️', '🙏', '💯'].includes(r.emoji))
+              .reduce((sum, r) => sum + r.count, 0);
+            
+            if (positiveCount === 5) {
+              window.Gamification.awardPoints(
+                { type: 'helpful_message', messageId },
+                window.Gamification.POINTS.HELPFUL_MESSAGE,
+                'Your message was marked as helpful'
+              );
+            }
+          }
         } else if (action === 'remove' && reaction) {
           reaction.count--;
           if (reaction.users) {
@@ -284,10 +332,10 @@ window.SocialFeedPage = {
                     <!-- Left Sidebar - Simplified -->
                     <div class="discord-sidebar">
                         <div class="sidebar-header">
-                            <h3>FindingSports Community</h3>
+                            <h3>${this.i18n ? this.i18n.t('social.title') : 'FindingSports Community'}</h3>
                             <div style="font-size: 12px; color: #999; margin-top: 5px;">
-                                📍 ${this.userLocation ? this.userLocation.charAt(0).toUpperCase() + this.userLocation.slice(1) : 'Detecting location...'}
-                                ${this.userSport && this.userSport !== 'general' ? `| 🏀 ${this.userSport.charAt(0).toUpperCase() + this.userSport.slice(1)}` : ''}
+                                📍 ${this.userLocation ? this.userLocation.charAt(0).toUpperCase() + this.userLocation.slice(1) : (this.i18n ? this.i18n.t('location.detecting') : 'Detecting location...')}
+                                ${this.userSport && this.userSport !== 'general' ? `| 🏀 ${this.i18n ? this.i18n.getSportName(this.userSport) : this.userSport.charAt(0).toUpperCase() + this.userSport.slice(1)}` : ''}
                             </div>
                         </div>
                         
@@ -295,11 +343,11 @@ window.SocialFeedPage = {
                         <div class="channel-section">
                             <div class="channel-header">
                                 <span class="collapse-icon">▼</span>
-                                CURRENT CHANNEL
+                                ${this.i18n ? this.i18n.t('social.channels').toUpperCase() : 'CURRENT CHANNEL'}
                             </div>
                             <div class="channels-list">
                                 <div class="channel-item active">
-                                    <span class="channel-icon">#</span> ${this.currentChannel}
+                                    <span class="channel-icon">#</span> ${this.getTranslatedChannelName(this.currentChannel)}
                                 </div>
                             </div>
                         </div>
@@ -344,6 +392,30 @@ window.SocialFeedPage = {
                             </div>
                         </div>
 
+                        <!-- Gamification Section -->
+                        ${!window.isGuest ? `
+                        <div class="channel-section">
+                            <div class="channel-header">
+                                <span class="collapse-icon">▼</span>
+                                REWARDS & PROGRESS
+                            </div>
+                            <div class="channels-list">
+                                <div class="channel-item ${this.currentView === 'gamification' ? 'active' : ''}" 
+                                     onclick="window.SocialFeedPage.switchToGamification()">
+                                    <span class="channel-icon">🏆</span> my-progress
+                                </div>
+                                <div class="channel-item" 
+                                     onclick="window.SocialFeedPage.showLeaderboards()">
+                                    <span class="channel-icon">📊</span> leaderboards
+                                </div>
+                                <div class="channel-item" 
+                                     onclick="window.SocialFeedPage.showDailyChallenges()">
+                                    <span class="channel-icon">🎯</span> daily-challenges
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
                         <!-- Settings -->
                         <div class="channel-section" style="margin-top: auto; padding-bottom: 20px;">
                             <div class="channel-header">
@@ -360,7 +432,9 @@ window.SocialFeedPage = {
 
                     <!-- Main Content Area -->
                     <div class="discord-main">
-                        ${this.currentView === 'chat' ? this.renderChatView() : this.renderMarketplaceView()}
+                        ${this.currentView === 'chat' ? this.renderChatView() : 
+                          this.currentView === 'marketplace' ? this.renderMarketplaceView() :
+                          this.currentView === 'gamification' ? this.renderGamificationView() : ''}
                     </div>
 
                     <!-- Right Sidebar - Online Users -->
@@ -412,7 +486,7 @@ window.SocialFeedPage = {
                             type="text" 
                             id="messageInput" 
                             class="message-input" 
-                            placeholder="Message #${this.currentChannel}"
+                            placeholder="${this.i18n ? this.i18n.t('social.message.placeholder') : `Message #${this.currentChannel}`}"
                             maxlength="500"
                             onkeydown="window.SocialFeedPage.handleKeyDown(event)"
                             oninput="window.SocialFeedPage.handleTyping()"
@@ -448,14 +522,14 @@ window.SocialFeedPage = {
   renderMarketplaceView() {
     return `
             <div class="marketplace-header">
-                <h2>Sports Marketplace</h2>
+                <h2>${this.i18n ? this.i18n.t('marketplace.title') : 'Sports Marketplace'}</h2>
                 <div class="marketplace-filters">
                     <select id="marketplaceCategory" class="marketplace-select" onchange="window.SocialFeedPage.filterMarketplace()">
-                        <option value="all">All Categories</option>
-                        <option value="equipment-sale">Equipment for Sale</option>
-                        <option value="equipment-wanted">Equipment Wanted</option>
-                        <option value="carpool">Carpooling</option>
-                        <option value="team-looking">Team Looking for Players</option>
+                        <option value="all">${this.i18n ? this.i18n.t('marketplace.allCategories') : 'All Categories'}</option>
+                        <option value="equipment-sale">${this.i18n ? this.i18n.t('marketplace.forSale') : 'Equipment for Sale'}</option>
+                        <option value="equipment-wanted">${this.i18n ? this.i18n.t('marketplace.wanted') : 'Equipment Wanted'}</option>
+                        <option value="carpool">${this.i18n ? this.i18n.t('marketplace.carpool') : 'Carpooling'}</option>
+                        <option value="team-looking">${this.i18n ? this.i18n.t('marketplace.teamLooking') : 'Team Looking for Players'}</option>
                     </select>
                     <select id="marketplaceSport" class="marketplace-select" onchange="window.SocialFeedPage.filterMarketplace()">
                         <option value="all">All Sports</option>
@@ -572,6 +646,132 @@ window.SocialFeedPage = {
     this.currentView = 'marketplace';
     this.render();
   },
+  
+  // Switch to gamification view
+  switchToGamification() {
+    this.currentView = 'gamification';
+    this.render();
+  },
+  
+  // Show leaderboards modal
+  async showLeaderboards() {
+    if (!window.Gamification) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'leaderboard-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: #2f3136;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      color: white;
+    `;
+    
+    // Load leaderboard data
+    const weeklyLeaders = await window.Gamification.getLeaderboard('weekly_points');
+    const helpfulLeaders = await window.Gamification.getLeaderboard('helpful_members');
+    
+    content.innerHTML = `
+      <h2 style="margin-bottom: 20px;">Community Leaderboards</h2>
+      
+      <div class="leaderboard-section">
+        <h3>📈 Weekly Points Leaders</h3>
+        <div class="leaderboard-list">
+          ${weeklyLeaders.slice(0, 10).map((user, index) => `
+            <div class="leaderboard-item">
+              <span class="rank">#${index + 1}</span>
+              <span class="user-name">${user.name}</span>
+              <span class="score">${user.score} pts</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div class="leaderboard-section" style="margin-top: 20px;">
+        <h3>🤝 Most Helpful Members</h3>
+        <div class="leaderboard-list">
+          ${helpfulLeaders.slice(0, 10).map((user, index) => `
+            <div class="leaderboard-item">
+              <span class="rank">#${index + 1}</span>
+              <span class="user-name">${user.name}</span>
+              <span class="score">${user.score} helped</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <button onclick="document.querySelector('.leaderboard-modal').remove()" 
+              style="width: 100%; padding: 12px; background: #5865f2; border: none; 
+                     border-radius: 4px; color: white; font-weight: 600; cursor: pointer; 
+                     margin-top: 20px;">
+        Close
+      </button>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+  },
+  
+  // Show daily challenges modal
+  showDailyChallenges() {
+    if (!window.Gamification) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'challenges-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: #2f3136;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      color: white;
+    `;
+    
+    content.innerHTML = `
+      <h2 style="margin-bottom: 20px;">Today's Challenges</h2>
+      ${window.Gamification.renderDashboard()}
+      <button onclick="document.querySelector('.challenges-modal').remove()" 
+              style="width: 100%; padding: 12px; background: #5865f2; border: none; 
+                     border-radius: 4px; color: white; font-weight: 600; cursor: pointer; 
+                     margin-top: 20px;">
+        Close
+      </button>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+  },
 
   // Load channel messages
   loadChannelMessages(channel) {
@@ -586,6 +786,24 @@ window.SocialFeedPage = {
 
   // Get demo messages based on channel
   getDemoMessages(channel) {
+    // Check if sample content generator is available and should show samples
+    if (window.SampleContentGenerator && window.SampleContentGenerator.shouldShowSampleContent()) {
+      const sampleMessages = window.SampleContentGenerator.initializeForChannel(channel);
+      if (sampleMessages && sampleMessages.length > 0) {
+        // Add a welcome message at the beginning
+        sampleMessages.unshift({
+          id: 'welcome-' + channel,
+          author: { name: 'System', avatar: '🤖' },
+          message: `Welcome to #${channel}! This is a sample of what the community looks like.`,
+          timestamp: new Date(Date.now() - (1000 * 60 * 60 * 24)), // 1 day ago
+          reactions: [],
+          isSample: true
+        });
+        return sampleMessages;
+      }
+    }
+    
+    // Fallback to basic demo messages
     const baseMessages = {
       general: [
         {
@@ -675,6 +893,12 @@ window.SocialFeedPage = {
     if (!container) {
       return;
     }
+    
+    // Check if any messages are samples and show banner
+    const hasSampleContent = messages.some(msg => msg.isSample);
+    if (hasSampleContent && window.SampleContentGenerator && window.SampleContentGenerator.shouldShowSampleContent()) {
+      window.SampleContentGenerator.showSampleContentBanner(container);
+    }
 
     // For guest users, show blurred messages
     const isBlurred = window.isGuest;
@@ -682,7 +906,7 @@ window.SocialFeedPage = {
     container.innerHTML = messages
       .map(
         msg => `
-            <div class="discord-message ${isBlurred ? 'blurred' : ''}" data-message-id="${msg.id}">
+            <div class="discord-message ${isBlurred ? 'blurred' : ''}" data-message-id="${msg.id}" ${msg.isSample ? 'data-sample="true"' : ''}>
                 <div class="message-avatar">${msg.author.avatar}</div>
                 <div class="message-content-wrapper">
                     <div class="message-header">
@@ -729,6 +953,12 @@ window.SocialFeedPage = {
 
   // Format timestamp Discord style
   formatTimestamp(timestamp) {
+    if (this.i18n) {
+      // Use i18n service for formatting
+      return this.i18n.formatRelativeTime(timestamp);
+    }
+    
+    // Fallback to original formatting
     const now = new Date();
     const date = new Date(timestamp);
     const diff = now - date;
@@ -995,6 +1225,37 @@ window.SocialFeedPage = {
 
     // Update UI
     this.appendMessage(newMessage);
+    
+    // Track message count for feature unlocking
+    const messageCount = parseInt(localStorage.getItem('messageCount') || '0');
+    localStorage.setItem('messageCount', (messageCount + 1).toString());
+    
+    // Check for feature unlocks
+    if (window.OnboardingSystem) {
+      window.OnboardingSystem.checkFeatureProgress();
+    }
+    
+    // Track gamification action
+    if (window.Gamification && !window.isGuest) {
+      // Award points for sending message
+      window.Gamification.awardPoints(
+        { type: 'send_message', channel: this.currentChannel },
+        window.Gamification.POINTS.SEND_MESSAGE,
+        'Sent a message'
+      );
+      
+      // Check if it's the first message of the day
+      const lastMessageDate = localStorage.getItem('lastMessageDate');
+      const today = new Date().toDateString();
+      if (lastMessageDate !== today) {
+        localStorage.setItem('lastMessageDate', today);
+        window.Gamification.awardPoints(
+          { type: 'daily_chat' },
+          window.Gamification.POINTS.DAILY_CHAT,
+          'First message of the day'
+        );
+      }
+    }
   },
 
   // Toggle reaction
@@ -1012,6 +1273,16 @@ window.SocialFeedPage = {
         emoji,
         userId: this.currentUserId
       });
+    }
+    
+    // Track gamification action
+    if (window.Gamification) {
+      // Track that user gave a reaction (helping others)
+      window.Gamification.awardPoints(
+        { type: 'give_reaction', emoji },
+        1,
+        'Reacted to a message'
+      );
     }
   },
 
@@ -1106,6 +1377,15 @@ window.SocialFeedPage = {
 
   // Load marketplace items
   loadMarketplaceItems() {
+    // Check if we should show sample content
+    if (window.SampleContentGenerator && window.SampleContentGenerator.shouldShowSampleContent()) {
+      const sampleItems = window.SampleContentGenerator.initializeMarketplace();
+      if (sampleItems && sampleItems.length > 0) {
+        this.displayMarketplaceItems(sampleItems);
+        return;
+      }
+    }
+    
     const items = [
       {
         id: 1,
@@ -1166,11 +1446,17 @@ window.SocialFeedPage = {
     if (!grid) {
       return;
     }
+    
+    // Check if showing sample content
+    const hasSampleContent = items.some(item => item.isSample);
+    if (hasSampleContent && window.SampleContentGenerator && window.SampleContentGenerator.shouldShowSampleContent()) {
+      window.SampleContentGenerator.showSampleContentBanner(grid.parentElement);
+    }
 
     grid.innerHTML = items
       .map(
         item => `
-            <div class="marketplace-card" data-category="${item.category}" data-sport="${item.sport}" data-location="${item.location}">
+            <div class="marketplace-card" data-category="${item.category}" data-sport="${item.sport}" data-location="${item.location}" ${item.isSample ? 'data-sample="true"' : ''}>
                 <div class="marketplace-card-header">
                     <div class="item-image">${item.image}</div>
                     <div class="item-category">${this.formatCategory(item.category)}</div>
@@ -1179,9 +1465,9 @@ window.SocialFeedPage = {
                     <h3 class="item-title">${item.title}</h3>
                     <p class="item-description">${item.description}</p>
                     <div class="item-details">
-                        <span class="item-price">${item.price}</span>
+                        <span class="item-price">${this.formatMarketplacePrice(item)}</span>
                         <span class="item-location">${item.location}</span>
-                        <span class="item-sport">${item.sport}</span>
+                        <span class="item-sport">${this.i18n ? this.i18n.getSportName(item.sport) : item.sport}</span>
                     </div>
                     <div class="item-footer">
                         <span class="item-seller">Posted by ${item.seller}</span>
@@ -1281,6 +1567,59 @@ window.SocialFeedPage = {
     return timestamp.toLocaleDateString();
   },
 
+  // Render gamification view
+  renderGamificationView() {
+    if (!window.Gamification) {
+      return '<div class="gamification-loading">Loading rewards system...</div>';
+    }
+    
+    return `
+      <div class="gamification-header">
+        <h2>Your Progress & Rewards</h2>
+      </div>
+      
+      <div class="gamification-content">
+        ${window.Gamification.renderDashboard()}
+        
+        <div class="unlocked-features" style="margin-top: 20px;">
+          <h3>Unlocked Features</h3>
+          <div class="features-grid">
+            ${window.Gamification.userStats.unlocked_features.map(featureId => {
+              const feature = window.Gamification.UNLOCKABLES[featureId.toUpperCase()];
+              return feature ? `
+                <div class="feature-card unlocked">
+                  <span class="feature-icon">${feature.icon}</span>
+                  <h4>${feature.name}</h4>
+                  <p>${feature.description}</p>
+                </div>
+              ` : '';
+            }).join('')}
+          </div>
+        </div>
+        
+        <div class="locked-features" style="margin-top: 20px;">
+          <h3>Features to Unlock</h3>
+          <div class="features-grid">
+            ${Object.values(window.Gamification.UNLOCKABLES)
+              .filter(f => !window.Gamification.userStats.unlocked_features.includes(f.id))
+              .slice(0, 6)
+              .map(feature => `
+                <div class="feature-card locked">
+                  <span class="feature-icon">${feature.icon}</span>
+                  <h4>${feature.name}</h4>
+                  <p>${feature.description}</p>
+                  <div class="requirement">
+                    ${feature.requirement.points ? `${feature.requirement.points} points` : ''}
+                    ${feature.requirement.badge ? `${feature.requirement.badge} badge` : ''}
+                  </div>
+                </div>
+              `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  },
+  
   // Show feedback message
   showFeedback(message, type) {
     const feedback = document.createElement('div');
@@ -1413,5 +1752,51 @@ window.SocialFeedPage = {
     }
 
     this.showFeedback(`Preferences saved! Joined #${newChannel}`, 'success');
+  },
+  
+  // Get translated channel name
+  getTranslatedChannelName(channel) {
+    if (!this.i18n) return channel;
+    
+    // Check if it's a sport channel
+    const sportKey = `sport.${channel}`;
+    const sportName = this.i18n.getSportName(channel);
+    
+    // If we found a translation, use it
+    if (sportName !== channel) {
+      return sportName;
+    }
+    
+    // Otherwise return the channel name as-is (for location channels)
+    return channel.charAt(0).toUpperCase() + channel.slice(1);
+  },
+  
+  // Format marketplace price with localized currency
+  formatMarketplacePrice(item) {
+    if (!this.i18n) return item.price;
+    
+    // Check if price is a number
+    if (typeof item.price === 'number') {
+      return this.i18n.formatCurrency(item.price);
+    }
+    
+    // Check for special cases
+    if (item.price === 'Free' || item.price === 'free') {
+      return this.i18n.t('marketplace.free');
+    }
+    
+    if (item.price === 'Negotiable' || item.price.includes('negotiable')) {
+      return this.i18n.t('marketplace.negotiable');
+    }
+    
+    // Try to extract number from string (e.g., "$80" -> 80)
+    const match = item.price.match(/[\d.]+/);
+    if (match) {
+      const amount = parseFloat(match[0]);
+      return this.i18n.formatCurrency(amount);
+    }
+    
+    // Return as-is if we can't parse it
+    return item.price;
   }
 };

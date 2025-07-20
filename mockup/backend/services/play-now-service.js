@@ -37,7 +37,7 @@ class PlayNowService extends EventEmitter {
       useRealData: true, // Use real data by default
       useSwarm: true, // Enable swarm for additional sources
       fallbackToMock: true, // Use mock data if all else fails
-      swarmTimeout: 5000 // 5 second timeout for swarm
+      swarmTimeout: 15000 // Increased to 15 seconds for better data coverage
     };
   }
 
@@ -429,6 +429,115 @@ class PlayNowService extends EventEmitter {
           address: '3360 Victoria Dr, Vancouver',
           coordinates: { lat: 49.2566, lng: -123.0656 }
         }
+      },
+      // Additional venues for better coverage
+      {
+        centre: 'Delbrook Community Recreation Centre',
+        sport: 'basketball',
+        day: 'Thursday',
+        time: '7:00pm-9:00pm',
+        type: 'Adult Drop-in Basketball',
+        venue: {
+          name: 'Delbrook Community Recreation Centre',
+          address: '600 West Queens Rd, North Vancouver',
+          coordinates: { lat: 49.3337, lng: -123.1051 }
+        }
+      },
+      {
+        centre: 'Ron McLean Park',
+        sport: 'soccer',
+        day: 'Wednesday',
+        time: '6:00pm-8:00pm',
+        type: 'Pickup Soccer',
+        venue: {
+          name: 'Ron McLean Park',
+          address: '1000 East 22nd Ave, Vancouver',
+          coordinates: { lat: 49.2525, lng: -123.0790 }
+        }
+      },
+      {
+        centre: 'Burnaby Lake Sports Complex',
+        sport: 'basketball',
+        day: 'Friday',
+        time: '6:30pm-8:30pm',
+        type: 'Drop-in Basketball',
+        venue: {
+          name: 'Burnaby Lake Sports Complex',
+          address: '3676 Kensington Ave, Burnaby',
+          coordinates: { lat: 49.2389, lng: -122.9465 }
+        }
+      },
+      {
+        centre: 'Minoru Centre for Active Living',
+        sport: 'badminton',
+        day: 'Saturday',
+        time: '10:00am-12:00pm',
+        type: 'All Ages Drop-in Badminton',
+        venue: {
+          name: 'Minoru Centre for Active Living',
+          address: '7191 Granville Ave, Richmond',
+          coordinates: { lat: 49.1658, lng: -123.1369 }
+        }
+      },
+      {
+        centre: 'Surrey Sport & Leisure Complex',
+        sport: 'volleyball',
+        day: 'Sunday',
+        time: '2:00pm-4:00pm',
+        type: 'Family Drop-in Volleyball',
+        venue: {
+          name: 'Surrey Sport & Leisure Complex',
+          address: '16555 Fraser Hwy, Surrey',
+          coordinates: { lat: 49.1021, lng: -122.7897 }
+        }
+      },
+      {
+        centre: 'Killarney Community Centre',
+        sport: 'basketball',
+        day: 'Tuesday',
+        time: '6:00pm-8:00pm',
+        type: 'Youth/Adult Basketball',
+        venue: {
+          name: 'Killarney Community Centre',
+          address: '6260 Killarney St, Vancouver',
+          coordinates: { lat: 49.2297, lng: -123.0442 }
+        }
+      },
+      {
+        centre: 'West End Community Centre',
+        sport: 'volleyball',
+        day: 'Thursday',
+        time: '7:30pm-9:30pm',
+        type: 'LGBTQ+ Friendly Drop-in Volleyball',
+        venue: {
+          name: 'West End Community Centre',
+          address: '870 Denman St, Vancouver',
+          coordinates: { lat: 49.2904, lng: -123.1392 }
+        }
+      },
+      {
+        centre: 'Creekside Community Centre',
+        sport: 'basketball',
+        day: 'Monday',
+        time: '5:30pm-7:30pm',
+        type: 'Open Gym Basketball',
+        venue: {
+          name: 'Creekside Community Centre',
+          address: '1 Athletes Way, Vancouver',
+          coordinates: { lat: 49.2717, lng: -123.1044 }
+        }
+      },
+      {
+        centre: 'Confederation Park',
+        sport: 'tennis',
+        day: 'Saturday',
+        time: '9:00am-11:00am',
+        type: 'Drop-in Tennis Doubles',
+        venue: {
+          name: 'Confederation Park',
+          address: '200 Willingdon Ave, Burnaby',
+          coordinates: { lat: 49.2918, lng: -123.0050 }
+        }
       }
     ];
 
@@ -501,7 +610,7 @@ class PlayNowService extends EventEmitter {
      */
   async getPlayNowActivities(userLocation, options = {}) {
     const {
-      radiusKm = 10,
+      radiusKm = 20, // Expanded from 10km to 20km for better coverage
       timeWindowHours = 2,
       includeFuture = true,
       includeOpenCourts = true,
@@ -596,7 +705,7 @@ class PlayNowService extends EventEmitter {
      */
   async getRealActivities(userLocation, options = {}) {
     const {
-      radiusKm = 10,
+      radiusKm = 20, // Expanded from 10km to 20km for better coverage
       includeOpenCourts = true,
       includePickupGames = true
     } = options;
@@ -606,6 +715,7 @@ class PlayNowService extends EventEmitter {
       happeningNow: [],
       startingSoon: [],
       laterToday: [],
+      upcoming: [], // Activities in the next 7 days
       openCourts: [],
       pickupGames: []
     };
@@ -649,6 +759,8 @@ class PlayNowService extends EventEmitter {
               activities.startingSoon.push(activityData);
             } else if (activityStatus.status === 'later-today') {
               activities.laterToday.push(activityData);
+            } else if (activityStatus.status === 'upcoming') {
+              activities.upcoming.push(activityData);
             }
           }
         });
@@ -666,7 +778,7 @@ class PlayNowService extends EventEmitter {
     }
 
     // Sort by distance
-    ['happeningNow', 'startingSoon', 'laterToday'].forEach(category => {
+    ['happeningNow', 'startingSoon', 'laterToday', 'upcoming'].forEach(category => {
       activities[category].sort((a, b) => a.distanceValue - b.distanceValue);
     });
 
@@ -1030,7 +1142,7 @@ class PlayNowService extends EventEmitter {
      */
   async getMockActivities(userLocation, options = {}) {
     const {
-      radiusKm = 10,
+      radiusKm = 20, // Expanded from 10km to 20km for better coverage
       includeOpenCourts = true
     } = options;
 
@@ -1039,6 +1151,7 @@ class PlayNowService extends EventEmitter {
       happeningNow: [],
       startingSoon: [],
       laterToday: [],
+      upcoming: [], // Activities in the next 7 days
       openCourts: [],
       pickupGames: []
     };
@@ -1082,6 +1195,8 @@ class PlayNowService extends EventEmitter {
               activities.startingSoon.push(activityData);
             } else if (activityStatus.status === 'later-today') {
               activities.laterToday.push(activityData);
+            } else if (activityStatus.status === 'upcoming') {
+              activities.upcoming.push(activityData);
             }
           }
         });
@@ -1097,7 +1212,7 @@ class PlayNowService extends EventEmitter {
     activities.pickupGames = this.getPickupGames(userLocation, radiusKm);
 
     // Sort by distance
-    ['happeningNow', 'startingSoon', 'laterToday'].forEach(category => {
+    ['happeningNow', 'startingSoon', 'laterToday', 'upcoming'].forEach(category => {
       activities[category].sort((a, b) => a.distanceValue - b.distanceValue);
     });
 
@@ -1111,17 +1226,28 @@ class PlayNowService extends EventEmitter {
     const dayOfWeek = now.getDay();
     const currentHour = now.getHours() + now.getMinutes() / 60;
 
-    if (!activity.schedule.days.includes(dayOfWeek)) {
-      // Check if it's later today
-      const nextToday = activity.schedule.days.find(d => d === dayOfWeek);
-      if (nextToday !== undefined && activity.schedule.startHour > currentHour) {
-        return {
-          status: 'later-today',
-          timeString: `${this.formatHour(activity.schedule.startHour)} - ${this.formatHour(activity.schedule.endHour)}`,
-          startTime: this.getTimeToday(activity.schedule.startHour),
-          endTime: this.getTimeToday(activity.schedule.endHour),
-          startsIn: this.getTimeUntil(activity.schedule.startHour, currentHour)
-        };
+    // First check if it's today
+    if (activity.schedule.days.includes(dayOfWeek)) {
+      // Handle today's activities (existing logic continues below)
+    } else {
+      // Check upcoming days (next 7 days)
+      for (let daysAhead = 1; daysAhead <= 7; daysAhead++) {
+        const futureDay = (dayOfWeek + daysAhead) % 7;
+        if (activity.schedule.days.includes(futureDay)) {
+          const dayName = this.getDayName(futureDay);
+          const daysText = daysAhead === 1 ? 'Tomorrow' : 
+                          daysAhead === 2 ? 'Day after tomorrow' : 
+                          `${dayName} (${daysAhead} days)`;
+          
+          return {
+            status: 'upcoming',
+            timeString: `${this.formatHour(activity.schedule.startHour)} - ${this.formatHour(activity.schedule.endHour)}`,
+            dayString: daysText,
+            daysAway: daysAhead,
+            startTime: this.getFutureTime(daysAhead, activity.schedule.startHour),
+            endTime: this.getFutureTime(daysAhead, activity.schedule.endHour)
+          };
+        }
       }
       return null;
     }
@@ -1310,6 +1436,18 @@ class PlayNowService extends EventEmitter {
   /**
      * Helper functions
      */
+  getDayName(dayNum) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayNum];
+  }
+
+  getFutureTime(daysAhead, hour) {
+    const future = new Date();
+    future.setDate(future.getDate() + daysAhead);
+    future.setHours(Math.floor(hour), (hour % 1) * 60, 0, 0);
+    return future;
+  }
+
   calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Earth's radius in km
     const dLat = (lat2 - lat1) * Math.PI / 180;

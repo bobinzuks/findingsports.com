@@ -1,0 +1,307 @@
+/* Gamification System Styles */
+
+/* Feature Cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.feature-card {
+  background: #40444b;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card.unlocked {
+  background: linear-gradient(135deg, #5865f2, #7289da);
+  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.feature-card.locked {
+  opacity: 0.7;
+  border: 2px dashed #4a4d52;
+}
+
+.feature-card.locked::before {
+  content: '🔒';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 20px;
+  opacity: 0.5;
+}
+
+.feature-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.feature-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: white;
+}
+
+.feature-card p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  opacity: 0.9;
+  color: #dcddde;
+}
+
+.requirement {
+  font-size: 12px;
+  color: #ffd700;
+  font-weight: 600;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Leaderboard Styles */
+.leaderboard-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: #dcddde;
+}
+
+.leaderboard-list {
+  background: #40444b;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 4px 0;
+  transition: background 0.2s;
+}
+
+.leaderboard-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-item .rank {
+  font-weight: bold;
+  font-size: 18px;
+  width: 40px;
+  color: #ffd700;
+}
+
+.leaderboard-item:nth-child(1) .rank {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.leaderboard-item:nth-child(2) .rank {
+  color: #c0c0c0;
+}
+
+.leaderboard-item:nth-child(3) .rank {
+  color: #cd7f32;
+}
+
+.leaderboard-item .user-name {
+  flex: 1;
+  font-size: 16px;
+  color: white;
+}
+
+.leaderboard-item .score {
+  font-weight: 600;
+  color: #7289da;
+  font-size: 16px;
+}
+
+/* Gamification Header */
+.gamification-header {
+  padding: 20px;
+  border-bottom: 1px solid #40444b;
+}
+
+.gamification-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 24px;
+}
+
+.gamification-content {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+/* Welcome new user prompt */
+.welcome-prompt {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: #5865f2;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.welcome-prompt:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-prompt .icon {
+  font-size: 24px;
+}
+
+.welcome-prompt .text {
+  flex: 1;
+}
+
+.welcome-prompt .points {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+/* Helper indicator for users looking for games */
+.looking-for-game-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: #43b581;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.looking-for-game-indicator::before {
+  content: '🎯';
+  font-size: 14px;
+}
+
+/* Helpful message indicator */
+.helpful-message {
+  position: relative;
+}
+
+.helpful-message::after {
+  content: '⭐ Helpful';
+  position: absolute;
+  top: -20px;
+  right: 0;
+  background: #ffd700;
+  color: #2f3136;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Achievement animations */
+@keyframes achievementPop {
+  0% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.achievement-unlocked {
+  animation: achievementPop 0.5s ease-out;
+}
+
+/* Progress indicators in user cards */
+.user-level-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #2f3136;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+/* Streak indicator */
+.streak-badge {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #ff6b6b;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-badge::before {
+  content: '🔥';
+}
+
+/* Gamification loading */
+.gamification-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #b9bbbe;
+  font-size: 18px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .leaderboard-item {
+    padding: 8px;
+  }
+  
+  .leaderboard-item .rank {
+    width: 30px;
+    font-size: 16px;
+  }
+  
+  .leaderboard-item .user-name,
+  .leaderboard-item .score {
+    font-size: 14px;
+  }
+}

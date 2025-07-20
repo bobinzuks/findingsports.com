@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Test Dashboard - Social Feed Optimization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .dashboard-header {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard-header h1 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .test-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .test-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .status-paused {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .variant-list {
+            margin: 1rem 0;
+        }
+        
+        .variant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .variant-item:hover {
+            border-color: #3498db;
+        }
+        
+        .variant-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .variant-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: #e0e0e0;
+        }
+        
+        .variant-metrics {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .metric-label {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+        }
+        
+        .winner-badge {
+            background: #27ae60;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .test-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        .btn-secondary:hover {
+            background: #bdc3c7;
+        }
+        
+        .summary-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .summary-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .implementation-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .metric-chart {
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            margin-top: 1rem;
+        }
+        
+        .insights-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .insights-box h4 {
+            color: #2980b9;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <h1>🧪 A/B Test Dashboard</h1>
+            <p>Social Feed Engagement Optimization Experiments</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Summary Section -->
+        <section class="summary-section">
+            <h2>Overall Performance</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">5</div>
+                    <div class="summary-label">Active Tests</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">12,450</div>
+                    <div class="summary-label">Total Users</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">+23.5%</div>
+                    <div class="summary-label">Avg. Engagement Lift</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">98.2%</div>
+                    <div class="summary-label">Statistical Confidence</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Tests -->
+        <h2 style="margin-bottom: 1.5rem;">Active Experiments</h2>
+        <div class="test-grid">
+            <!-- Test 1: Tab Visual Indicators -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 class="test-name">Tab Visual Indicators</h3>
+                    <span class="test-status status-active">Active</span>
+                </div>
+                
+                <div class="variant-list">
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Badges</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">68%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">3.2s</span>
+                                <span class="metric-label">Time to Click</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item" style="border-color: #27ae60;">
+                        <div class="variant-name">
+                            <span>Dots</span>
+                            <span class="variant-badge">25%</span>
+                            <span class="winner-badge">WINNER</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">82%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">2.1s</span>
+                                <span class="metric-label">Time to Click</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Text</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">45%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">5.4s</span>
+                                <span class="metric-label">Time to Click</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Glow</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">71%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">2.8s</span>
+                                <span class="metric-label">Time to Click</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-chart">
+                    📊 Conversion Rate Over Time Chart
+                </div>
+                
+                <div class="test-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Export Data</button>
+                </div>
+            </div>
+
+            <!-- Test 2: Social Prompt Timing -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 class="test-name">Social Prompt Timing</h3>
+                    <span class="test-status status-active">Active</span>
+                </div>
+                
+                <div class="variant-list">
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Immediate</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">12%</span>
+                                <span class="metric-label">Conversion</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">78%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>After 5 min</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">28%</span>
+                                <span class="metric-label">Conversion</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">45%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item" style="border-color: #27ae60;">
+                        <div class="variant-name">
+                            <span>After First Game</span>
+                            <span class="variant-badge">25%</span>
+                            <span class="winner-badge">LEADING</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">42%</span>
+                                <span class="metric-label">Conversion</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">23%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>On Idle</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">35%</span>
+                                <span class="metric-label">Conversion</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">31%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insights-box">
+                    <h4>💡 Insight</h4>
+                    <p>Showing the prompt after users view their first game results in 3.5x higher conversion rate compared to immediate display.</p>
+                </div>
+                
+                <div class="test-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Pause Test</button>
+                </div>
+            </div>
+
+            <!-- Test 3: Empty State Messages -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 class="test-name">Empty State Messages</h3>
+                    <span class="test-status status-active">Active</span>
+                </div>
+                
+                <div class="variant-list">
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Friendly</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">15%</span>
+                                <span class="metric-label">Message Sent</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">45%</span>
+                                <span class="metric-label">Bounce Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Actionable</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">22%</span>
+                                <span class="metric-label">Message Sent</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">38%</span>
+                                <span class="metric-label">Bounce Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Social Proof</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">28%</span>
+                                <span class="metric-label">Message Sent</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">32%</span>
+                                <span class="metric-label">Bounce Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item" style="border-color: #27ae60;">
+                        <div class="variant-name">
+                            <span>Gamified</span>
+                            <span class="variant-badge">25%</span>
+                            <span class="winner-badge">WINNER</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">41%</span>
+                                <span class="metric-label">Message Sent</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">24%</span>
+                                <span class="metric-label">Bounce Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Export Data</button>
+                </div>
+            </div>
+
+            <!-- Test 4: Feature Reveal Strategy -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 class="test-name">Feature Reveal Strategy</h3>
+                    <span class="test-status status-active">Active</span>
+                </div>
+                
+                <div class="variant-list">
+                    <div class="variant-item" style="border-color: #27ae60;">
+                        <div class="variant-name">
+                            <span>Progressive</span>
+                            <span class="variant-badge">25%</span>
+                            <span class="winner-badge">LEADING</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">89%</span>
+                                <span class="metric-label">Discovery</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">72%</span>
+                                <span class="metric-label">7d Retention</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Immediate</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">62%</span>
+                                <span class="metric-label">Discovery</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">48%</span>
+                                <span class="metric-label">7d Retention</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Guided</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">78%</span>
+                                <span class="metric-label">Discovery</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">65%</span>
+                                <span class="metric-label">7d Retention</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Contextual</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">71%</span>
+                                <span class="metric-label">Discovery</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">68%</span>
+                                <span class="metric-label">7d Retention</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insights-box">
+                    <h4>💡 Insight</h4>
+                    <p>Progressive unlocking increases feature discovery by 43% and improves 7-day retention by 50% compared to showing all features immediately.</p>
+                </div>
+                
+                <div class="test-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Export Data</button>
+                </div>
+            </div>
+
+            <!-- Test 5: Notification Strategy -->
+            <div class="test-card">
+                <div class="test-header">
+                    <h3 class="test-name">Notification Strategy</h3>
+                    <span class="test-status status-active">Active</span>
+                </div>
+                
+                <div class="variant-list">
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Subtle</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">45%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">12%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item" style="border-color: #27ae60;">
+                        <div class="variant-name">
+                            <span>Prominent</span>
+                            <span class="variant-badge">25%</span>
+                            <span class="winner-badge">WINNER</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">78%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">8%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Animated</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">65%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">15%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="variant-item">
+                        <div class="variant-name">
+                            <span>Sound Enabled</span>
+                            <span class="variant-badge">25%</span>
+                        </div>
+                        <div class="variant-metrics">
+                            <div class="metric">
+                                <span class="metric-value">72%</span>
+                                <span class="metric-label">Click Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">22%</span>
+                                <span class="metric-label">Dismissal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Export Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Guide -->
+        <section class="implementation-section">
+            <h2>Implementation Guide</h2>
+            
+            <h3>Quick Start</h3>
+            <p>Add the A/B testing framework to your social feed page:</p>
+            
+            <div class="code-block">
+&lt;!-- Add to your HTML head --&gt;
+&lt;script src="js/ab-test-social-feed.js"&gt;&lt;/script&gt;
+
+&lt;!-- The framework will automatically initialize and assign users to test variants --&gt;
+            </div>
+            
+            <h3>Tracking Custom Events</h3>
+            <p>Track custom events for your specific metrics:</p>
+            
+            <div class="code-block">
+// Track a custom event
+window.ABTestSocialFeed.trackEvent('testId', 'eventName', {
+    customData: 'value',
+    timestamp: Date.now()
+});
+
+// Get current test results
+const results = window.getABTestResults();
+console.log(results);
+            </div>
+            
+            <h3>Backend Integration</h3>
+            <p>The framework sends events to your analytics endpoint:</p>
+            
+            <div class="code-block">
+// POST /api/analytics/ab-test
+{
+    "testId": "tabIndicators",
+    "variant": "dots",
+    "eventName": "tab_clicked",
+    "data": {
+        "timeToClick": 2100
+    },
+    "timestamp": 1647890123456,
+    "userId": "user123",
+    "sessionId": "session456"
+}
+            </div>
+            
+            <h3>Best Practices</h3>
+            <ul style="margin-top: 1rem; padding-left: 2rem;">
+                <li>Run tests for at least 2 weeks to account for weekly patterns</li>
+                <li>Ensure sample sizes reach statistical significance (min 1000 users per variant)</li>
+                <li>Monitor for novelty effects in the first 48 hours</li>
+                <li>Consider segmenting results by user cohorts (new vs returning)</li>
+                <li>Document winning variants and implement them permanently</li>
+            </ul>
+        </section>
+    </div>
+
+    <script>
+        // Demo functionality for the dashboard
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('This would show detailed analytics for the test');
+            });
+        });
+        
+        document.querySelectorAll('.btn-secondary').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.textContent;
+                alert(`Action: ${action}`);
+            });
+        });
+        
+        // Simulate real-time updates
+        setInterval(() => {
+            document.querySelectorAll('.metric-value').forEach(el => {
+                const current = parseFloat(el.textContent);
+                const change = (Math.random() - 0.5) * 2;
+                const newValue = current + change;
+                
+                if (el.textContent.includes('%')) {
+                    el.textContent = Math.max(0, Math.min(100, newValue)).toFixed(0) + '%';
+                } else if (el.textContent.includes('s')) {
+                    el.textContent = Math.max(0.1, newValue).toFixed(1) + 's';
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

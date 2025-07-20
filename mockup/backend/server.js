@@ -279,6 +279,10 @@ app.use('/api/version', require('./routes/version-check'));
 
 // Moderation endpoints
 app.use('/api', require('./routes/moderation'));
+// Gamification endpoints
+app.use('/api/gamification', require('./routes/gamification'));
+// Community and reputation endpoints
+app.use('/api/community', require('./routes/community'));
 
 // Health check
 app.get('/health', (req, res) => {

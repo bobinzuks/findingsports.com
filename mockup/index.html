@@ -15,8 +15,29 @@
         <link rel="stylesheet" href="css/map-container-fix.css?v=1752683265404" />
         <link rel="stylesheet" href="css/map-stable.css?v=1752683265404" />
         <link rel="stylesheet" href="css/dark-mode-button.css?v=1752683265404" />
-        <link rel="stylesheet" href="css/social-feed-enhanced.css?v=1752683265404" />
+        <!-- Critical CSS for social feed -->
+        <link rel="preload" href="css/social-feed-critical.css?v=1752683265404" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="css/social-feed-critical.css?v=1752683265404"></noscript>
+        
+        <!-- Non-critical social feed styles -->
+        <link rel="stylesheet" href="css/social-feed-enhanced.css?v=1752683265404" media="print" onload="this.media='all'" />
+        <link rel="stylesheet" href="css/social-feed-mobile.css?v=1752683265404" media="print" onload="this.media='all'" />
+        <link rel="stylesheet" href="css/social-feed-animations.css?v=1752683265404" media="print" onload="this.media='all'" />
         <link rel="stylesheet" href="css/moderation.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/onboarding.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/gamification.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/microinteractions.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/pwa-offline.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/i18n-rtl.css?v=1752683265404" />
+        
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#f39c12">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Finding Sports">
+        <link rel="apple-touch-icon" href="/images/icon-192x192.png">
+        
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -25,7 +46,7 @@
         />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1752683265404" />
         <style>
-            /* Hide social section by default */
+            /* Hide social section by default - moved to bottom */
             .social-section {
                 display: none;
             }
@@ -75,17 +96,12 @@
     <body>
         <div class="sports-bg-pattern"></div>
         <div class="app-container">
-            <!-- Deployment Status Banner -->
-            <div id="deploymentBanner" style="background: #f39c12; color: white; padding: 10px; text-align: center; display: none;">
-                <span id="deploymentStatus">Checking deployment status...</span>
-                <button onclick="checkDeployment()" style="margin-left: 10px; padding: 5px 10px; background: white; color: #333; border: none; border-radius: 3px; cursor: pointer;">Re-check</button>
-            </div>
             
             <!-- Header -->
             <header class="header">
                 <div class="header-content">
                     <div class="logo-section">
-                        <img src="images/logo2.png?v=1752683265404" alt="Finding Sports" class="logo-image" />
+                        <img src="images/logo.png?v=1752683265404" alt="Finding Sports" class="logo-image" />
                         <p class="tagline">Wherever, whenever</p>
                     </div>
                     <div class="user-menu header-right">
@@ -141,22 +157,12 @@
                 <button class="tab" onclick="switchTab('social')">Social Feed</button>
                 <button class="tab active" onclick="switchTab('upcoming')">Upcoming Games</button>
                 <button class="tab" onclick="showRulesPage()">Sport Rules</button>
+                <button class="tab" onclick="window.location.href='community.html'">Community Hub</button>
             </nav>
 
             <!-- Main Content Area -->
             <main class="main-content">
                 <div class="content-wrapper">
-                    <!-- Social Feed Section -->
-                    <section class="social-section" id="socialSection">
-                        <div class="social-header">
-                            <h2 class="section-title">Social Feed</h2>
-                            <button class="create-post-btn" onclick="createPost()" id="createPostBtn">Share Something</button>
-                        </div>
-                        <div class="social-feed-container" id="social-feed-container">
-                            <!-- Social feed will be loaded dynamically -->
-                        </div>
-                    </section>
-
                     <!-- Games List -->
                     <section class="games-section">
                         <h2 class="section-title">Games near <span id="locationName">Vancouver</span></h2>
@@ -171,6 +177,17 @@
                     <!-- Map Section -->
                     <section class="map-section">
                         <div id="map" class="map-container"></div>
+                    </section>
+                    
+                    <!-- Social Feed Section (moved to bottom) -->
+                    <section class="social-section" id="socialSection">
+                        <div class="social-header">
+                            <h2 class="section-title">Social Feed</h2>
+                            <button class="create-post-btn" onclick="createPost()" id="createPostBtn">Share Something</button>
+                        </div>
+                        <div class="social-feed-container" id="social-feed-container">
+                            <!-- Social feed will be loaded dynamically -->
+                        </div>
                     </section>
                 </div>
             </main>
@@ -195,10 +212,39 @@
         -->
         <script src="js/drop-in-games.js?v=1752683265404"></script>
         <script src="js/social-feed.js?v=1752683265404"></script>
+        <script src="js/gamification.js?v=1752683265404"></script>
+        <script src="js/microinteractions.js?v=1752683265404"></script>
+        <script src="js/mobile-microinteractions.js?v=1752683265404"></script>
+        <script src="js/play-now-microinteractions.js?v=1752683265404"></script>
+        <!-- Performance optimizations for social feed -->
+        <script src="js/social-feed-config.js?v=1752683265404"></script>
+        <script src="js/social-feed-performance.js?v=1752683265404" defer></script>
+        <script src="js/social-feed-optimized.js?v=1752683265404" defer></script>
+        <script src="js/social-feed-monitor.js?v=1752683265404" defer></script>
+        <script type="module">
+            // Lazy load social feed module when needed
+            document.addEventListener('DOMContentLoaded', () => {
+                const socialTab = document.querySelector('[onclick*="showTab(\'social\')"]');
+                if (socialTab) {
+                    socialTab.addEventListener('mouseenter', async () => {
+                        // Preload social feed module on hover
+                        const module = await import('./js/social-feed-module.js');
+                        window.SocialFeedModule = module.default;
+                    }, { once: true });
+                }
+            });
+        </script>
+        <script src="js/social-feed-mobile.js?v=1752683265404"></script>
+        <script src="js/social-feed-animations.js?v=1752683265404"></script>
         <script src="js/moderation.js?v=1752683265404"></script>
+        <script src="js/onboarding.js?v=1752683265404"></script>
+        <script src="js/sample-content-generator.js?v=1752683265404"></script>
+        <script src="js/quick-setup-wizard.js?v=1752683265404"></script>
         <script src="js/leagues.js?v=1752683265404"></script>
         <script src="js/sport-rules.js?v=1752683265404"></script>
         <script src="js/language-service.js?v=1752683265404"></script>
+        <script src="js/i18n-service.js?v=1752683265404"></script>
+        <script src="js/social-feed-i18n-integration.js?v=1752683265404"></script>
         <script src="js/debug-utils.js?v=1752683265404"></script>
         <script src="js/map-debug.js?v=1752683265404"></script>
         <script src="js/map-init-fix.js?v=1752683265404"></script>
@@ -890,10 +936,9 @@
             console.log('Expected version: 2025-01-16-ultra-secure-social-feed');
             console.log('🔒 SECURITY FEATURES: XSS Protection, CSRF Protection, Rate Limiting, Input Validation');
             
-            const banner = document.getElementById('deploymentBanner');
-            const status = document.getElementById('deploymentStatus');
-            
-            if (banner) banner.style.display = 'block';
+            // Deployment banner removed
+            const banner = null;
+            const status = null;
             
             try {
                 const response = await fetch('/api/version/check?t=' + Date.now());
@@ -934,6 +979,24 @@
             console.log('Running deployment check...');
             checkDeployment();
         }, 1000);
+        </script>
+        
+        <!-- PWA Scripts -->
+        <script src="js/pwa-handler.js"></script>
+        <script src="js/social-feed-offline.js"></script>
+        <script>
+            // Register service worker on page load
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful:', registration);
+                        })
+                        .catch(err => {
+                            console.log('ServiceWorker registration failed:', err);
+                        });
+                });
+            }
         </script>
     </body>
 </html>

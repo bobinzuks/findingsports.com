@@ -34,10 +34,12 @@ router.get('/', async (req, res) => {
       totalActivities:
                 activities.happeningNow.length +
                 activities.startingSoon.length +
-                activities.laterToday.length,
+                activities.laterToday.length +
+                (activities.upcoming ? activities.upcoming.length : 0),
       happeningNow: activities.happeningNow.length,
       startingSoon: activities.startingSoon.length,
       laterToday: activities.laterToday.length,
+      upcoming: activities.upcoming ? activities.upcoming.length : 0,
       openCourts: activities.openCourts.length,
       pickupGames: activities.pickupGames.length,
       searchRadius: `${options.radiusKm} km`,
