@@ -8,7 +8,7 @@
     "buildCommand": "cd mockup/backend && npm install --production --no-audit --no-fund"
   },
   "deploy": {
-    "startCommand": "cd mockup/backend && node server.js",
+    "startCommand": "cd mockup/backend && npm install --production && node server-production.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
