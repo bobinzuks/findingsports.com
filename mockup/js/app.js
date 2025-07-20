@@ -152,8 +152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Update navigation
   window.updateNavigation();
 
-  // Initialize default page (Play Now)
-  window.switchPage('play-now');
+  // Initialize with Upcoming Games tab by default
+  window.switchTab('upcoming');
 
   // Log map status for debugging
   if (window.mapDebug) {
@@ -497,20 +497,54 @@ window.switchTab = function (tab) {
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(t => t.classList.remove('active'));
 
+  // Get sections
+  const socialSection = document.getElementById('socialSection');
+  const gamesSection = document.querySelector('.games-section');
+
   // Find and activate the correct tab
   if (tab === 'social') {
     tabs[0]?.classList.add('active');
+    // Show social section, hide games section
+    if (socialSection) socialSection.style.display = 'block';
+    if (gamesSection) gamesSection.style.display = 'none';
     window.switchPage('social');
   } else if (tab === 'upcoming') {
     tabs[1]?.classList.add('active');
+    // Hide social section, show games section
+    if (socialSection) socialSection.style.display = 'none';
+    if (gamesSection) gamesSection.style.display = 'block';
     window.showUpcomingGames();
   }
 };
 
 // Show upcoming games
-window.showUpcomingGames = function () {
+window.showUpcomingGames = async function () {
   const gamesList = document.getElementById('gamesList');
-  gamesList.innerHTML = '<h3 style="text-align: center; color: #b8bdd8;">Your upcoming games will appear here</h3>';
+  
+  // Show loading state
+  gamesList.innerHTML = '<div class="loading-state"><div class="spinner"></div>Loading games...</div>';
+  
+  try {
+    // Fetch games from API
+    const games = await window.api.getGames();
+    
+    if (games && games.length > 0) {
+      // Clear loading state
+      gamesList.innerHTML = '';
+      
+      // Display games
+      games.forEach(game => {
+        const gameCard = window.createGameCard(game);
+        gamesList.appendChild(gameCard);
+      });
+    } else {
+      // No games found
+      gamesList.innerHTML = '<h3 style="text-align: center; color: #b8bdd8;">No games available at the moment. Check back later!</h3>';
+    }
+  } catch (error) {
+    console.error('Error loading games:', error);
+    gamesList.innerHTML = '<h3 style="text-align: center; color: #ff6b35;">Unable to load games. Please try again later.</h3>';
+  }
 };
 
 // Show/hide sport rules page

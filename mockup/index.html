@@ -25,6 +25,16 @@
         />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1752683265404" />
         <style>
+            /* Hide social section by default */
+            .social-section {
+                display: none;
+            }
+            
+            /* Show games section by default */
+            .games-section {
+                display: block;
+            }
+            
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
@@ -128,8 +138,8 @@
 
             <!-- Navigation Tabs -->
             <nav class="tabs">
-                <button class="tab active" onclick="switchTab('social')">Social Feed</button>
-                <button class="tab" onclick="switchTab('upcoming')">Upcoming Games</button>
+                <button class="tab" onclick="switchTab('social')">Social Feed</button>
+                <button class="tab active" onclick="switchTab('upcoming')">Upcoming Games</button>
                 <button class="tab" onclick="showRulesPage()">Sport Rules</button>
             </nav>
 
