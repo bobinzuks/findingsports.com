@@ -67,7 +67,7 @@
         <script src="js/mapbox-config.js?v=1752683265404"></script>
         <script>
             // Set Mapbox access token (should come from server in production)
-            window.MAPBOX_ACCESS_TOKEN = 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
+            window.MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZmluZGluZ3Nwb3J0cyIsImEiOiJjbTU5enI5ZHQwMDN4MmxwdzVoNnQzOWFwIn0.0-60Cv6Y-CepNS0R-fkD5w';
             
             // Add Railway deployment timestamp to force updates
             window.DEPLOYMENT_VERSION = '2025-01-16-mapbox-migration-' + Date.now();
@@ -961,7 +961,11 @@
         }, 1000);
         </script>
         
+        <!-- Performance Monitor (load first) -->
+        <script src="js/performance-monitor.js"></script>
+        
         <!-- Map Scripts -->
+        <script src="js/login-component.js?v=1752683265404"></script>
         <script src="js/mapbox-maps.js?v=1752683265404"></script>
         <script src="js/google-maps.js?v=1752683265404"></script>
         <script src="js/sport-icons.js?v=1752683265404"></script>
