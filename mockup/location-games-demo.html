@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding Sports - Location & Games Demo</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Mapbox GL CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Custom styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .app-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .demo-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .demo-controls h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .info-panel {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .info-panel code {
+            background: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Game marker styles for map */
+        .game-marker {
+            background: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .mapboxgl-popup-content {
+            padding: 10px;
+        }
+
+        .mapboxgl-popup-content h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .mapboxgl-popup-content p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 24px;
+            }
+
+            .main-container {
+                padding: 10px;
+            }
+
+            .control-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .loading-content i {
+            font-size: 48px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="main-container">
+            <h1>Finding Sports - Location & Games Demo</h1>
+            <p>Discover drop-in sports games near you with real-time location tracking</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <h2>Demo Controls</h2>
+            
+            <div class="control-group">
+                <button class="btn btn-primary" onclick="requestLocation()">
+                    <i class="fas fa-location-dot"></i> Request Location Permission
+                </button>
+                <button class="btn btn-secondary" onclick="simulateLocation()">
+                    <i class="fas fa-map-pin"></i> Simulate Vancouver Location
+                </button>
+                <button class="btn btn-secondary" onclick="simulateLocationKelowna()">
+                    <i class="fas fa-map-pin"></i> Simulate Kelowna Location
+                </button>
+            </div>
+
+            <div class="control-group">
+                <button class="btn btn-success" onclick="loadMoreGames()">
+                    <i class="fas fa-plus"></i> Load More Sample Games
+                </button>
+                <button class="btn btn-secondary" onclick="clearGames()">
+                    <i class="fas fa-trash"></i> Clear All Games
+                </button>
+                <button class="btn btn-primary" onclick="showStats()">
+                    <i class="fas fa-chart-bar"></i> Show Statistics
+                </button>
+            </div>
+
+            <div class="info-panel">
+                <strong>Instructions:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Click "Request Location Permission" to use your real location</li>
+                    <li>Or use "Simulate Location" buttons to test different cities</li>
+                    <li>Switch between List and Map views to see games differently</li>
+                    <li>Use filters to narrow down games by sport, distance, etc.</li>
+                    <li>Click on any game card to see full details</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Location & Games UI Component -->
+        <div id="location-games-ui"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    
+    <!-- Configuration -->
+    <script>
+        window.CONFIG = {
+            MAPBOX_API_KEY: 'pk.eyJ1IjoiZmluZGluZ3Nwb3J0cyIsImEiOiJjbHRqbzA2OWwwZXprMmtwZzh6d3VyZjl1In0.MO45RZQSpiKhjCBrzO54CQ',
+            API_ENDPOINT: window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000/api/v2' 
+                : '/api/v2'
+        };
+    </script>
+    
+    <!-- Load our services -->
+    <script src="js/geolocation-service.js"></script>
+    <script src="js/game-data-service.js"></script>
+    <script src="js/location-games-ui.js"></script>
+    
+    <!-- Demo functionality -->
+    <script>
+        // Initialize UI on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            window.locationGamesUI.initialize('location-games-ui');
+        });
+
+        // Demo control functions
+        function showLoading(show = true) {
+            document.getElementById('loading-overlay').classList.toggle('active', show);
+        }
+
+        async function requestLocation() {
+            showLoading(true);
+            try {
+                const location = await window.geolocationService.getCurrentLocation({
+                    enableHighAccuracy: true,
+                    timeout: 15000
+                });
+                
+                alert(`Location detected:\n${location.city || 'Unknown'}, ${location.region || 'Unknown'}\nLat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}\nAccuracy: ${location.accuracy}m\nSource: ${location.source}`);
+            } catch (error) {
+                alert(`Location error: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function simulateLocation() {
+            showLoading(true);
+            
+            // Simulate Vancouver location
+            const vancouverLocation = {
+                lat: 49.2827,
+                lng: -123.1207,
+                accuracy: 50,
+                city: 'Vancouver',
+                region: 'BC',
+                source: 'simulated',
+                timestamp: Date.now()
+            };
+
+            window.geolocationService.userLocation = vancouverLocation;
+            window.geolocationService.notifyListeners('locationUpdate', vancouverLocation);
+            
+            // Fetch games for this location
+            setTimeout(() => {
+                window.geolocationService.fetchNearbyGames(vancouverLocation);
+                showLoading(false);
+            }, 1000);
+        }
+
+        function simulateLocationKelowna() {
+            showLoading(true);
+            
+            // Simulate Kelowna location
+            const kelownaLocation = {
+                lat: 49.888,
+                lng: -119.496,
+                accuracy: 50,
+                city: 'Kelowna',
+                region: 'BC',
+                source: 'simulated',
+                timestamp: Date.now()
+            };
+
+            window.geolocationService.userLocation = kelownaLocation;
+            window.geolocationService.notifyListeners('locationUpdate', kelownaLocation);
+            
+            // Fetch games for this location
+            setTimeout(() => {
+                window.geolocationService.fetchNearbyGames(kelownaLocation);
+                showLoading(false);
+            }, 1000);
+        }
+
+        function loadMoreGames() {
+            showLoading(true);
+            
+            // Add more sample games
+            const venues = [
+                {
+                    id: 'venue_demo_1',
+                    name: 'Stanley Park Tennis Courts',
+                    address: 'Stanley Park, Vancouver, BC',
+                    coordinates: { lat: 49.3043, lng: -123.1443 },
+                    type: 'park'
+                },
+                {
+                    id: 'venue_demo_2',
+                    name: 'English Bay Beach Volleyball',
+                    address: 'English Bay, Vancouver, BC',
+                    coordinates: { lat: 49.2863, lng: -123.1430 },
+                    type: 'park'
+                }
+            ];
+
+            venues.forEach(venue => {
+                window.gameDataService.createGame({
+                    sport: 'volleyball',
+                    type: 'drop-in',
+                    venue: venue,
+                    startTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
+                    endTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+                    capacity: 12,
+                    currentPlayers: 4,
+                    skillLevel: 'all',
+                    price: 0,
+                    description: 'Casual beach volleyball. Bring your own ball!',
+                    source: 'demo',
+                    verified: true
+                });
+            });
+
+            // Refresh display
+            setTimeout(() => {
+                if (window.geolocationService.userLocation) {
+                    window.geolocationService.fetchNearbyGames(window.geolocationService.userLocation);
+                }
+                showLoading(false);
+                alert('Added more sample games!');
+            }, 500);
+        }
+
+        function clearGames() {
+            if (confirm('Are you sure you want to clear all games?')) {
+                window.gameDataService.games.clear();
+                window.gameDataService.venues.clear();
+                window.geolocationService.nearbyGames = [];
+                window.geolocationService.notifyListeners('gamesUpdate', []);
+                alert('All games cleared!');
+            }
+        }
+
+        function showStats() {
+            const stats = window.gameDataService.getStatistics();
+            const userLocation = window.geolocationService.userLocation;
+            
+            let message = `Game Statistics:\n\n`;
+            message += `Total Games: ${stats.totalGames}\n`;
+            message += `Total Venues: ${stats.totalVenues}\n`;
+            message += `Today's Games: ${stats.todaysGames}\n`;
+            message += `Free Games: ${stats.freeGames}\n`;
+            message += `Verified Games: ${stats.verifiedGames}\n\n`;
+            
+            message += `Games by Sport:\n`;
+            Object.entries(stats.gamesBySport).forEach(([sport, count]) => {
+                message += `  ${sport}: ${count}\n`;
+            });
+            
+            message += `\nGames by Type:\n`;
+            Object.entries(stats.gamesByType).forEach(([type, count]) => {
+                message += `  ${type}: ${count}\n`;
+            });
+            
+            if (userLocation) {
+                message += `\n\nCurrent Location:\n`;
+                message += `City: ${userLocation.city || 'Unknown'}\n`;
+                message += `Coordinates: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}\n`;
+                message += `Source: ${userLocation.source}\n`;
+            }
+            
+            alert(message);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'l':
+                        e.preventDefault();
+                        requestLocation();
+                        break;
+                    case 'm':
+                        e.preventDefault();
+                        document.getElementById('toggle-view').click();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        showStats();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sport Game Cards with Icons - Finding Sports</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sport-icons.css">
+    <link rel="stylesheet" href="css/play-now.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .game-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .game-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .game-card-title {
+            flex: 1;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .game-card-sport-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .game-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .game-info-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .game-players {
+            margin-top: 12px;
+        }
+        
+        .game-players-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .game-players-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .game-players-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .game-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .game-action-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .game-action-btn.primary {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .game-action-btn.primary:hover {
+            background: #e55a2b;
+            transform: translateY(-1px);
+        }
+        
+        .game-action-btn.secondary {
+            background: white;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+        }
+        
+        .game-action-btn.secondary:hover {
+            background: #fff5f2;
+        }
+        
+        .sport-type-ribbon {
+            position: absolute;
+            top: 20px;
+            left: -30px;
+            transform: rotate(-45deg);
+            width: 100px;
+            padding: 4px 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .skill-level-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .skill-level-beginner {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .skill-level-intermediate {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .skill-level-advanced {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 style="text-align: center; color: #333; margin-bottom: 32px;">
+            Sport Game Cards with Custom Icons
+        </h1>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h3 style="margin-top: 0;">Filter by Sport</h3>
+            <div class="sport-filter-container" id="sportFilters"></div>
+        </div>
+        
+        <!-- Games Grid -->
+        <div class="games-grid" id="gamesGrid"></div>
+    </div>
+    
+    <!-- Load Scripts -->
+    <script src="js/sport-icons.js"></script>
+    
+    <script>
+        // Sample game data
+        const sampleGames = [
+            {
+                id: 1,
+                title: 'Friday Night Basketball',
+                sport: 'basketball',
+                venue: 'Community Center Court A',
+                date: 'Jan 26, 2024',
+                time: '7:00 PM',
+                attendees: 8,
+                maxAttendees: 12,
+                skillLevel: 'intermediate',
+                description: 'Competitive 5v5 full court games. Bring your A-game!'
+            },
+            {
+                id: 2,
+                title: 'Weekend Soccer Match',
+                sport: 'soccer',
+                venue: 'Central Park Field',
+                date: 'Jan 27, 2024',
+                time: '10:00 AM',
+                attendees: 16,
+                maxAttendees: 22,
+                skillLevel: 'beginner',
+                description: 'Friendly weekend soccer. All skill levels welcome!'
+            },
+            {
+                id: 3,
+                title: 'Tennis Doubles',
+                sport: 'tennis',
+                venue: 'Riverside Tennis Club',
+                date: 'Jan 26, 2024',
+                time: '5:00 PM',
+                attendees: 3,
+                maxAttendees: 4,
+                skillLevel: 'advanced',
+                description: 'Looking for one more for competitive doubles match.'
+            },
+            {
+                id: 4,
+                title: 'Beach Volleyball',
+                sport: 'volleyball',
+                venue: 'Sunset Beach Courts',
+                date: 'Jan 28, 2024',
+                time: '2:00 PM',
+                attendees: 10,
+                maxAttendees: 16,
+                skillLevel: 'intermediate',
+                description: '4v4 beach volleyball. Sun, sand, and spikes!'
+            },
+            {
+                id: 5,
+                title: 'Morning Swim Session',
+                sport: 'swimming',
+                venue: 'Aquatic Center',
+                date: 'Jan 29, 2024',
+                time: '6:00 AM',
+                attendees: 5,
+                maxAttendees: 10,
+                skillLevel: 'intermediate',
+                description: 'Lap swimming and technique practice.'
+            },
+            {
+                id: 6,
+                title: 'Hockey Pickup Game',
+                sport: 'hockey',
+                venue: 'Ice Arena Rink 2',
+                date: 'Jan 27, 2024',
+                time: '8:00 PM',
+                attendees: 14,
+                maxAttendees: 20,
+                skillLevel: 'intermediate',
+                description: 'Full gear required. Mixed skill levels.'
+            },
+            {
+                id: 7,
+                title: 'Golf Scramble',
+                sport: 'golf',
+                venue: 'Pine Valley Golf Course',
+                date: 'Jan 28, 2024',
+                time: '8:00 AM',
+                attendees: 7,
+                maxAttendees: 8,
+                skillLevel: 'beginner',
+                description: 'Fun scramble format. Great for beginners!'
+            },
+            {
+                id: 8,
+                title: 'Trail Running Group',
+                sport: 'running',
+                venue: 'Mountain Trail Start',
+                date: 'Jan 27, 2024',
+                time: '7:00 AM',
+                attendees: 12,
+                maxAttendees: 20,
+                skillLevel: 'intermediate',
+                description: '10K trail run through scenic routes.'
+            },
+            {
+                id: 9,
+                title: 'Cycling Club Ride',
+                sport: 'cycling',
+                venue: 'City Hall Plaza',
+                date: 'Jan 28, 2024',
+                time: '9:00 AM',
+                attendees: 15,
+                maxAttendees: 25,
+                skillLevel: 'intermediate',
+                description: '50km group ride. Moderate pace, no drop.'
+            },
+            {
+                id: 10,
+                title: 'Badminton Tournament',
+                sport: 'badminton',
+                venue: 'Sports Complex Hall B',
+                date: 'Jan 27, 2024',
+                time: '1:00 PM',
+                attendees: 11,
+                maxAttendees: 16,
+                skillLevel: 'advanced',
+                description: 'Singles elimination tournament.'
+            }
+        ];
+        
+        let filteredGames = [...sampleGames];
+        let selectedSport = 'all';
+        
+        // Create game card
+        function createGameCard(game) {
+            const icon = SportIcons.getIcon(game.sport);
+            const attendancePercentage = (game.attendees / game.maxAttendees) * 100;
+            
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.innerHTML = `
+                <div class="sport-type-ribbon" style="background: ${icon.color}">
+                    ${icon.name}
+                </div>
+                
+                <div class="game-card-header">
+                    <h3 class="game-card-title">${game.title}</h3>
+                    <div class="game-card-sport-icon">
+                        ${SportIcons.createInlineSVG(game.sport, 32)}
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="game-info-item">
+                        <span class="game-info-icon">📍</span>
+                        <span>${game.venue}</span>
+                    </div>
+                    <div class="game-info-item">
+                        <span class="game-info-icon">📅</span>
+                        <span>${game.date}</span>
+                    </div>
+                    <div class="game-info-item">
+                        <span class="game-info-icon">🕐</span>
+                        <span>${game.time}</span>
+                    </div>
+                    <div class="game-info-item">
+                        <span class="game-info-icon">🎯</span>
+                        <span class="skill-level-badge skill-level-${game.skillLevel}">
+                            ${game.skillLevel}
+                        </span>
+                    </div>
+                </div>
+                
+                <p style="color: #666; font-size: 14px; margin: 12px 0;">
+                    ${game.description}
+                </p>
+                
+                <div class="game-players">
+                    <div class="game-players-label">
+                        👥 ${game.attendees}/${game.maxAttendees} players
+                    </div>
+                    <div class="game-players-bar">
+                        <div class="game-players-fill" 
+                             style="width: ${attendancePercentage}%; background: ${icon.color};">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-actions">
+                    <button class="game-action-btn primary" onclick="joinGame(${game.id})">
+                        Join Game
+                    </button>
+                    <button class="game-action-btn secondary" onclick="viewDetails(${game.id})">
+                        Details
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Render games
+        function renderGames() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            
+            filteredGames.forEach(game => {
+                grid.appendChild(createGameCard(game));
+            });
+        }
+        
+        // Create sport filters
+        function createFilters() {
+            const container = document.getElementById('sportFilters');
+            
+            // All sports button
+            const allBtn = document.createElement('button');
+            allBtn.className = 'sport-filter-btn active filter-all';
+            allBtn.innerHTML = '🎯 All Sports';
+            allBtn.onclick = () => filterBySport('all');
+            container.appendChild(allBtn);
+            
+            // Get unique sports from games
+            const sports = [...new Set(sampleGames.map(g => g.sport))];
+            
+            sports.forEach(sport => {
+                const icon = SportIcons.getIcon(sport);
+                const btn = document.createElement('button');
+                btn.className = `sport-filter-btn filter-${sport}`;
+                btn.innerHTML = `${icon.emoji} ${icon.name}`;
+                btn.onclick = () => filterBySport(sport);
+                container.appendChild(btn);
+            });
+        }
+        
+        // Filter by sport
+        function filterBySport(sport) {
+            selectedSport = sport;
+            
+            // Update button states
+            document.querySelectorAll('.sport-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (sport === 'all') {
+                document.querySelector('.filter-all').classList.add('active');
+                filteredGames = [...sampleGames];
+            } else {
+                document.querySelector(`.filter-${sport}`).classList.add('active');
+                filteredGames = sampleGames.filter(g => g.sport === sport);
+            }
+            
+            renderGames();
+        }
+        
+        // Mock functions
+        function joinGame(gameId) {
+            alert(`Joining game ${gameId}`);
+        }
+        
+        function viewDetails(gameId) {
+            alert(`Viewing details for game ${gameId}`);
+        }
+        
+        // Initialize
+        createFilters();
+        renderGames();
+    </script>
+</body>
+</html>

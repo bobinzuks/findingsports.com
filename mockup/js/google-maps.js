@@ -196,6 +196,12 @@ window.initializeGoogleMap = function (userLocation, mapElementId = 'map') {
     // Store map instance globally
     window.googleMap = googleMap;
     window.map = googleMap; // For compatibility
+    
+    // Initialize sport markers module if available
+    if (window.SportMapMarkers) {
+      window.SportMapMarkers.init(googleMap);
+      console.log('Sport markers module initialized');
+    }
 
     console.log('Google Maps initialized successfully');
   } catch (error) {
@@ -247,6 +253,13 @@ function addUserLocationMarker(position) {
 
 // Clear all markers
 window.clearGoogleMarkers = function () {
+  // Use the new SportMapMarkers module if available
+  if (window.SportMapMarkers && window.SportMapMarkers.map) {
+    window.SportMapMarkers.clearMarkers();
+    return;
+  }
+  
+  // Fallback to basic implementation
   googleMarkers.forEach(marker => {
     marker.setMap(null);
   });
@@ -255,6 +268,12 @@ window.clearGoogleMarkers = function () {
 
 // Add game marker
 window.addGoogleGameMarker = function (game) {
+  // Use the new SportMapMarkers module if available
+  if (window.SportMapMarkers && window.SportMapMarkers.map) {
+    return window.SportMapMarkers.addGameMarker(game);
+  }
+  
+  // Fallback to basic implementation
   let position;
 
   if (game.coords) {

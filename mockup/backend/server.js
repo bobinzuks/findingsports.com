@@ -262,6 +262,9 @@ app.use('/api/games', require('./routes/game-chat'));
 // API v2 - Enhanced swarm endpoints
 app.use('/api/v2', require('./routes/api-v2'));
 
+// Location-based games endpoint
+app.use('/api/v2/games', require('./routes/location-games'));
+
 // Play Now endpoint
 app.use('/api/play-now', require('./routes/play-now'));
 
@@ -291,23 +294,25 @@ app.get('/health', (req, res) => {
 
 // Config endpoint for frontend
 app.get('/api/config', (req, res) => {
-  // SECURITY: Never expose API keys directly. Google Maps API key must be set via environment variable.
-  if (!process.env.GOOGLE_MAPS_API_KEY) {
-    console.error('🚨 SECURITY ERROR: GOOGLE_MAPS_API_KEY environment variable is required but not set!');
+  // SECURITY: Using Mapbox instead of Google Maps
+  if (!process.env.MAPBOX_ACCESS_TOKEN) {
+    console.error('🚨 SECURITY ERROR: MAPBOX_ACCESS_TOKEN environment variable is required but not set!');
     if (process.env.NODE_ENV === 'production') {
       return res.status(500).json({ 
         error: 'Server configuration error: Missing required API keys',
-        details: 'Contact administrator to configure Google Maps API key'
+        details: 'Contact administrator to configure Mapbox access token'
       });
     }
     // Development fallback with clear warning
-    console.warn('⚠️  WARNING: Using placeholder API key in development. Set GOOGLE_MAPS_API_KEY environment variable.');
+    console.warn('⚠️  WARNING: Using placeholder API key in development. Set MAPBOX_ACCESS_TOKEN environment variable.');
   }
 
   res.json({
-    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || null,
+    mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN || null,
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || null, // Kept for backwards compatibility during migration
     environment: process.env.NODE_ENV || 'development',
-    hasGoogleMapsKey: Boolean(process.env.GOOGLE_MAPS_API_KEY)
+    hasMapboxToken: Boolean(process.env.MAPBOX_ACCESS_TOKEN),
+    mapProvider: process.env.MAPBOX_ACCESS_TOKEN ? 'mapbox' : 'google' // Use Mapbox if token is available
   });
 });
 

@@ -1,10 +1,11 @@
+/* eslint-env jest */
 const request = require('supertest');
 const express = require('express');
-const { Pool } = require('pg');
-const GameModel = require('../models/game.model');
-const CacheManager = require('../cache/cache-manager');
-const UserGameService = require('../services/user-game-service');
-const DataAggregator = require('../services/data-aggregator');
+// const { Pool } = require('pg'); // eslint-disable-line no-unused-vars
+// const GameModel = require('../models/game.model'); // eslint-disable-line no-unused-vars
+// const CacheManager = require('../cache/cache-manager'); // eslint-disable-line no-unused-vars
+// const UserGameService = require('../services/user-game-service'); // eslint-disable-line no-unused-vars
+// const DataAggregator = require('../services/data-aggregator'); // eslint-disable-line no-unused-vars
 const createGamesRouter = require('../api/routes/games');
 
 // Mock dependencies
@@ -13,7 +14,7 @@ jest.mock('ioredis');
 
 describe('Games API', () => {
   let app;
-  let mockPool;
+  // let mockPool; // eslint-disable-line no-unused-vars
   let mockCacheManager;
   let mockGameModel;
   let mockUserGameService;
@@ -21,9 +22,9 @@ describe('Games API', () => {
 
   beforeEach(() => {
     // Setup mocks
-    mockPool = {
+    const mockPool = {
       query: jest.fn(),
-      end: jest.fn(),
+      end: jest.fn()
     };
 
     mockCacheManager = {
@@ -32,23 +33,23 @@ describe('Games API', () => {
       generateCacheKey: jest.fn((type, params) => `${type}:${JSON.stringify(params)}`),
       getTTL: jest.fn(() => 600),
       getStats: jest.fn(() => ({ l1Hits: 100, l1Misses: 20 })),
-      stats: { dbHits: 0 },
+      stats: { dbHits: 0 }
     };
 
     mockGameModel = {
       findGamesNearLocation: jest.fn(),
-      getGameDetails: jest.fn(),
+      getGameDetails: jest.fn()
     };
 
     mockUserGameService = {
       submitGame: jest.fn(),
       verifyGame: jest.fn(),
-      getUserSubmittedGames: jest.fn(),
+      getUserSubmittedGames: jest.fn()
     };
 
     mockAggregator = {
       aggregateData: jest.fn(),
-      getSyncStatus: jest.fn(() => ({})),
+      getSyncStatus: jest.fn(() => ({}))
     };
 
     // Create Express app with router
@@ -67,21 +68,21 @@ describe('Games API', () => {
       const mockGames = [
         {
           id: '123',
-          venue_id: '456',
-          venue_name: 'Community Center',
-          venue_address: '123 Main St',
-          distance_meters: 500,
+          venueId: '456',
+          venueName: 'Community Center',
+          venueAddress: '123 Main St',
+          distanceMeters: 500,
           location: { type: 'Point', coordinates: [-79.3832, 43.6532] },
           sport: 'basketball',
-          game_type: 'drop-in',
-          start_time: '2024-01-15T18:00:00Z',
-          end_time: '2024-01-15T20:00:00Z',
+          gameType: 'drop-in',
+          startTime: '2024-01-15T18:00:00Z',
+          endTime: '2024-01-15T20:00:00Z',
           capacity: 20,
-          current_players: 5,
-          skill_level: 'all',
+          currentPlayers: 5,
+          skillLevel: 'all',
           price: '0',
-          verification_status: 'verified',
-        },
+          verificationStatus: 'verified'
+        }
       ];
 
       mockCacheManager.get.mockResolvedValue(null);

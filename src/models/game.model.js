@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+// const { Pool } = require('pg'); // eslint-disable-line no-unused-vars
 const geohash = require('geohash');
 
 class GameModel {
@@ -72,10 +72,10 @@ class GameModel {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
       const tableName = `games_${date.toISOString().split('T')[0].replace(/-/g, '_')}`;
-      const startDate = date.toISOString().split('T')[0];
+      const [startDate] = date.toISOString().split('T');
       const endDate = new Date(date);
       endDate.setDate(endDate.getDate() + 1);
-      
+
       await this.pool.query(`
         CREATE TABLE IF NOT EXISTS ${tableName} 
         PARTITION OF games 
@@ -87,7 +87,7 @@ class GameModel {
   async addVenue(venue) {
     const { name, address, latitude, longitude, type, source, sourceId, metadata } = venue;
     const hash = geohash.encode(latitude, longitude, 8);
-    
+
     const query = `
       INSERT INTO venues (name, address, location, geohash, type, source, source_id, metadata)
       VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, $6, $7, $8, $9)
@@ -101,34 +101,34 @@ class GameModel {
         updated_at = CURRENT_TIMESTAMP
       RETURNING *;
     `;
-    
+
     const result = await this.pool.query(query, [
       name, address, longitude, latitude, hash, type, source, sourceId, metadata
     ]);
-    
+
     return result.rows[0];
   }
 
   async addGame(game) {
     const { venueId, sport, gameType, startTime, endTime, capacity, skillLevel, price, source, metadata } = game;
-    
+
     const query = `
       INSERT INTO games (venue_id, sport, game_type, start_time, end_time, capacity, skill_level, price, source, metadata)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       ON CONFLICT DO NOTHING
       RETURNING *;
     `;
-    
+
     const result = await this.pool.query(query, [
       venueId, sport, gameType, startTime, endTime, capacity, skillLevel, price, source, metadata
     ]);
-    
+
     return result.rows[0];
   }
 
   async findGamesNearLocation(latitude, longitude, radiusKm = 10, filters = {}) {
     const hash = geohash.encode(latitude, longitude, 4); // Lower precision for radius search
-    
+
     const query = `
       WITH nearby_venues AS (
         SELECT 
@@ -159,17 +159,21 @@ class GameModel {
       ORDER BY g.start_time, nv.distance_meters
       LIMIT 100;
     `;
-    
+
     const params = [longitude, latitude, hash, radiusKm * 1000];
-    if (filters.sport) params.push(filters.sport);
-    if (filters.gameType) params.push(filters.gameType);
-    
+    if (filters.sport) {
+      params.push(filters.sport);
+    }
+    if (filters.gameType) {
+      params.push(filters.gameType);
+    }
+
     const result = await this.pool.query(query, params);
     return result.rows;
   }
 
   async cleanupOldGames() {
-    const query = `DROP TABLE IF EXISTS games_${new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0].replace(/-/g, '_')};`;
+    const query = `DROP TABLE IF EXISTS games_${new Date(Date.now() - (8 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0].replace(/-/g, '_')};`;
     await this.pool.query(query);
   }
 }

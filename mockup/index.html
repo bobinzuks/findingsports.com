@@ -29,6 +29,7 @@
         <link rel="stylesheet" href="css/microinteractions.css?v=1752683265404" />
         <link rel="stylesheet" href="css/pwa-offline.css?v=1752683265404" />
         <link rel="stylesheet" href="css/i18n-rtl.css?v=1752683265404" />
+        <link rel="stylesheet" href="css/sport-icons.css?v=1752683265404" />
         
         <!-- PWA Manifest -->
         <link rel="manifest" href="/manifest.json">
@@ -61,36 +62,14 @@
                 100% { transform: rotate(360deg); }
             }
         </style>
+        <!-- Mapbox Configuration -->
+        <script src="js/mapbox-config.js?v=1752683265404"></script>
         <script>
-            // Google Maps API Key with Railway deployment support
-            window.GOOGLE_MAPS_API_KEY = 'AIzaSyD2ux0PIekUQLAqVDNhy0tHwhBht6vcXqA';
+            // Set Mapbox access token (should come from server in production)
+            window.MAPBOX_ACCESS_TOKEN = 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
             
             // Add Railway deployment timestamp to force updates
-            window.DEPLOYMENT_VERSION = '2025-01-16-ultra-secure-' + Date.now();
-            
-            // Security: Remove API key from client-side (move to server)
-            // window.GOOGLE_MAPS_API_KEY = 'AIzaSyD2ux0PIekUQLAqVDNhy0tHwhBht6vcXqA';
-            
-            // Load Google Maps API
-            function loadGoogleMapsScript() {
-                const script = document.createElement('script');
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&libraries=places&callback=onGoogleMapsReady`;
-                script.async = true;
-                script.defer = true;
-                document.head.appendChild(script);
-            }
-            
-            // Callback when Google Maps is ready
-            window.onGoogleMapsReady = function() {
-                console.log('Google Maps API loaded successfully');
-                window.googleMapsLoaded = true;
-                
-                // Dispatch event for any waiting code
-                window.dispatchEvent(new Event('googlemapsloaded'));
-            };
-            
-            // Start loading Google Maps
-            loadGoogleMapsScript();
+            window.DEPLOYMENT_VERSION = '2025-01-16-mapbox-migration-' + Date.now();
         </script>
     </head>
     <body>
@@ -980,6 +959,13 @@
             checkDeployment();
         }, 1000);
         </script>
+        
+        <!-- Map Scripts -->
+        <script src="js/mapbox-maps.js?v=1752683265404"></script>
+        <script src="js/google-maps.js?v=1752683265404"></script>
+        <script src="js/sport-icons.js?v=1752683265404"></script>
+        <script src="js/google-maps-sport-markers.js?v=1752683265404"></script>
+        <script src="js/map-init.js?v=1752683265404"></script>
         
         <!-- PWA Scripts -->
         <script src="js/pwa-handler.js"></script>
