@@ -452,7 +452,7 @@ window.LeaguesPage = {
     if (window.isGuest) {
       if (confirm('Sign in to join this league?')) {
         sessionStorage.setItem('joinLeagueAfterLogin', leagueId);
-        window.location.href = '/login-google.html';
+        alert('Please sign in to continue');
       }
     } else {
       console.log('Joining league:', leagueId);
@@ -465,7 +465,7 @@ window.LeaguesPage = {
     if (window.isGuest) {
       if (confirm('Sign in to register for this tournament?')) {
         sessionStorage.setItem('registerTournamentAfterLogin', tournamentId);
-        window.location.href = '/login-google.html';
+        alert('Please sign in to continue');
       }
     } else {
       console.log('Registering for tournament:', tournamentId);
@@ -483,7 +483,7 @@ window.LeaguesPage = {
   notifyMe(leagueId) {
     if (window.isGuest) {
       if (confirm('Sign in to get notified?')) {
-        window.location.href = '/login-google.html';
+        alert('Please sign in to continue');
       }
     } else {
       console.log('Setting notification for league:', leagueId);

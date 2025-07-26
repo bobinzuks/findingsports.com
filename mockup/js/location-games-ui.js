@@ -828,7 +828,7 @@ class LocationGamesUI {
         <button class="btn-primary" onclick="window.geolocationService.updateGameAttendance('${game.id}', 'join')">
           <i class="fas fa-plus"></i> Join Game
         </button>
-        <button class="btn-secondary" onclick="window.open('https://maps.google.com/?q=${game.venue.coordinates.lat},${game.venue.coordinates.lng}', '_blank')">
+        <button class="btn-secondary" onclick="window.open('https://www.openstreetmap.org/?mlat=${game.venue.coordinates.lat}&mlon=${game.venue.coordinates.lng}&zoom=15', '_blank')">
           <i class="fas fa-directions"></i> Get Directions
         </button>
       </div>

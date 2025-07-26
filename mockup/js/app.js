@@ -161,28 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Initialize map (delegates to Google Maps implementation)
+// Initialize map (Leaflet/OpenStreetMap only)
 window.initializeMap = function (userLocation) {
-  const config = window.APP_CONFIG || {};
-  const useGoogleMaps = config.ENABLE_GOOGLE_MAPS !== false;
-  const apiKey = config.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY || 'AIzaSyBqVDmKw7sY5lqqOJlk1b5cMYjCXf-xlG4';
-
-  if (useGoogleMaps && (typeof google === 'undefined' || !google.maps)) {
-    window.loadGoogleMapsAPI(apiKey).then(() => {
-      window.initializeGoogleMap(userLocation);
-    }).catch(error => {
-      console.error('Failed to load Google Maps:', error);
-      // Fallback to Leaflet if enabled
-      if (config.ENABLE_LEAFLET_FALLBACK !== false) {
-        initializeLeafletMap(userLocation);
-      }
-    });
-  } else if (useGoogleMaps) {
-    window.initializeGoogleMap(userLocation);
-  } else {
-    // Use Leaflet if Google Maps is disabled
-    initializeLeafletMap(userLocation);
-  }
+  // Always use Leaflet - Google Maps has been removed
+  initializeLeafletMap(userLocation);
 };
 
 // Fallback Leaflet map implementation
@@ -257,9 +239,7 @@ window.displayGames = function (location) {
   gamesList.innerHTML = '';
 
   // Clear existing markers
-  if (window.googleMap && window.clearGoogleMarkers) {
-    window.clearGoogleMarkers();
-  } else if (map && markers) {
+  if (map && markers) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
   }
@@ -271,9 +251,7 @@ window.displayGames = function (location) {
     gamesList.appendChild(gameCard);
 
     // Add marker to map
-    if (window.googleMap && window.addGoogleGameMarker) {
-      window.addGoogleGameMarker(game);
-    } else if (map) {
+    if (map) {
       const marker = L.marker(game.coords).addTo(map).bindPopup(`
                     <strong>${game.title}</strong><br>
                     ${game.location}<br>
@@ -284,9 +262,7 @@ window.displayGames = function (location) {
   });
 
   // Adjust map view to show all markers
-  if (window.googleMap && window.fitMapToMarkers) {
-    window.fitMapToMarkers();
-  } else if (map && markers && markers.length > 0) {
+  if (map && markers && markers.length > 0) {
     const group = new L.FeatureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.1));
   }
@@ -392,7 +368,7 @@ window.displayFilteredGames = function (location, games) {
   gamesList.innerHTML = '';
 
   // Clear markers
-  if (window.googleMap && window.clearGoogleMarkers) {
+  if (false) { // Google Maps removed
     window.clearGoogleMarkers();
   } else if (map && markers) {
     markers.forEach(marker => map.removeLayer(marker));
@@ -409,7 +385,7 @@ window.displayFilteredGames = function (location, games) {
     const gameCard = window.createGameCard(game);
     gamesList.appendChild(gameCard);
 
-    if (window.googleMap && window.addGoogleGameMarker) {
+    if (false) { // Google Maps removed
       window.addGoogleGameMarker(game);
     } else if (map) {
       const marker = L.marker(game.coords).addTo(map).bindPopup(`
@@ -422,7 +398,7 @@ window.displayFilteredGames = function (location, games) {
   });
 
   // Adjust map view
-  if (window.googleMap && window.fitMapToMarkers) {
+  if (false) { // Google Maps removed
     window.fitMapToMarkers();
   } else if (map && markers && markers.length > 0) {
     const group = new L.FeatureGroup(markers);
@@ -603,7 +579,7 @@ Sign in to join this game?`);
     if (join) {
       // Save game ID to join after login
       sessionStorage.setItem('joinGameAfterLogin', game.id);
-      window.location.href = '/login-google.html';
+      alert('Please sign in to join games');
     }
   } else {
     // Logged in user can join
@@ -688,7 +664,8 @@ Get directions to this location?`;
 
 // Get directions to a location
 window.getDirections = function (lat, lng) {
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const userLocation = JSON.parse(localStorage.getItem('userLocation') || '{}');
+  const url = `https://www.openstreetmap.org/directions?route=${userLocation.lat || 49.2827},${userLocation.lng || -123.1207};${lat},${lng}`;
   window.open(url, '_blank');
 };
 
@@ -890,9 +867,7 @@ window.showPlayNowResults = function (playNowGames, errorMessage, allRecommendat
   gamesList.innerHTML = '';
 
   // Clear map markers
-  if (window.googleMap && window.clearGoogleMarkers) {
-    window.clearGoogleMarkers();
-  } else if (map && markers) {
+  if (map && markers) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
   }
@@ -1023,10 +998,7 @@ window.createPlayNowCard = function (game, rank) {
 
 // Add game marker to map
 window.addGameMarker = function (game, iconOverride) {
-  // Use Google Maps if available, otherwise fall back to Leaflet
-  if (window.googleMap && window.addGoogleGameMarker) {
-    return window.addGoogleGameMarker(game);
-  }
+  // Use Leaflet only - Google Maps removed
 
   // Leaflet fallback
   let coords = null;
@@ -1132,7 +1104,7 @@ window.updateAuthUI = function () {
     const loginBtn = document.createElement('button');
     loginBtn.className = 'guest-login-btn';
     loginBtn.textContent = 'Sign In';
-    loginBtn.onclick = () => (window.location.href = '/login-google.html');
+    loginBtn.onclick = () => alert('Login functionality coming soon');
     userMenu.appendChild(loginBtn);
   } else if (currentUser) {
     // Logged in user UI
@@ -1240,9 +1212,7 @@ window.displayGamesOnMap = function (games) {
 
   // Clear existing
   gamesList.innerHTML = '';
-  if (window.googleMap && window.clearGoogleMarkers) {
-    window.clearGoogleMarkers();
-  } else if (map && markers) {
+  if (map && markers) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
   }
@@ -1269,9 +1239,7 @@ window.displayGamesOnMap = function (games) {
 
     // Add marker to map if coordinates exist
     if (coords) {
-      if (window.googleMap && window.addGoogleGameMarker) {
-        window.addGoogleGameMarker(game);
-      } else if (map) {
+      if (map) {
         try {
           const markerIcon = L.divIcon({
             className: 'game-marker',
@@ -1311,9 +1279,7 @@ window.displayGamesOnMap = function (games) {
   });
 
   // Adjust map view
-  if (window.googleMap && window.fitMapToMarkers) {
-    window.fitMapToMarkers();
-  } else if (markers && markers.length > 0 && map) {
+  if (markers && markers.length > 0 && map) {
     try {
       const group = new L.FeatureGroup(markers);
       map.fitBounds(group.getBounds().pad(0.1));

@@ -32,7 +32,7 @@
       strokeWeight: 3
     },
     happeningNow: {
-      path: google.maps.SymbolPath.CIRCLE,
+      path: null, // Google Maps removed
       scale: 12,
       fillColor: '#e74c3c',
       fillOpacity: 1,
@@ -40,7 +40,7 @@
       strokeWeight: 3
     },
     startingSoon: {
-      path: google.maps.SymbolPath.CIRCLE,
+      path: null, // Google Maps removed
       scale: 10,
       fillColor: '#f39c12',
       fillOpacity: 1,
@@ -48,7 +48,7 @@
       strokeWeight: 3
     },
     laterToday: {
-      path: google.maps.SymbolPath.CIRCLE,
+      path: null, // Google Maps removed
       scale: 8,
       fillColor: '#27ae60',
       fillOpacity: 1,
@@ -56,7 +56,7 @@
       strokeWeight: 2
     },
     openCourt: {
-      path: google.maps.SymbolPath.CIRCLE,
+      path: null, // Google Maps removed
       scale: 8,
       fillColor: '#9b59b6',
       fillOpacity: 0.8,

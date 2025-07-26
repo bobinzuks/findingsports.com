@@ -508,7 +508,7 @@ window.SocialFeedPage = {
                     <div class="guest-message">
                         <h3>Join the conversation!</h3>
                         <p>Sign in to send messages and connect with other players</p>
-                        <button class="auth-button discord-style" onclick="window.location.href='/login-google.html'">
+                        <button class="auth-button discord-style" onclick="alert('Please sign in to continue')">
                             Sign In to Chat
                         </button>
                     </div>

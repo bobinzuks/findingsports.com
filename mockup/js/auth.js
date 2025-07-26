@@ -69,7 +69,7 @@ document.getElementById('loginForm').addEventListener('submit', async e => {
 
     // Redirect based on onboarding status
     setTimeout(() => {
-      if (!data.user.onboarded && data.user.provider === 'google') {
+      if (!data.user.onboarded && data.user.provider === 'email') {
         window.location.href = '/onboarding/';
       } else {
         window.location.href = '/';
