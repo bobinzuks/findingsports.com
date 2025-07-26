@@ -25,15 +25,8 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');
     
-    // Fix Content Security Policy to allow necessary resources
-    res.setHeader('Content-Security-Policy', 
-        "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
-        "script-src * 'unsafe-inline' 'unsafe-eval'; " +
-        "connect-src * https: wss: ws:; " +
-        "img-src * data: blob: 'unsafe-inline'; " +
-        "frame-src *; " +
-        "style-src * 'unsafe-inline';"
-    );
+    // Remove Content Security Policy to avoid blocking issues
+    // Since this is a development/demo server, we'll disable CSP
     
     // Handle OPTIONS
     if (req.method === 'OPTIONS') {

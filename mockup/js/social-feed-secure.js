@@ -150,4 +150,764 @@
             time: SecurityUtils.sanitizeHTML(gameInfo.time || 'Time TBD'),
             spotsLeft: Math.max(0, parseInt(gameInfo.spotsLeft) || 0)
         };
-    }\n    \n    // Validate timestamp\n    function validateTimestamp(timestamp) {\n        const ts = parseInt(timestamp);\n        if (isNaN(ts) || ts < 0 || ts > Date.now() + 86400000) {\n            return Date.now() - 3600000; // Default to 1 hour ago\n        }\n        return ts;\n    }\n    \n    // Get demo posts with security\n    function getDemoPostsSecure() {\n        const demoData = [\n            {\n                id: 'demo-1',\n                author: {\n                    name: 'Demo User',\n                    avatar: 'https://via.placeholder.com/40x40?text=D',\n                    isAdmin: false\n                },\n                content: 'Welcome to the secure social feed! All content is now properly sanitized.',\n                timestamp: Date.now() - 3600000,\n                likes: 8,\n                comments: 3,\n                type: 'post',\n                gameId: null\n            },\n            {\n                id: 'demo-2',\n                author: {\n                    name: 'Game Host',\n                    avatar: 'https://via.placeholder.com/40x40?text=G',\n                    isAdmin: true\n                },\n                content: 'Basketball game at Hillcrest Community Centre - 2 spots left! Secure chat available.',\n                timestamp: Date.now() - 1800000,\n                likes: 15,\n                comments: 12,\n                type: 'game',\n                gameId: 'game-123',\n                gameInfo: {\n                    sport: 'Basketball',\n                    location: 'Hillcrest Community Centre',\n                    time: '7:00 PM',\n                    spotsLeft: 2\n                }\n            }\n        ];\n        \n        return demoData.map(sanitizePost).filter(Boolean);\n    }\n    \n    // Render social feed with security\n    function renderSocialFeedSecure() {\n        const feedContainer = document.getElementById('social-feed-container');\n        if (!feedContainer) return;\n        \n        // Clear existing content\n        feedContainer.innerHTML = '';\n        \n        if (window.socialFeedSecure.posts.length === 0) {\n            showEmptyState(feedContainer);\n            return;\n        }\n        \n        // Create posts container\n        const postsContainer = document.createElement('div');\n        postsContainer.className = 'posts-container';\n        \n        // Render posts securely\n        window.socialFeedSecure.posts.forEach(post => {\n            const postElement = createPostElementSecure(post);\n            if (postElement) {\n                postsContainer.appendChild(postElement);\n            }\n        });\n        \n        feedContainer.appendChild(postsContainer);\n    }\n    \n    // Create post element securely\n    function createPostElementSecure(post) {\n        try {\n            const postDiv = document.createElement('div');\n            postDiv.className = 'social-post';\n            postDiv.setAttribute('data-post-id', post.id);\n            \n            // Post header\n            const header = document.createElement('div');\n            header.className = 'post-header';\n            \n            // Author avatar\n            const avatar = document.createElement('img');\n            avatar.className = 'author-avatar';\n            avatar.src = post.author.avatar;\n            avatar.alt = `${post.author.name} avatar`;\n            avatar.onerror = function() {\n                this.src = 'https://via.placeholder.com/40x40?text=U';\n            };\n            \n            // Author info\n            const authorInfo = document.createElement('div');\n            authorInfo.className = 'author-info';\n            \n            const authorName = document.createElement('span');\n            authorName.className = 'author-name';\n            authorName.textContent = post.author.name;\n            \n            const postTime = document.createElement('span');\n            postTime.className = 'post-time';\n            postTime.textContent = formatTimeSecure(post.timestamp);\n            \n            authorInfo.appendChild(authorName);\n            \n            // Admin badge\n            if (post.author.isAdmin) {\n                const adminBadge = document.createElement('span');\n                adminBadge.className = 'admin-badge';\n                adminBadge.textContent = 'Admin';\n                authorInfo.appendChild(adminBadge);\n            }\n            \n            authorInfo.appendChild(postTime);\n            \n            header.appendChild(avatar);\n            header.appendChild(authorInfo);\n            \n            // Post content\n            const content = document.createElement('div');\n            content.className = 'post-content';\n            content.textContent = post.content;\n            \n            // Game info if applicable\n            if (post.type === 'game' && post.gameInfo) {\n                const gameInfo = createGameInfoElementSecure(post.gameInfo, post.gameId);\n                if (gameInfo) {\n                    content.appendChild(gameInfo);\n                }\n            }\n            \n            // Post actions\n            const actions = createPostActionsSecure(post);\n            \n            // Assemble post\n            postDiv.appendChild(header);\n            postDiv.appendChild(content);\n            postDiv.appendChild(actions);\n            \n            return postDiv;\n        } catch (error) {\n            console.error('Error creating post element:', error);\n            return null;\n        }\n    }\n    \n    // Create game info element securely\n    function createGameInfoElementSecure(gameInfo, gameId) {\n        const gameDiv = document.createElement('div');\n        gameDiv.className = 'game-info';\n        \n        const gameDetails = document.createElement('div');\n        gameDetails.className = 'game-details';\n        \n        // Sport\n        const sport = document.createElement('span');\n        sport.innerHTML = `🏀 ${gameInfo.sport}`;\n        \n        // Location\n        const location = document.createElement('span');\n        location.innerHTML = `📍 ${gameInfo.location}`;\n        \n        // Time\n        const time = document.createElement('span');\n        time.innerHTML = `🕐 ${gameInfo.time}`;\n        \n        // Spots left\n        const spots = document.createElement('span');\n        spots.className = 'spots-left';\n        spots.textContent = `${gameInfo.spotsLeft} spots left`;\n        \n        gameDetails.appendChild(sport);\n        gameDetails.appendChild(location);\n        gameDetails.appendChild(time);\n        gameDetails.appendChild(spots);\n        \n        // Join game button\n        const joinBtn = document.createElement('button');\n        joinBtn.className = 'join-game-btn';\n        joinBtn.textContent = 'Join Game';\n        joinBtn.onclick = () => joinGameSecure(gameId);\n        \n        gameDiv.appendChild(gameDetails);\n        gameDiv.appendChild(joinBtn);\n        \n        return gameDiv;\n    }\n    \n    // Create post actions securely\n    function createPostActionsSecure(post) {\n        const actions = document.createElement('div');\n        actions.className = 'post-actions';\n        \n        // Like button\n        const likeBtn = document.createElement('button');\n        likeBtn.className = 'like-btn';\n        likeBtn.innerHTML = `👍 ${post.likes}`;\n        likeBtn.onclick = () => likePostSecure(post.id);\n        \n        // Comment button\n        const commentBtn = document.createElement('button');\n        commentBtn.className = 'comment-btn';\n        commentBtn.innerHTML = `💬 ${post.comments}`;\n        commentBtn.onclick = () => showCommentsSecure(post.id);\n        \n        actions.appendChild(likeBtn);\n        actions.appendChild(commentBtn);\n        \n        // Chat button for game posts\n        if (post.type === 'game' && post.gameId) {\n            const chatBtn = document.createElement('button');\n            chatBtn.className = 'chat-btn';\n            chatBtn.innerHTML = '💬 Chat';\n            chatBtn.onclick = () => joinGameChatSecure(post.gameId);\n            actions.appendChild(chatBtn);\n        }\n        \n        return actions;\n    }\n    \n    // Format time securely\n    function formatTimeSecure(timestamp) {\n        try {\n            const now = Date.now();\n            const diff = now - timestamp;\n            \n            if (diff < 3600000) { // Less than 1 hour\n                const minutes = Math.floor(diff / 60000);\n                return `${minutes}m ago`;\n            } else if (diff < 86400000) { // Less than 24 hours\n                const hours = Math.floor(diff / 3600000);\n                return `${hours}h ago`;\n            } else {\n                const days = Math.floor(diff / 86400000);\n                return `${days}d ago`;\n            }\n        } catch (error) {\n            return 'Recently';\n        }\n    }\n    \n    // Like post securely\n    window.likePostSecure = async function(postId) {\n        // Check authentication\n        if (!window.authState || !window.authState.isAuthenticated) {\n            if (window.showLoginModal) {\n                window.showLoginModal();\n            }\n            return;\n        }\n        \n        // Rate limiting\n        if (!SecurityUtils.rateLimiter(`like_${postId}`, 1, 5000)) {\n            console.log('Rate limit exceeded for like action');\n            return;\n        }\n        \n        try {\n            const response = await fetch(`/api/social/posts/${encodeURIComponent(postId)}/like`, {\n                method: 'POST',\n                headers: {\n                    'Authorization': `Bearer ${window.authState.token}`,\n                    'Content-Type': 'application/json',\n                    'X-CSRF-Token': SecurityUtils.setCSRFToken()\n                }\n            });\n            \n            if (!response.ok) {\n                throw new Error(`HTTP error! status: ${response.status}`);\n            }\n            \n            const data = await response.json();\n            \n            if (data.success) {\n                // Update post likes in UI\n                const post = window.socialFeedSecure.posts.find(p => p.id === postId);\n                if (post) {\n                    post.likes = Math.max(0, parseInt(data.likes) || post.likes + 1);\n                    renderSocialFeedSecure();\n                }\n            }\n        } catch (error) {\n            console.error('Error liking post:', error);\n            \n            // Optimistic update for demo\n            const post = window.socialFeedSecure.posts.find(p => p.id === postId);\n            if (post) {\n                post.likes = Math.max(0, post.likes + 1);\n                renderSocialFeedSecure();\n            }\n        }\n    };\n    \n    // Join game chat securely\n    window.joinGameChatSecure = function(gameId) {\n        // Check authentication\n        if (!window.authState || !window.authState.isAuthenticated) {\n            if (window.showLoginModal) {\n                window.showLoginModal();\n            }\n            return;\n        }\n        \n        // Sanitize game ID\n        const sanitizedGameId = SecurityUtils.sanitizeHTML(gameId);\n        if (!sanitizedGameId) {\n            console.error('Invalid game ID');\n            return;\n        }\n        \n        // Create or join chat room for the game\n        const chatRoom = `game-${sanitizedGameId}`;\n        window.socialFeedSecure.activeChat = chatRoom;\n        \n        // Initialize chat room if not exists\n        if (!window.socialFeedSecure.chatRooms.has(chatRoom)) {\n            window.socialFeedSecure.chatRooms.set(chatRoom, {\n                messages: [],\n                participants: []\n            });\n        }\n        \n        // Show chat modal\n        showChatModalSecure(chatRoom);\n    };\n    \n    // Show chat modal securely\n    function showChatModalSecure(chatRoom) {\n        // Remove any existing chat modal\n        const existingModal = document.getElementById('chat-modal');\n        if (existingModal) {\n            existingModal.remove();\n        }\n        \n        const modal = document.createElement('div');\n        modal.id = 'chat-modal';\n        modal.style.cssText = `\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0,0,0,0.5);\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            z-index: 10000;\n        `;\n        \n        const modalContent = document.createElement('div');\n        modalContent.style.cssText = `\n            background: white;\n            width: 90%;\n            max-width: 600px;\n            height: 80%;\n            border-radius: 12px;\n            display: flex;\n            flex-direction: column;\n        `;\n        \n        // Header\n        const header = document.createElement('div');\n        header.style.cssText = `\n            padding: 1rem;\n            border-bottom: 1px solid #eee;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n        `;\n        \n        const title = document.createElement('h3');\n        title.textContent = 'Game Chat';\n        title.style.margin = '0';\n        \n        const closeBtn = document.createElement('button');\n        closeBtn.innerHTML = '×';\n        closeBtn.style.cssText = `\n            background: none;\n            border: none;\n            font-size: 24px;\n            cursor: pointer;\n            padding: 0;\n            width: 30px;\n            height: 30px;\n        `;\n        closeBtn.onclick = closeChatModalSecure;\n        \n        header.appendChild(title);\n        header.appendChild(closeBtn);\n        \n        // Messages container\n        const messagesDiv = document.createElement('div');\n        messagesDiv.id = 'chat-messages';\n        messagesDiv.style.cssText = `\n            flex: 1;\n            overflow-y: auto;\n            padding: 1rem;\n            background: #f9f9f9;\n        `;\n        \n        // Input container\n        const inputContainer = document.createElement('div');\n        inputContainer.style.cssText = `\n            padding: 1rem;\n            border-top: 1px solid #eee;\n            display: flex;\n            gap: 10px;\n        `;\n        \n        const chatInput = document.createElement('input');\n        chatInput.type = 'text';\n        chatInput.id = 'chat-input';\n        chatInput.placeholder = 'Type a message...';\n        chatInput.maxLength = 1000;\n        chatInput.style.cssText = `\n            flex: 1;\n            padding: 12px;\n            border: 1px solid #ddd;\n            border-radius: 6px;\n            outline: none;\n        `;\n        \n        const sendBtn = document.createElement('button');\n        sendBtn.textContent = 'Send';\n        sendBtn.style.cssText = `\n            padding: 12px 20px;\n            background: #ff6b35;\n            color: white;\n            border: none;\n            border-radius: 6px;\n            cursor: pointer;\n            font-weight: 600;\n        `;\n        sendBtn.onclick = () => sendChatMessageSecure(chatRoom);\n        \n        inputContainer.appendChild(chatInput);\n        inputContainer.appendChild(sendBtn);\n        \n        // Assemble modal\n        modalContent.appendChild(header);\n        modalContent.appendChild(messagesDiv);\n        modalContent.appendChild(inputContainer);\n        \n        modal.appendChild(modalContent);\n        document.body.appendChild(modal);\n        \n        // Load chat messages\n        loadChatMessagesSecure(chatRoom);\n        \n        // Focus input\n        chatInput.focus();\n        \n        // Handle Enter key\n        chatInput.addEventListener('keypress', (e) => {\n            if (e.key === 'Enter') {\n                sendChatMessageSecure(chatRoom);\n            }\n        });\n        \n        // Handle click outside to close\n        modal.addEventListener('click', (e) => {\n            if (e.target === modal) {\n                closeChatModalSecure();\n            }\n        });\n    }\n    \n    // Send chat message securely\n    function sendChatMessageSecure(chatRoom) {\n        const input = document.getElementById('chat-input');\n        if (!input || !input.value.trim()) return;\n        \n        const messageText = input.value.trim();\n        \n        // Rate limiting\n        if (!SecurityUtils.rateLimiter('chat_message', 10, 60000)) {\n            alert('You are sending messages too quickly. Please wait.');\n            return;\n        }\n        \n        // Sanitize message\n        const sanitizedMessage = SecurityUtils.sanitizeMessage(messageText);\n        if (!sanitizedMessage) {\n            alert('Invalid message content.');\n            return;\n        }\n        \n        // Create message object\n        const message = {\n            id: Date.now().toString(),\n            author: {\n                name: window.authState.user.name || window.authState.user.email,\n                avatar: window.authState.user.avatar || 'https://via.placeholder.com/24x24?text=U'\n            },\n            content: sanitizedMessage,\n            timestamp: Date.now()\n        };\n        \n        // Add to room\n        const roomData = window.socialFeedSecure.chatRooms.get(chatRoom);\n        if (roomData) {\n            // Limit number of messages\n            if (roomData.messages.length >= window.socialFeedSecure.maxChatMessages) {\n                roomData.messages.shift(); // Remove oldest message\n            }\n            \n            roomData.messages.push(message);\n            loadChatMessagesSecure(chatRoom);\n        }\n        \n        // Clear input\n        input.value = '';\n        \n        // TODO: Send to server via WebSocket\n        console.log('Message sent:', message);\n    }\n    \n    // Load chat messages securely\n    function loadChatMessagesSecure(chatRoom) {\n        const messagesContainer = document.getElementById('chat-messages');\n        if (!messagesContainer) return;\n        \n        messagesContainer.innerHTML = '';\n        \n        const roomData = window.socialFeedSecure.chatRooms.get(chatRoom);\n        if (!roomData || roomData.messages.length === 0) {\n            const emptyMsg = document.createElement('div');\n            emptyMsg.style.cssText = 'text-align: center; color: #666; padding: 2rem;';\n            emptyMsg.textContent = 'No messages yet. Start the conversation!';\n            messagesContainer.appendChild(emptyMsg);\n            return;\n        }\n        \n        // Render messages\n        roomData.messages.forEach(msg => {\n            const messageDiv = document.createElement('div');\n            messageDiv.className = 'chat-message';\n            messageDiv.style.cssText = 'margin-bottom: 1rem;';\n            \n            const header = document.createElement('div');\n            header.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 5px;';\n            \n            const avatar = document.createElement('img');\n            avatar.src = msg.author.avatar;\n            avatar.alt = 'Avatar';\n            avatar.style.cssText = 'width: 24px; height: 24px; border-radius: 50%;';\n            avatar.onerror = function() {\n                this.src = 'https://via.placeholder.com/24x24?text=U';\n            };\n            \n            const name = document.createElement('strong');\n            name.textContent = msg.author.name;\n            \n            const time = document.createElement('span');\n            time.textContent = formatTimeSecure(msg.timestamp);\n            time.style.cssText = 'color: #666; font-size: 0.8em;';\n            \n            header.appendChild(avatar);\n            header.appendChild(name);\n            header.appendChild(time);\n            \n            const content = document.createElement('div');\n            content.style.cssText = 'margin-left: 34px; word-wrap: break-word;';\n            content.textContent = msg.content;\n            \n            messageDiv.appendChild(header);\n            messageDiv.appendChild(content);\n            \n            messagesContainer.appendChild(messageDiv);\n        });\n        \n        // Scroll to bottom\n        messagesContainer.scrollTop = messagesContainer.scrollHeight;\n    }\n    \n    // Close chat modal securely\n    function closeChatModalSecure() {\n        const modal = document.getElementById('chat-modal');\n        if (modal) {\n            modal.remove();\n        }\n        window.socialFeedSecure.activeChat = null;\n    }\n    \n    // Join game securely\n    function joinGameSecure(gameId) {\n        // Check authentication\n        if (!window.authState || !window.authState.isAuthenticated) {\n            if (window.showLoginModal) {\n                window.showLoginModal();\n            }\n            return;\n        }\n        \n        // Sanitize game ID\n        const sanitizedGameId = SecurityUtils.sanitizeHTML(gameId);\n        if (!sanitizedGameId) {\n            console.error('Invalid game ID');\n            return;\n        }\n        \n        // Make join request\n        fetch(`/api/games/${encodeURIComponent(sanitizedGameId)}/join`, {\n            method: 'POST',\n            headers: {\n                'Authorization': `Bearer ${window.authState.token}`,\n                'Content-Type': 'application/json',\n                'X-CSRF-Token': SecurityUtils.setCSRFToken()\n            }\n        })\n        .then(response => response.json())\n        .then(data => {\n            if (data.success) {\n                alert('Successfully joined the game!');\n                // Refresh the feed\n                loadSocialPostsSecure();\n            } else {\n                alert('Failed to join game: ' + (data.message || 'Unknown error'));\n            }\n        })\n        .catch(error => {\n            console.error('Error joining game:', error);\n            alert('Error joining game. Please try again.');\n        });\n    }\n    \n    // Show loading state\n    function showLoadingState(container) {\n        container.innerHTML = `\n            <div style=\"text-align: center; padding: 3rem; color: #666;\">\n                <div style=\"width: 40px; height: 40px; border: 3px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;\"></div>\n                <p>Loading social feed...</p>\n            </div>\n        `;\n    }\n    \n    // Show error state\n    function showErrorState(container, message) {\n        container.innerHTML = `\n            <div style=\"text-align: center; padding: 3rem; color: #666;\">\n                <p style=\"color: #e74c3c;\">${SecurityUtils.sanitizeHTML(message)}</p>\n                <button onclick=\"loadSocialPostsSecure()\" style=\"padding: 0.5rem 1rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;\">Try Again</button>\n            </div>\n        `;\n    }\n    \n    // Show empty state\n    function showEmptyState(container) {\n        container.innerHTML = `\n            <div class=\"empty-feed\" style=\"text-align: center; padding: 3rem; color: #666;\">\n                <h3>No posts yet</h3>\n                <p>Be the first to share something!</p>\n            </div>\n        `;\n    }\n    \n    // Setup real-time updates placeholder\n    function setupRealTimeUpdatesSecure() {\n        console.log('Real-time updates ready (WebSocket implementation pending)');\n    }\n    \n    // Setup periodic refresh\n    function setupPeriodicRefresh() {\n        // Refresh feed every 5 minutes\n        setInterval(() => {\n            if (!window.socialFeedSecure.isLoading) {\n                loadSocialPostsSecure();\n            }\n        }, 300000);\n    }\n    \n    // Create new post securely\n    window.createPostSecure = function() {\n        // Check authentication\n        if (!window.authState || !window.authState.isAuthenticated) {\n            if (window.showLoginModal) {\n                window.showLoginModal();\n            }\n            return;\n        }\n        \n        // Rate limiting\n        if (!SecurityUtils.rateLimiter('create_post', 5, 3600000)) {\n            alert('You have reached the post limit. Please wait before posting again.');\n            return;\n        }\n        \n        const content = prompt('What would you like to share?');\n        if (!content) return;\n        \n        const sanitizedContent = SecurityUtils.sanitizeMessage(content);\n        if (!sanitizedContent) {\n            alert('Invalid post content.');\n            return;\n        }\n        \n        const post = {\n            id: Date.now().toString(),\n            author: {\n                name: window.authState.user.name || window.authState.user.email,\n                avatar: window.authState.user.avatar || 'https://via.placeholder.com/40x40?text=U',\n                isAdmin: window.authState.isAdmin\n            },\n            content: sanitizedContent,\n            timestamp: Date.now(),\n            likes: 0,\n            comments: 0,\n            type: 'post',\n            gameId: null\n        };\n        \n        // Add to posts (optimistic update)\n        window.socialFeedSecure.posts.unshift(post);\n        \n        // Limit posts\n        if (window.socialFeedSecure.posts.length > window.socialFeedSecure.maxPosts) {\n            window.socialFeedSecure.posts.pop();\n        }\n        \n        renderSocialFeedSecure();\n        \n        // TODO: Send to server\n        console.log('Post created:', post);\n    };\n    \n    // Placeholder for comments\n    function showCommentsSecure(postId) {\n        alert('Comments feature coming soon!');\n    }\n    \n    // Make functions globally accessible\n    window.likePost = window.likePostSecure;\n    window.joinGameChat = window.joinGameChatSecure;\n    window.sendChatMessage = function() { sendChatMessageSecure(window.socialFeedSecure.activeChat); };\n    window.closeChatModal = closeChatModalSecure;\n    window.createPost = window.createPostSecure;\n    window.joinGame = joinGameSecure;\n    window.showComments = showCommentsSecure;\n    \n    // Initialize when page is ready\n    if (document.readyState === 'loading') {\n        document.addEventListener('DOMContentLoaded', () => {\n            // Wait for auth to be ready\n            setTimeout(window.initSecureSocialFeed, 1000);\n        });\n    } else {\n        setTimeout(window.initSecureSocialFeed, 1000);\n    }\n    \n    console.log('SECURE Social Feed System Ready');\n})();
+    }
+    
+    // Validate timestamp
+    function validateTimestamp(timestamp) {
+        const ts = parseInt(timestamp);
+        if (isNaN(ts) || ts < 0 || ts > Date.now() + 86400000) {
+            return Date.now() - 3600000; // Default to 1 hour ago
+        }
+        return ts;
+    }
+    
+    // Get demo posts with security
+    function getDemoPostsSecure() {
+        const demoData = [
+            {
+                id: 'demo-1',
+                author: {
+                    name: 'Demo User',
+                    avatar: 'https://via.placeholder.com/40x40?text=D',
+                    isAdmin: false
+                },
+                content: 'Welcome to the secure social feed! All content is now properly sanitized.',
+                timestamp: Date.now() - 3600000,
+                likes: 8,
+                comments: 3,
+                type: 'post',
+                gameId: null
+            },
+            {
+                id: 'demo-2',
+                author: {
+                    name: 'Game Host',
+                    avatar: 'https://via.placeholder.com/40x40?text=G',
+                    isAdmin: true
+                },
+                content: 'Basketball game at Hillcrest Community Centre - 2 spots left! Secure chat available.',
+                timestamp: Date.now() - 1800000,
+                likes: 15,
+                comments: 12,
+                type: 'game',
+                gameId: 'game-123',
+                gameInfo: {
+                    sport: 'Basketball',
+                    location: 'Hillcrest Community Centre',
+                    time: '7:00 PM',
+                    spotsLeft: 2
+                }
+            }
+        ];
+        
+        return demoData.map(sanitizePost).filter(Boolean);
+    }
+    
+    // Render social feed with security
+    function renderSocialFeedSecure() {
+        const feedContainer = document.getElementById('social-feed-container');
+        if (!feedContainer) return;
+        
+        // Clear existing content
+        feedContainer.innerHTML = '';
+        
+        if (window.socialFeedSecure.posts.length === 0) {
+            showEmptyState(feedContainer);
+            return;
+        }
+        
+        // Create posts container
+        const postsContainer = document.createElement('div');
+        postsContainer.className = 'posts-container';
+        
+        // Render posts securely
+        window.socialFeedSecure.posts.forEach(post => {
+            const postElement = createPostElementSecure(post);
+            if (postElement) {
+                postsContainer.appendChild(postElement);
+            }
+        });
+        
+        feedContainer.appendChild(postsContainer);
+    }
+    
+    // Create post element securely
+    function createPostElementSecure(post) {
+        try {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'social-post';
+            postDiv.setAttribute('data-post-id', post.id);
+            
+            // Post header
+            const header = document.createElement('div');
+            header.className = 'post-header';
+            
+            // Author avatar
+            const avatar = document.createElement('img');
+            avatar.className = 'author-avatar';
+            avatar.src = post.author.avatar;
+            avatar.alt = `${post.author.name} avatar`;
+            avatar.onerror = function() {
+                this.src = 'https://via.placeholder.com/40x40?text=U';
+            };
+            
+            // Author info
+            const authorInfo = document.createElement('div');
+            authorInfo.className = 'author-info';
+            
+            const authorName = document.createElement('span');
+            authorName.className = 'author-name';
+            authorName.textContent = post.author.name;
+            
+            const postTime = document.createElement('span');
+            postTime.className = 'post-time';
+            postTime.textContent = formatTimeSecure(post.timestamp);
+            
+            authorInfo.appendChild(authorName);
+            
+            // Admin badge
+            if (post.author.isAdmin) {
+                const adminBadge = document.createElement('span');
+                adminBadge.className = 'admin-badge';
+                adminBadge.textContent = 'Admin';
+                authorInfo.appendChild(adminBadge);
+            }
+            
+            authorInfo.appendChild(postTime);
+            
+            header.appendChild(avatar);
+            header.appendChild(authorInfo);
+            
+            // Post content
+            const content = document.createElement('div');
+            content.className = 'post-content';
+            content.textContent = post.content;
+            
+            // Game info if applicable
+            if (post.type === 'game' && post.gameInfo) {
+                const gameInfo = createGameInfoElementSecure(post.gameInfo, post.gameId);
+                if (gameInfo) {
+                    content.appendChild(gameInfo);
+                }
+            }
+            
+            // Post actions
+            const actions = createPostActionsSecure(post);
+            
+            // Assemble post
+            postDiv.appendChild(header);
+            postDiv.appendChild(content);
+            postDiv.appendChild(actions);
+            
+            return postDiv;
+        } catch (error) {
+            console.error('Error creating post element:', error);
+            return null;
+        }
+    }
+    
+    // Create game info element securely
+    function createGameInfoElementSecure(gameInfo, gameId) {
+        const gameDiv = document.createElement('div');
+        gameDiv.className = 'game-info';
+        
+        const gameDetails = document.createElement('div');
+        gameDetails.className = 'game-details';
+        
+        // Sport
+        const sport = document.createElement('span');
+        sport.innerHTML = `🏀 ${gameInfo.sport}`;
+        
+        // Location
+        const location = document.createElement('span');
+        location.innerHTML = `📍 ${gameInfo.location}`;
+        
+        // Time
+        const time = document.createElement('span');
+        time.innerHTML = `🕐 ${gameInfo.time}`;
+        
+        // Spots left
+        const spots = document.createElement('span');
+        spots.className = 'spots-left';
+        spots.textContent = `${gameInfo.spotsLeft} spots left`;
+        
+        gameDetails.appendChild(sport);
+        gameDetails.appendChild(location);
+        gameDetails.appendChild(time);
+        gameDetails.appendChild(spots);
+        
+        // Join game button
+        const joinBtn = document.createElement('button');
+        joinBtn.className = 'join-game-btn';
+        joinBtn.textContent = 'Join Game';
+        joinBtn.onclick = () => joinGameSecure(gameId);
+        
+        gameDiv.appendChild(gameDetails);
+        gameDiv.appendChild(joinBtn);
+        
+        return gameDiv;
+    }
+    
+    // Create post actions securely
+    function createPostActionsSecure(post) {
+        const actions = document.createElement('div');
+        actions.className = 'post-actions';
+        
+        // Like button
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'like-btn';
+        likeBtn.innerHTML = `👍 ${post.likes}`;
+        likeBtn.onclick = () => likePostSecure(post.id);
+        
+        // Comment button
+        const commentBtn = document.createElement('button');
+        commentBtn.className = 'comment-btn';
+        commentBtn.innerHTML = `💬 ${post.comments}`;
+        commentBtn.onclick = () => showCommentsSecure(post.id);
+        
+        actions.appendChild(likeBtn);
+        actions.appendChild(commentBtn);
+        
+        // Chat button for game posts
+        if (post.type === 'game' && post.gameId) {
+            const chatBtn = document.createElement('button');
+            chatBtn.className = 'chat-btn';
+            chatBtn.innerHTML = '💬 Chat';
+            chatBtn.onclick = () => joinGameChatSecure(post.gameId);
+            actions.appendChild(chatBtn);
+        }
+        
+        return actions;
+    }
+    
+    // Format time securely
+    function formatTimeSecure(timestamp) {
+        try {
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            if (diff < 3600000) { // Less than 1 hour
+                const minutes = Math.floor(diff / 60000);
+                return `${minutes}m ago`;
+            } else if (diff < 86400000) { // Less than 24 hours
+                const hours = Math.floor(diff / 3600000);
+                return `${hours}h ago`;
+            } else {
+                const days = Math.floor(diff / 86400000);
+                return `${days}d ago`;
+            }
+        } catch (error) {
+            return 'Recently';
+        }
+    }
+    
+    // Like post securely
+    window.likePostSecure = async function(postId) {
+        // Check authentication
+        if (!window.authState || !window.authState.isAuthenticated) {
+            if (window.showLoginModal) {
+                window.showLoginModal();
+            }
+            return;
+        }
+        
+        // Rate limiting
+        if (!SecurityUtils.rateLimiter(`like_${postId}`, 1, 5000)) {
+            console.log('Rate limit exceeded for like action');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/social/posts/${encodeURIComponent(postId)}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.authState.token}`,
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': SecurityUtils.setCSRFToken()
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update post likes in UI
+                const post = window.socialFeedSecure.posts.find(p => p.id === postId);
+                if (post) {
+                    post.likes = Math.max(0, parseInt(data.likes) || post.likes + 1);
+                    renderSocialFeedSecure();
+                }
+            }
+        } catch (error) {
+            console.error('Error liking post:', error);
+            
+            // Optimistic update for demo
+            const post = window.socialFeedSecure.posts.find(p => p.id === postId);
+            if (post) {
+                post.likes = Math.max(0, post.likes + 1);
+                renderSocialFeedSecure();
+            }
+        }
+    };
+    
+    // Join game chat securely
+    window.joinGameChatSecure = function(gameId) {
+        // Check authentication
+        if (!window.authState || !window.authState.isAuthenticated) {
+            if (window.showLoginModal) {
+                window.showLoginModal();
+            }
+            return;
+        }
+        
+        // Sanitize game ID
+        const sanitizedGameId = SecurityUtils.sanitizeHTML(gameId);
+        if (!sanitizedGameId) {
+            console.error('Invalid game ID');
+            return;
+        }
+        
+        // Create or join chat room for the game
+        const chatRoom = `game-${sanitizedGameId}`;
+        window.socialFeedSecure.activeChat = chatRoom;
+        
+        // Initialize chat room if not exists
+        if (!window.socialFeedSecure.chatRooms.has(chatRoom)) {
+            window.socialFeedSecure.chatRooms.set(chatRoom, {
+                messages: [],
+                participants: []
+            });
+        }
+        
+        // Show chat modal
+        showChatModalSecure(chatRoom);
+    };
+    
+    // Show chat modal securely
+    function showChatModalSecure(chatRoom) {
+        // Remove any existing chat modal
+        const existingModal = document.getElementById('chat-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.id = 'chat-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            height: 80%;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        `;
+        
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = `
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Game Chat';
+        title.style.margin = '0';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '×';
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        `;
+        closeBtn.onclick = closeChatModalSecure;
+        
+        header.appendChild(title);
+        header.appendChild(closeBtn);
+        
+        // Messages container
+        const messagesDiv = document.createElement('div');
+        messagesDiv.id = 'chat-messages';
+        messagesDiv.style.cssText = `
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f9f9f9;
+        `;
+        
+        // Input container
+        const inputContainer = document.createElement('div');
+        inputContainer.style.cssText = `
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        `;
+        
+        const chatInput = document.createElement('input');
+        chatInput.type = 'text';
+        chatInput.id = 'chat-input';
+        chatInput.placeholder = 'Type a message...';
+        chatInput.maxLength = 1000;
+        chatInput.style.cssText = `
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        `;
+        
+        const sendBtn = document.createElement('button');
+        sendBtn.textContent = 'Send';
+        sendBtn.style.cssText = `
+            padding: 12px 20px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        `;
+        sendBtn.onclick = () => sendChatMessageSecure(chatRoom);
+        
+        inputContainer.appendChild(chatInput);
+        inputContainer.appendChild(sendBtn);
+        
+        // Assemble modal
+        modalContent.appendChild(header);
+        modalContent.appendChild(messagesDiv);
+        modalContent.appendChild(inputContainer);
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Load chat messages
+        loadChatMessagesSecure(chatRoom);
+        
+        // Focus input
+        chatInput.focus();
+        
+        // Handle Enter key
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessageSecure(chatRoom);
+            }
+        });
+        
+        // Handle click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeChatModalSecure();
+            }
+        });
+    }
+    
+    // Send chat message securely
+    function sendChatMessageSecure(chatRoom) {
+        const input = document.getElementById('chat-input');
+        if (!input || !input.value.trim()) return;
+        
+        const messageText = input.value.trim();
+        
+        // Rate limiting
+        if (!SecurityUtils.rateLimiter('chat_message', 10, 60000)) {
+            alert('You are sending messages too quickly. Please wait.');
+            return;
+        }
+        
+        // Sanitize message
+        const sanitizedMessage = SecurityUtils.sanitizeMessage(messageText);
+        if (!sanitizedMessage) {
+            alert('Invalid message content.');
+            return;
+        }
+        
+        // Create message object
+        const message = {
+            id: Date.now().toString(),
+            author: {
+                name: window.authState.user.name || window.authState.user.email,
+                avatar: window.authState.user.avatar || 'https://via.placeholder.com/24x24?text=U'
+            },
+            content: sanitizedMessage,
+            timestamp: Date.now()
+        };
+        
+        // Add to room
+        const roomData = window.socialFeedSecure.chatRooms.get(chatRoom);
+        if (roomData) {
+            // Limit number of messages
+            if (roomData.messages.length >= window.socialFeedSecure.maxChatMessages) {
+                roomData.messages.shift(); // Remove oldest message
+            }
+            
+            roomData.messages.push(message);
+            loadChatMessagesSecure(chatRoom);
+        }
+        
+        // Clear input
+        input.value = '';
+        
+        // TODO: Send to server via WebSocket
+        console.log('Message sent:', message);
+    }
+    
+    // Load chat messages securely
+    function loadChatMessagesSecure(chatRoom) {
+        const messagesContainer = document.getElementById('chat-messages');
+        if (!messagesContainer) return;
+        
+        messagesContainer.innerHTML = '';
+        
+        const roomData = window.socialFeedSecure.chatRooms.get(chatRoom);
+        if (!roomData || roomData.messages.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.style.cssText = 'text-align: center; color: #666; padding: 2rem;';
+            emptyMsg.textContent = 'No messages yet. Start the conversation!';
+            messagesContainer.appendChild(emptyMsg);
+            return;
+        }
+        
+        // Render messages
+        roomData.messages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            messageDiv.style.cssText = 'margin-bottom: 1rem;';
+            
+            const header = document.createElement('div');
+            header.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 5px;';
+            
+            const avatar = document.createElement('img');
+            avatar.src = msg.author.avatar;
+            avatar.alt = 'Avatar';
+            avatar.style.cssText = 'width: 24px; height: 24px; border-radius: 50%;';
+            avatar.onerror = function() {
+                this.src = 'https://via.placeholder.com/24x24?text=U';
+            };
+            
+            const name = document.createElement('strong');
+            name.textContent = msg.author.name;
+            
+            const time = document.createElement('span');
+            time.textContent = formatTimeSecure(msg.timestamp);
+            time.style.cssText = 'color: #666; font-size: 0.8em;';
+            
+            header.appendChild(avatar);
+            header.appendChild(name);
+            header.appendChild(time);
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'margin-left: 34px; word-wrap: break-word;';
+            content.textContent = msg.content;
+            
+            messageDiv.appendChild(header);
+            messageDiv.appendChild(content);
+            
+            messagesContainer.appendChild(messageDiv);
+        });
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Close chat modal securely
+    function closeChatModalSecure() {
+        const modal = document.getElementById('chat-modal');
+        if (modal) {
+            modal.remove();
+        }
+        window.socialFeedSecure.activeChat = null;
+    }
+    
+    // Join game securely
+    function joinGameSecure(gameId) {
+        // Check authentication
+        if (!window.authState || !window.authState.isAuthenticated) {
+            if (window.showLoginModal) {
+                window.showLoginModal();
+            }
+            return;
+        }
+        
+        // Sanitize game ID
+        const sanitizedGameId = SecurityUtils.sanitizeHTML(gameId);
+        if (!sanitizedGameId) {
+            console.error('Invalid game ID');
+            return;
+        }
+        
+        // Make join request
+        fetch(`/api/games/${encodeURIComponent(sanitizedGameId)}/join`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${window.authState.token}`,
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': SecurityUtils.setCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Successfully joined the game!');
+                // Refresh the feed
+                loadSocialPostsSecure();
+            } else {
+                alert('Failed to join game: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error joining game:', error);
+            alert('Error joining game. Please try again.');
+        });
+    }
+    
+    // Show loading state
+    function showLoadingState(container) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <div style="width: 40px; height: 40px; border: 3px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p>Loading social feed...</p>
+            </div>
+        `;
+    }
+    
+    // Show error state
+    function showErrorState(container, message) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <p style="color: #e74c3c;">${SecurityUtils.sanitizeHTML(message)}</p>
+                <button onclick="loadSocialPostsSecure()" style="padding: 0.5rem 1rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Try Again</button>
+            </div>
+        `;
+    }
+    
+    // Show empty state
+    function showEmptyState(container) {
+        container.innerHTML = `
+            <div class="empty-feed" style="text-align: center; padding: 3rem; color: #666;">
+                <h3>No posts yet</h3>
+                <p>Be the first to share something!</p>
+            </div>
+        `;
+    }
+    
+    // Setup real-time updates placeholder
+    function setupRealTimeUpdatesSecure() {
+        console.log('Real-time updates ready (WebSocket implementation pending)');
+    }
+    
+    // Setup periodic refresh
+    function setupPeriodicRefresh() {
+        // Refresh feed every 5 minutes
+        setInterval(() => {
+            if (!window.socialFeedSecure.isLoading) {
+                loadSocialPostsSecure();
+            }
+        }, 300000);
+    }
+    
+    // Create new post securely
+    window.createPostSecure = function() {
+        // Check authentication
+        if (!window.authState || !window.authState.isAuthenticated) {
+            if (window.showLoginModal) {
+                window.showLoginModal();
+            }
+            return;
+        }
+        
+        // Rate limiting
+        if (!SecurityUtils.rateLimiter('create_post', 5, 3600000)) {
+            alert('You have reached the post limit. Please wait before posting again.');
+            return;
+        }
+        
+        const content = prompt('What would you like to share?');
+        if (!content) return;
+        
+        const sanitizedContent = SecurityUtils.sanitizeMessage(content);
+        if (!sanitizedContent) {
+            alert('Invalid post content.');
+            return;
+        }
+        
+        const post = {
+            id: Date.now().toString(),
+            author: {
+                name: window.authState.user.name || window.authState.user.email,
+                avatar: window.authState.user.avatar || 'https://via.placeholder.com/40x40?text=U',
+                isAdmin: window.authState.isAdmin
+            },
+            content: sanitizedContent,
+            timestamp: Date.now(),
+            likes: 0,
+            comments: 0,
+            type: 'post',
+            gameId: null
+        };
+        
+        // Add to posts (optimistic update)
+        window.socialFeedSecure.posts.unshift(post);
+        
+        // Limit posts
+        if (window.socialFeedSecure.posts.length > window.socialFeedSecure.maxPosts) {
+            window.socialFeedSecure.posts.pop();
+        }
+        
+        renderSocialFeedSecure();
+        
+        // TODO: Send to server
+        console.log('Post created:', post);
+    };
+    
+    // Placeholder for comments
+    function showCommentsSecure(postId) {
+        alert('Comments feature coming soon!');
+    }
+    
+    // Make functions globally accessible
+    window.likePost = window.likePostSecure;
+    window.joinGameChat = window.joinGameChatSecure;
+    window.sendChatMessage = function() { sendChatMessageSecure(window.socialFeedSecure.activeChat); };
+    window.closeChatModal = closeChatModalSecure;
+    window.createPost = window.createPostSecure;
+    window.joinGame = joinGameSecure;
+    window.showComments = showCommentsSecure;
+    
+    // Initialize when page is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for auth to be ready
+            setTimeout(window.initSecureSocialFeed, 1000);
+        });
+    } else {
+        setTimeout(window.initSecureSocialFeed, 1000);
+    }
+    
+    console.log('SECURE Social Feed System Ready');
+})();

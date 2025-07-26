@@ -1,6 +1,10 @@
-// Google Maps integration for Play Now feature
+// Google Maps integration for Play Now feature - DISABLED
 (function() {
   'use strict';
+
+  // Exit early since Google Maps is not being used
+  console.log('Google Maps integration disabled - not using Google Maps');
+  return;
 
   let map = null;
   let userMarker = null;
@@ -20,7 +24,7 @@
   // Custom marker icons
   const markerIcons = {
     user: {
-      path: google.maps.SymbolPath.CIRCLE,
+      path: typeof google !== 'undefined' && google.maps ? google.maps.SymbolPath.CIRCLE : null,
       scale: 10,
       fillColor: '#4285F4',
       fillOpacity: 1,

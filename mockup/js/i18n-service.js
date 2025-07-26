@@ -771,7 +771,10 @@ window.I18nService = {
         const sport = channelName.substring(1);
         const translatedSport = this.getSportName(sport);
         if (translatedSport !== sport) {
-          item.querySelector('.channel-name')?.textContent = `#${translatedSport}`;
+          const channelNameElem = item.querySelector('.channel-name');
+          if (channelNameElem) {
+            channelNameElem.textContent = `#${translatedSport}`;
+          }
         }
       }
     });
