@@ -1,1 +1,1 @@
-web: cd mockup/backend && node server.js
+web: gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info

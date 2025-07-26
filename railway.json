@@ -1,22 +1,14 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "watchPatterns": [
-      "mockup/backend/**"
-    ],
-    "buildCommand": "cd mockup/backend && npm install --production --no-audit --no-fund"
+    "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "cd mockup/backend && npm install --production && node server-production.js",
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 300,
+    "numReplicas": 1,
+    "startCommand": "gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
-  },
-  "environments": {
-    "production": {
-      "NODE_ENV": "production"
-    }
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 30
   }
 }
