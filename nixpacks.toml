@@ -1,11 +1,8 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "python311"]
+nixPkgs = ["...", "python311", "gcc"]
 
 [phases.install]
-cmds = ["cd mockup/backend && npm install --production --no-audit --no-fund"]
-
-[phases.build]
-cmds = ["echo 'No build step required'"]
+cmds = ["pip install -r railway-requirements.txt"]
 
 [start]
-cmd = "cd mockup/backend && node server.js"
+cmd = "gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info"
