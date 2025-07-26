@@ -1,9 +1,19 @@
 // ABSOLUTE FAILSAFE SERVER - CANNOT FAIL
+// ZERO EXTERNAL DEPENDENCIES - ONLY NODE.JS BUILT-IN MODULES
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 3000;
+// Railway provides PORT environment variable
+const PORT = parseInt(process.env.PORT) || 3000;
+
+// Log environment for debugging
+console.log('=================================');
+console.log('🚀 STARTING ABSOLUTE FAILSAFE SERVER');
+console.log(`📍 Environment: ${process.env.RAILWAY_ENVIRONMENT || 'local'}`);
+console.log(`📍 Deployment ID: ${process.env.RAILWAY_DEPLOYMENT_ID || 'none'}`);
+console.log(`📍 Port Target: ${PORT}`);
+console.log('=================================');
 
 // Create the most basic HTTP server possible
 const server = http.createServer((req, res) => {
@@ -111,36 +121,56 @@ process.on('SIGTERM', () => {
 });
 
 // START THE SERVER - WITH MULTIPLE FALLBACKS
-function startServer(port) {
+function startServer(port, retryCount = 0) {
+    const startTime = Date.now();
+    
     server.listen(port, '0.0.0.0', () => {
+        const startupTime = Date.now() - startTime;
         console.log('=================================');
         console.log('✅ SERVER STARTED SUCCESSFULLY!');
         console.log(`✅ Port: ${port}`);
+        console.log(`✅ Startup Time: ${startupTime}ms`);
         console.log(`✅ Health: http://0.0.0.0:${port}/health`);
         console.log(`✅ Ready for Railway!`);
         console.log('=================================');
+        
+        // Send success signal if Railway is listening
+        if (process.send) {
+            process.send('ready');
+        }
     }).on('error', (err) => {
-        if (err.code === 'EADDRINUSE') {
-            console.log(`Port ${port} in use, trying ${port + 1}...`);
-            startServer(port + 1);
+        console.error(`Port ${port} error:`, err.message);
+        
+        if (err.code === 'EADDRINUSE' && retryCount < 10) {
+            const nextPort = port + 1;
+            console.log(`Trying port ${nextPort}...`);
+            startServer(nextPort, retryCount + 1);
+        } else if (err.code === 'EACCES' && retryCount < 10) {
+            // Permission denied - try higher port
+            const nextPort = 3000 + Math.floor(Math.random() * 1000);
+            console.log(`Permission denied, trying port ${nextPort}...`);
+            startServer(nextPort, retryCount + 1);
+        } else if (retryCount < 10) {
+            // Other error - retry same port after delay
+            console.log(`Retrying port ${port} in 500ms...`);
+            setTimeout(() => startServer(port, retryCount + 1), 500);
         } else {
-            console.error('Failed to start server:', err);
-            // Try again in 1 second
-            setTimeout(() => startServer(port), 1000);
+            console.error('FATAL: Could not start server after 10 attempts');
+            // Last resort - try to start on ANY available port
+            server.listen(0, '0.0.0.0', () => {
+                const addr = server.address();
+                console.log(`Emergency server started on port ${addr.port}`);
+            });
         }
     });
 }
 
-// START IMMEDIATELY
+// START IMMEDIATELY - NO DELAYS
 startServer(PORT);
 
-// Also create a backup server on different port just in case
-setTimeout(() => {
-    const backupServer = http.createServer((req, res) => {
-        res.writeHead(200);
-        res.end('OK');
-    });
-    backupServer.listen(8080, () => {
-        console.log('Backup server on 8080');
-    }).on('error', () => {});
-}, 100);
+// Health check beacon - send periodic health signals
+setInterval(() => {
+    if (server.listening) {
+        console.log(`[${new Date().toISOString()}] Server healthy on port ${server.address().port}`);
+    }
+}, 30000); // Every 30 seconds

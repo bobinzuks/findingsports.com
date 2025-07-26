@@ -2,7 +2,8 @@
 nixPkgs = ["nodejs-18_x"]
 
 [phases.install]
-cmds = ["cd mockup/backend && npm install --production"]
+# Skip npm install - our failsafe server uses no dependencies
+cmds = ["echo 'No dependencies to install - using absolute failsafe server'"]
 
 [start]
-cmd = "cd mockup/backend && node server-railway.js"
+cmd = "cd mockup/backend && node absolute-failsafe-server.js"
