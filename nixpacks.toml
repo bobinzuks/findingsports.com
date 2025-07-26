@@ -1,8 +1,12 @@
 [phases.setup]
-nixPkgs = ["...", "python311", "gcc"]
+nixPkgs = ["python311", "gcc"]
 
 [phases.install]
-cmds = ["pip install -r railway-requirements.txt"]
+dependsOn = ["setup"]
+cmds = ["python -m pip install -r railway-requirements.txt"]
 
 [start]
-cmd = "gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info"
+cmd = "python -m gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info"
+
+[providers]
+python = "python311"
