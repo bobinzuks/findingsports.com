@@ -4,9 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "cd mockup/backend && node server-railway.js",
-    "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 300,
+    "startCommand": "cd mockup/backend && node absolute-failsafe-server.js",
     "numReplicas": 1
   }
 }
