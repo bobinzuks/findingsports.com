@@ -25,6 +25,16 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');
     
+    // Fix Content Security Policy to allow necessary resources
+    res.setHeader('Content-Security-Policy', 
+        "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+        "script-src * 'unsafe-inline' 'unsafe-eval'; " +
+        "connect-src * https: wss: ws:; " +
+        "img-src * data: blob: 'unsafe-inline'; " +
+        "frame-src *; " +
+        "style-src * 'unsafe-inline';"
+    );
+    
     // Handle OPTIONS
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
@@ -47,6 +57,81 @@ const server = http.createServer((req, res) => {
             status: 'running',
             port: PORT,
             deployment: process.env.RAILWAY_DEPLOYMENT_ID || 'local'
+        }));
+        return;
+    }
+    
+    // Mock API endpoints
+    if (req.url.startsWith('/api/')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        
+        // Social posts endpoint
+        if (req.url === '/api/social/posts') {
+            res.end(JSON.stringify({
+                success: true,
+                posts: [
+                    {
+                        id: 1,
+                        userId: 'user1',
+                        userName: 'John Doe',
+                        userAvatar: '/images/avatar1.jpg',
+                        content: 'Just finished an amazing basketball game at Central Park!',
+                        sport: 'basketball',
+                        location: 'Central Park',
+                        likes: 12,
+                        comments: 3,
+                        timestamp: new Date(Date.now() - 3600000).toISOString()
+                    },
+                    {
+                        id: 2,
+                        userId: 'user2',
+                        userName: 'Jane Smith',
+                        userAvatar: '/images/avatar2.jpg',
+                        content: 'Looking for tennis partners this weekend. Anyone interested?',
+                        sport: 'tennis',
+                        location: 'West Side Courts',
+                        likes: 8,
+                        comments: 5,
+                        timestamp: new Date(Date.now() - 7200000).toISOString()
+                    }
+                ]
+            }));
+            return;
+        }
+        
+        // Venues endpoint
+        if (req.url === '/api/venues' || req.url.startsWith('/api/venues?')) {
+            res.end(JSON.stringify({
+                success: true,
+                venues: [
+                    {
+                        id: 1,
+                        name: 'Central Park Basketball Courts',
+                        type: 'basketball',
+                        latitude: 40.7829,
+                        longitude: -73.9654,
+                        address: 'Central Park, New York, NY',
+                        activeGames: 2
+                    },
+                    {
+                        id: 2,
+                        name: 'West Side Tennis Center',
+                        type: 'tennis',
+                        latitude: 40.7751,
+                        longitude: -73.9814,
+                        address: '123 West Side Ave, New York, NY',
+                        activeGames: 1
+                    }
+                ]
+            }));
+            return;
+        }
+        
+        // Default API response
+        res.end(JSON.stringify({
+            success: true,
+            message: 'API endpoint available',
+            endpoint: req.url
         }));
         return;
     }
