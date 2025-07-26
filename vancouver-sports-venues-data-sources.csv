@@ -1,0 +1,85 @@
+Venue Type,Venue Name,Location,Sports/Activities,Data Source Type,Data Source URL,API Available,Scraping Method,Update Frequency,Data Quality,Implementation Status,Notes
+Park,Queen Elizabeth Park,Vancouver BC,Tennis Courts,Municipal Website,https://vancouver.ca/parks-recreation-culture/queen-elizabeth-park.aspx,No,Web Scraping,Daily,Medium,Planned,Static court info
+Park,Stanley Park,Vancouver BC,Tennis Courts/Running Trails,Municipal Website,https://vancouver.ca/parks-recreation-culture/stanley-park.aspx,No,Web Scraping,Daily,High,Planned,Popular tourist destination
+Park,Van Dusen Botanical Garden,Vancouver BC,Walking/Running,Municipal Website,https://vancouver.ca/parks-recreation-culture/vandusen-botanical-garden.aspx,No,Web Scraping,Weekly,Low,Planned,Limited sports activities
+Park,Dr. Sun Yat-Sen Classical Chinese Garden,Vancouver BC,Tai Chi,Municipal Website,https://vancouver.ca/parks-recreation-culture/dr-sun-yat-sen-classical-chinese-garden.aspx,No,Web Scraping,Weekly,Low,Planned,Specialized activities
+Park,Jericho Beach Park,Vancouver BC,Beach Volleyball/Sailing,Municipal Website,https://vancouver.ca/parks-recreation-culture/jericho-beach.aspx,No,Web Scraping,Daily,High,Active,Beach sports popular
+Park,English Bay Beach,Vancouver BC,Beach Volleyball/Swimming,Municipal Website,https://vancouver.ca/parks-recreation-culture/english-bay-beach.aspx,No,Web Scraping,Daily,High,Active,Prime beach volleyball location
+Park,Kitsilano Beach,Vancouver BC,Beach Volleyball/Basketball,Municipal Website,https://vancouver.ca/parks-recreation-culture/kitsilano-beach.aspx,No,Web Scraping,Daily,High,Active,Multiple beach courts
+Park,Sunset Beach,Vancouver BC,Beach Volleyball,Municipal Website,https://vancouver.ca/parks-recreation-culture/sunset-beach.aspx,No,Web Scraping,Daily,Medium,Active,Limited facilities
+Park,Locarno Beach,Vancouver BC,Beach Volleyball,Municipal Website,https://vancouver.ca/parks-recreation-culture/locarno-beach.aspx,No,Web Scraping,Daily,Medium,Planned,Less crowded option
+Community Centre,Kerrisdale Community Centre,Vancouver BC,Basketball/Badminton/Pickleball,Community Centre Website,https://www.kerrisdalecc.com/,No,Web Scraping,Daily,High,Active,Active drop-in programs
+Community Centre,Mount Pleasant Community Centre,Vancouver BC,Gym Sports/Fitness,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/mount-pleasant-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Full facility
+Community Centre,Sunset Community Centre,Vancouver BC,Basketball/Badminton,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/sunset-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Pool and gym facilities
+Community Centre,Roundhouse Community Centre,Vancouver BC,Multi-Sport/Fitness,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/roundhouse-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Downtown location
+Community Centre,Ray-Cam Co-operative Centre,Vancouver BC,Basketball/Youth Programs,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/ray-cam-co-operative-centre.aspx,No,Web Scraping,Daily,Medium,Planned,Community focused
+Community Centre,Renfrew Community Centre,Vancouver BC,Basketball/Badminton,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/renfrew-community-centre.aspx,No,Web Scraping,Daily,High,Planned,East Vancouver
+Community Centre,Trout Lake Community Centre,Vancouver BC,Basketball/Fitness,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/trout-lake-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Popular location
+Community Centre,West End Community Centre,Vancouver BC,Basketball/Badminton/Squash,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/west-end-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Dense urban area
+Ice Arena,Britannia Ice Rink,Vancouver BC,Hockey/Figure Skating,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/britannia-community-centre.aspx,No,Web Scraping,Daily,High,Planned,Part of Britannia Centre
+Ice Arena,Hillcrest Centre Ice Rink,Vancouver BC,Hockey/Public Skating,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/hillcrest-centre.aspx,No,Web Scraping,Daily,High,Planned,Olympic legacy facility
+Ice Arena,Killarney Ice Rink,Vancouver BC,Hockey/Public Skating,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/killarney-community-centre.aspx,No,Web Scraping,Daily,High,Planned,South Vancouver
+Ice Arena,Hastings Community Centre Ice Rink,Vancouver BC,Hockey/Public Skating,Vancouver Parks Rec,https://vancouver.ca/parks-recreation-culture/hastings-community-centre.aspx,No,Web Scraping,Daily,High,Planned,East Vancouver
+Sports Complex,Richmond Olympic Oval,Richmond BC,Speed Skating/Multi-Sport,Oval Website,https://www.richmondoval.ca/,No,Web Scraping,Daily,High,Active,Olympic venue
+Sports Complex,UBC Recreation Centre,Vancouver BC,All Sports,UBC Recreation,https://recreation.ubc.ca/,No,Web Scraping,Daily,High,Active,University facility
+Sports Complex,SFU Recreation Centre,Burnaby BC,All Sports,SFU Recreation,https://www.sfu.ca/recreation/,No,Web Scraping,Daily,High,Active,Mountain campus
+Sports Complex,YMCA Downtown,Vancouver BC,Basketball/Swimming/Fitness,YMCA Greater Vancouver,https://gv.ymca.ca/,No,Web Scraping,Daily,High,Active,Membership required
+Sports Complex,Steve Nash Fitness World,Multiple Locations,Basketball/Fitness,Steve Nash Website,https://www.stevenashfitness.ca/,No,Web Scraping,Daily,Medium,Active,Drop-in programs
+Field,Swangard Stadium,Burnaby BC,Soccer/Track,Municipal Website,https://www.burnaby.ca/recreation-and-arts/sports-fields-courts/swangard-stadium,No,Web Scraping,Weekly,Medium,Planned,Professional venue
+Field,BC Place Stadium,Vancouver BC,Football/Soccer Events,BC Place Website,https://www.bcplace.com/,No,Web Scraping,Weekly,Low,Planned,Event venue only
+Field,Minoru Park,Richmond BC,Soccer Fields,Richmond Parks,https://www.richmond.ca/parks/parks/about/park/minoru.htm,No,Web Scraping,Daily,High,Planned,Multiple fields
+Field,Burnaby Lake Sports Complex,Burnaby BC,Soccer/Rugby,Burnaby Parks,https://www.burnaby.ca/recreation-and-arts/sports-fields-courts,No,Web Scraping,Daily,High,Planned,Major sports complex
+Field,Central Park,Burnaby BC,Soccer/Baseball,Burnaby Parks,https://www.burnaby.ca/parks-and-trails/parks/central-park,No,Web Scraping,Daily,Medium,Planned,Large urban park
+Tennis Courts,Queen Elizabeth Park Tennis Courts,Vancouver BC,Tennis,Vancouver Parks,https://vancouver.ca/parks-recreation-culture/tennis.aspx,No,Web Scraping,Daily,High,Active,6 courts available
+Tennis Courts,Stanley Park Tennis Courts,Vancouver BC,Tennis,Vancouver Parks,https://vancouver.ca/parks-recreation-culture/tennis.aspx,No,Web Scraping,Daily,High,Active,Popular location
+Tennis Courts,Jericho Tennis Club,Vancouver BC,Tennis,Tennis BC,https://www.tennisbc.org/,No,Web Scraping,Daily,High,Active,Club membership
+Tennis Courts,Hollyburn Country Club,West Vancouver BC,Tennis/Golf,Private Club,https://www.hollyburn.org/,No,Web Scraping,Weekly,Low,Planned,Private membership
+Basketball Courts,Britannia Basketball Courts,Vancouver BC,Basketball,Vancouver Parks,https://vancouver.ca/parks-recreation-culture/basketball.aspx,No,Web Scraping,Daily,High,Planned,Outdoor courts
+Basketball Courts,Sunset Basketball Courts,Vancouver BC,Basketball,Vancouver Parks,https://vancouver.ca/parks-recreation-culture/basketball.aspx,No,Web Scraping,Daily,High,Planned,Outdoor courts
+Basketball Courts,Strathcona Basketball Courts,Vancouver BC,Basketball,Vancouver Parks,https://vancouver.ca/parks-recreation-culture/basketball.aspx,No,Web Scraping,Daily,High,Planned,Community courts
+Volleyball Courts,Jericho Beach Volleyball,Vancouver BC,Beach Volleyball,Vancouver Beach Volleyball,https://vancouver.ca/parks-recreation-culture/beach-volleyball.aspx,No,Web Scraping,Daily,High,Active,Prime beach volleyball
+Volleyball Courts,Kitsilano Beach Volleyball,Vancouver BC,Beach Volleyball,Vancouver Beach Volleyball,https://vancouver.ca/parks-recreation-culture/beach-volleyball.aspx,No,Web Scraping,Daily,High,Active,Multiple courts
+Volleyball Courts,English Bay Volleyball,Vancouver BC,Beach Volleyball,Vancouver Beach Volleyball,https://vancouver.ca/parks-recreation-culture/beach-volleyball.aspx,No,Web Scraping,Daily,High,Active,Central location
+Specialty Venue,Pacific Coliseum,Vancouver BC,Hockey/Events,PNE Website,https://www.pne.ca/pacific-coliseum/,No,Web Scraping,Weekly,Low,Planned,Major events only
+Specialty Venue,Rogers Arena,Vancouver BC,Hockey/Basketball/Events,Rogers Arena Website,https://www.rogersarena.com/,No,Web Scraping,Weekly,Low,Planned,Professional venue
+Specialty Venue,BC Sports Hall of Fame,Vancouver BC,Sports History/Events,BC Sports Hall of Fame,https://www.bcsportshalloffame.com/,No,Web Scraping,Monthly,Low,Planned,Educational venue
+Private Club,Vancouver Lawn Tennis Club,Vancouver BC,Tennis/Squash,Private Club,https://www.vltc.com/,No,Web Scraping,Weekly,Medium,Planned,Historic private club
+Private Club,Terminal City Club,Vancouver BC,Squash/Fitness,Private Club,https://www.tcclub.com/,No,Web Scraping,Weekly,Low,Planned,Business club
+Private Club,Vancouver Racquets Club,Vancouver BC,Racquetball/Squash,Private Club,https://www.vancouverracquetsclub.com/,No,Web Scraping,Weekly,Medium,Planned,Racquet sports focus
+Data Aggregator,Pickeball BC,Province Wide,Pickleball,Pickleball BC Website,https://pickleballbc.ca/,No,Web Scraping,Daily,High,Active,Comprehensive drop-in listings
+Data Aggregator,Tennis BC,Province Wide,Tennis,Tennis BC Website,https://www.tennisbc.org/,No,Web Scraping,Daily,High,Active,Court finder and programs
+Data Aggregator,BC Soccer,Province Wide,Soccer,BC Soccer Website,https://www.bcsoccer.net/,No,Web Scraping,Daily,High,Planned,Field directory
+Data Aggregator,Volleyball BC,Province Wide,Volleyball,Volleyball BC Website,https://www.volleyballbc.org/,No,Web Scraping,Weekly,Medium,Planned,Club and facility listings
+Data Aggregator,Basketball BC,Province Wide,Basketball,Basketball BC Website,https://www.basketball.bc.ca/,No,Web Scraping,Weekly,Medium,Planned,League and facility info
+Data Aggregator,Hockey BC,Province Wide,Hockey,Hockey BC Website,https://www.hockeybc.ca/,No,Web Scraping,Weekly,Medium,Planned,Rink and program listings
+Event Platform,Meetup Vancouver Sports,Vancouver BC,All Sports,Meetup API,https://www.meetup.com/find/?keywords=sports&location=vancouver,Yes,API + Scraping,Hourly,High,Active,Real-time events
+Event Platform,Eventbrite Sports Vancouver,Vancouver BC,All Sports,Eventbrite API,https://www.eventbrite.ca/d/bc--vancouver/sports/,Partial,API + Scraping,Hourly,Medium,Planned,Paid events focus
+Event Platform,Facebook Events Sports,Vancouver BC,All Sports,Facebook Graph API,https://www.facebook.com/events/,Yes,API (Limited),Daily,Medium,Planned,Requires app approval
+Social Platform,OpenSports Vancouver,Vancouver BC,All Sports,OpenSports Website,https://opensports.ca/,No,Web Scraping,Hourly,High,Active,Drop-in game platform
+Social Platform,JoinMyGame Vancouver,Vancouver BC,All Sports,JoinMyGame Website,https://www.joinmygame.com/,No,Web Scraping,Hourly,Medium,Planned,Game organization platform
+Social Platform,PlayFinder Vancouver,Vancouver BC,All Sports,PlayFinder Website,https://www.playfinder.com/,No,Web Scraping,Daily,Medium,Active,Facility and game finder
+Government Data,Vancouver Open Data,Vancouver BC,Facilities/Programs,Vancouver Open Data Portal,https://opendata.vancouver.ca/,Yes,API,Daily,High,Planned,Official municipal data
+Government Data,BC Government Recreation Sites,Province Wide,Outdoor Recreation,BC Gov Website,https://www.sitesandtrailsbc.ca/,No,Web Scraping,Weekly,Medium,Planned,Outdoor focus
+Weather Data,Environment Canada Vancouver,Vancouver BC,Weather Conditions,Environment Canada API,https://weather.gc.ca/,Yes,API,Hourly,High,Active,Official weather data
+Weather Data,OpenWeatherMap Vancouver,Vancouver BC,Weather Conditions,OpenWeatherMap API,https://openweathermap.org/,Yes,API,Hourly,High,Planned,Global weather service
+Location Data,Google Places Sports Vancouver,Vancouver BC,Sports Venues,Google Places API,https://maps.googleapis.com/,Yes,API,Real-time,High,Active,Comprehensive venue data
+Location Data,Foursquare Sports Vancouver,Vancouver BC,Sports Venues,Foursquare API,https://foursquare.com/,Yes,API,Real-time,Medium,Planned,Venue discovery
+Location Data,Yelp Sports Vancouver,Vancouver BC,Sports Venues,Yelp API,https://www.yelp.ca/,Yes,API,Daily,High,Planned,Reviews and ratings
+Fitness Chains,GoodLife Fitness,Multiple Locations,Group Fitness/Courts,GoodLife Website,https://www.goodlifefitness.com/,No,Web Scraping,Daily,Medium,Planned,Chain fitness centers
+Fitness Chains,Anytime Fitness,Multiple Locations,General Fitness,Anytime Fitness Website,https://www.anytimefitness.com/,No,Web Scraping,Weekly,Low,Planned,24-hour access
+Municipal,Burnaby Recreation,Burnaby BC,All Sports,Burnaby Parks & Rec,https://www.burnaby.ca/recreation-and-arts,No,Web Scraping,Daily,High,Planned,Comprehensive programs
+Municipal,Richmond Recreation,Richmond BC,All Sports,Richmond Parks & Rec,https://www.richmond.ca/recreation,No,Web Scraping,Daily,High,Planned,Extensive facilities
+Municipal,Surrey Recreation,Surrey BC,All Sports,Surrey Parks & Rec,https://www.surrey.ca/recreation-culture,No,Web Scraping,Daily,High,Planned,Large municipality
+Municipal,North Vancouver Recreation,North Vancouver BC,All Sports,North Van Parks & Rec,https://www.cnv.org/parks-recreation,No,Web Scraping,Daily,Medium,Planned,Mountain access
+Municipal,West Vancouver Recreation,West Vancouver BC,All Sports,West Van Parks & Rec,https://westvancouver.ca/parks-recreation,No,Web Scraping,Daily,Medium,Planned,Affluent area facilities
+School District,Vancouver School Board,Vancouver BC,Gym Rentals,VSB Community Use,https://www.vsb.bc.ca/community-use-facilities,No,Web Scraping,Daily,High,Active,Evening/weekend gym access
+School District,Burnaby School District,Burnaby BC,Gym Rentals,Burnaby Schools,https://www.burnabyschools.ca/,No,Web Scraping,Weekly,Medium,Planned,Community gym programs
+School District,Richmond School District,Richmond BC,Gym Rentals,Richmond Schools,https://www.sd38.bc.ca/,No,Web Scraping,Weekly,Medium,Planned,School facility rentals
+University,Simon Fraser University,Burnaby BC,All Sports,SFU Athletics,https://www.sfu.ca/athletics/,No,Web Scraping,Daily,High,Planned,Campus recreation
+University,University of British Columbia,Vancouver BC,All Sports,UBC Athletics,https://recreation.ubc.ca/,No,Web Scraping,Daily,High,Active,Major university facilities
+University,Emily Carr University,Vancouver BC,Limited Sports,Emily Carr,https://www.ecuad.ca/,No,Web Scraping,Weekly,Low,Planned,Art school with limited facilities
+College,Vancouver Community College,Vancouver BC,Gym Facilities,VCC Recreation,https://www.vcc.ca/,No,Web Scraping,Weekly,Medium,Planned,Community college facilities
+College,Langara College,Vancouver BC,Sports Facilities,Langara Athletics,https://langara.ca/,No,Web Scraping,Weekly,Medium,Planned,College sports programs
+Private Facility,Basketball City,Vancouver BC,Basketball,Basketball City Website,https://basketballcity.ca/,No,Web Scraping,Daily,High,Active,Dedicated basketball facility
+Private Facility,Urban Rec Vancouver,Vancouver BC,All Sports,Urban Rec Website,https://vancouver.urbanrec.ca/,No,Web Scraping,Daily,High,Active,Adult recreational leagues
+Private Facility,Courts of the World,Vancouver BC,Multiple Sports,Courts of the World Website,https://www.courtsoftheworld.com/,No,Web Scraping,Weekly,Medium,Active,Court directory platform
