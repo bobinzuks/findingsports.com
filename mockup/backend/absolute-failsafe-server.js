@@ -120,6 +120,47 @@ const server = http.createServer((req, res) => {
             return;
         }
         
+        // Games nearby endpoint for MapLibre
+        if (req.url.startsWith('/api/games/nearby')) {
+            res.end(JSON.stringify({
+                success: true,
+                games: [
+                    {
+                        id: '1',
+                        sport: 'Basketball',
+                        venue: 'Kitsilano Beach Courts',
+                        lat: 49.2747,
+                        lng: -123.1442,
+                        time: '6:00 PM',
+                        players: '5/10',
+                        skillLevel: 'Intermediate'
+                    },
+                    {
+                        id: '2',
+                        sport: 'Soccer',
+                        venue: 'UBC Fields',
+                        lat: 49.2606,
+                        lng: -123.2460,
+                        time: '7:00 PM',
+                        players: '14/22',
+                        skillLevel: 'All Levels'
+                    },
+                    {
+                        id: '3',
+                        sport: 'Volleyball',
+                        venue: 'English Bay Beach',
+                        lat: 49.2863,
+                        lng: -123.1436,
+                        time: '5:30 PM',
+                        players: '4/6',
+                        skillLevel: 'Beginner'
+                    }
+                ],
+                total: 3
+            }));
+            return;
+        }
+        
         // Default API response
         res.end(JSON.stringify({
             success: true,

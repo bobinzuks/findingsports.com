@@ -46,7 +46,7 @@
             href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1752683265404" />
+        <!-- MapLibre GL JS CSS will be loaded dynamically -->
         <style>
             /* Hide social section by default - moved to bottom */
             .social-section {
@@ -63,14 +63,10 @@
                 100% { transform: rotate(360deg); }
             }
         </style>
-        <!-- Mapbox Configuration -->
-        <script src="js/mapbox-config.js?v=1752683265404"></script>
+        <!-- MapLibre GL JS Configuration -->
         <script>
-            // Set Mapbox access token (should come from server in production)
-            window.MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZmluZGluZ3Nwb3J0cyIsImEiOiJjbTU5enI5ZHQwMDN4MmxwdzVoNnQzOWFwIn0.0-60Cv6Y-CepNS0R-fkD5w';
-            
             // Add Railway deployment timestamp to force updates
-            window.DEPLOYMENT_VERSION = '2025-01-16-mapbox-migration-' + Date.now();
+            window.DEPLOYMENT_VERSION = '2025-01-26-maplibre-migration-' + Date.now();
         </script>
     </head>
     <body>
@@ -344,7 +340,7 @@
                             ` : ''}
                         </div>
                         
-                        <!-- Google Maps Container -->
+                        <!-- MapLibre GL JS Container -->
                         <div id="playNowMap" class="loading" style="width: 100%; height: 400px; margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"></div>
                 `;
                 
@@ -519,15 +515,15 @@
                 
                 mainContent.innerHTML = html;
                 
-                // Initialize Google Maps after HTML is rendered
+                // Initialize MapLibre after HTML is rendered
                 setTimeout(() => {
-                    if (window.google && window.google.maps) {
-                        initializePlayNowMap(userLat, userLng, activities, data.games);
-                    } else {
-                        // Wait for Google Maps to load
-                        window.addEventListener('googlemapsloaded', () => {
-                            initializePlayNowMap(userLat, userLng, activities, data.games);
+                    if (window.initializeMapLibre) {
+                        window.initializeMapLibre('playNowMap').then(() => {
+                            // Map initialized with user location and game pins
+                            console.log('MapLibre initialized for Play Now');
                         });
+                    } else {
+                        console.error('MapLibre not loaded');
                     }
                 }, 100);
             };
@@ -679,29 +675,8 @@
             window.location.href = '/sport-rules.html';
         };
         
-        // Initialize Google Maps for Play Now
-        window.initializePlayNowMap = function(userLat, userLng, activities, allGames) {
-            if (!window.google || !window.google.maps) {
-                console.error('Google Maps not loaded');
-                return;
-            }
-            
-            const mapDiv = document.getElementById('playNowMap');
-            if (!mapDiv) return;
-            
-            const map = new google.maps.Map(mapDiv, {
-                center: { lat: userLat, lng: userLng },
-                zoom: 13,
-                styles: [
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ]
-            });
-            
-            // Add marker for user location
+        // MapLibre initialization is handled by maplibre-implementation.js
+        // The map will automatically get user location and display game pins
             new google.maps.Marker({
                 position: { lat: userLat, lng: userLng },
                 map: map,
@@ -962,9 +937,9 @@
         
         <!-- Map Scripts -->
         <script src="js/login-component.js?v=1752683265404"></script>
-        <script src="js/mapbox-maps.js?v=1752683265404"></script>
+        <script src="js/map-cleanup.js?v=1753559800000"></script>
+        <script src="js/maplibre-implementation.js?v=1753559800000"></script>
         <script src="js/sport-icons.js?v=1752683265404"></script>
-        <script src="js/map-init.js?v=1752683265404"></script>
         
         <!-- PWA Scripts -->
         <script src="js/pwa-handler.js"></script>

@@ -3,12 +3,8 @@ window.DropInGamesPage = {
   // Initialize the Drop-in Games page
   async initialize() {
     // Initialize map if not already done
-    if (!window.map && !window.googleMap) {
-      const locationResult = window.locationService?.getLocationInfo();
-      const userLocation = locationResult?.userLocation ?
-        [locationResult.userLocation.lat, locationResult.userLocation.lng] :
-        null;
-      window.initializeMap(userLocation);
+    if (!window.map) {
+      window.initializeMapLibre('map');
     }
 
     // Load games

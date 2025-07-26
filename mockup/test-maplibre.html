@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapLibre Test - Finding Sports</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #ff6b35;
+        }
+        #map {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .status {
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #e55a2b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ MapLibre GL JS Test</h1>
+    
+    <div class="info">
+        <h2>Map Status</h2>
+        <div id="status" class="status">Initializing...</div>
+        <div id="location" class="status"></div>
+        <div id="games" class="status"></div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="info">
+        <h2>Test Controls</h2>
+        <button onclick="getUserLocation()">Get My Location</button>
+        <button onclick="addTestGames()">Add Test Games</button>
+        <button onclick="clearMarkers()">Clear Markers</button>
+        <button onclick="testMapFeatures()">Test All Features</button>
+    </div>
+    
+    <div class="info">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Load MapLibre implementation -->
+    <script src="js/maplibre-implementation.js"></script>
+    
+    <script>
+        let testsPassed = 0;
+        let testsFailed = 0;
+        
+        // Initialize map on page load
+        window.addEventListener('load', async () => {
+            updateStatus('Loading MapLibre GL JS...', 'info');
+            
+            try {
+                await window.initializeMapLibre('map');
+                updateStatus('✅ MapLibre initialized successfully!', 'success');
+                
+                // Run automatic tests
+                setTimeout(runAutomaticTests, 2000);
+            } catch (error) {
+                updateStatus('❌ Failed to initialize MapLibre: ' + error.message, 'error');
+            }
+        });
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            console.log(message);
+        }
+        
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const coords = [position.coords.longitude, position.coords.latitude];
+                        document.getElementById('location').textContent = 
+                            `📍 Your location: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                        document.getElementById('location').className = 'status success';
+                        
+                        if (window.maplibreManager) {
+                            window.maplibreManager.updateUserLocation(coords);
+                            const map = window.maplibreManager.getMap();
+                            if (map) {
+                                map.flyTo({
+                                    center: coords,
+                                    zoom: 14,
+                                    duration: 1500
+                                });
+                            }
+                        }
+                    },
+                    (error) => {
+                        document.getElementById('location').textContent = '❌ Location error: ' + error.message;
+                        document.getElementById('location').className = 'status error';
+                    }
+                );
+            }
+        }
+        
+        function addTestGames() {
+            const testGames = [
+                {
+                    id: 'test1',
+                    sport: 'Basketball',
+                    venue: 'Test Court 1',
+                    lat: 49.28,
+                    lng: -123.12,
+                    time: '6:00 PM',
+                    players: '5/10'
+                },
+                {
+                    id: 'test2',
+                    sport: 'Soccer',
+                    venue: 'Test Field',
+                    lat: 49.27,
+                    lng: -123.13,
+                    time: '7:00 PM',
+                    players: '10/22'
+                },
+                {
+                    id: 'test3',
+                    sport: 'Volleyball',
+                    venue: 'Beach Courts',
+                    lat: 49.29,
+                    lng: -123.11,
+                    time: '5:30 PM',
+                    players: '4/6'
+                }
+            ];
+            
+            if (window.maplibreManager) {
+                window.maplibreManager.loadGames();
+                document.getElementById('games').textContent = '🎮 Added ' + testGames.length + ' test games';
+                document.getElementById('games').className = 'status success';
+            }
+        }
+        
+        function clearMarkers() {
+            if (window.maplibreManager) {
+                window.maplibreManager.clearMarkers();
+                document.getElementById('games').textContent = '🧹 Cleared all markers';
+                document.getElementById('games').className = 'status';
+            }
+        }
+        
+        async function runAutomaticTests() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<h3>Running automatic tests...</h3>';
+            
+            const tests = [
+                { name: 'MapLibre GL loaded', test: () => !!window.maplibregl },
+                { name: 'Map instance created', test: () => !!window.maplibreManager?.getMap() },
+                { name: 'Map container exists', test: () => !!document.getElementById('map').children.length },
+                { name: 'Navigation controls added', test: () => !!document.querySelector('.maplibregl-ctrl-nav-compass') },
+                { name: 'Scale control added', test: () => !!document.querySelector('.maplibregl-ctrl-scale') },
+                { name: 'Geolocate control added', test: () => !!document.querySelector('.maplibregl-ctrl-geolocate') },
+                { name: 'Map tiles loading', test: () => {
+                    const map = window.maplibreManager?.getMap();
+                    return map && map.loaded();
+                }}
+            ];
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr><th style="text-align: left; padding: 5px;">Test</th><th style="text-align: left; padding: 5px;">Result</th></tr>';
+            
+            for (const test of tests) {
+                try {
+                    const passed = await test.test();
+                    if (passed) {
+                        testsPassed++;
+                        html += `<tr><td style="padding: 5px;">${test.name}</td><td style="padding: 5px; color: green;">✅ PASSED</td></tr>`;
+                    } else {
+                        testsFailed++;
+                        html += `<tr><td style="padding: 5px;">${test.name}</td><td style="padding: 5px; color: red;">❌ FAILED</td></tr>`;
+                    }
+                } catch (error) {
+                    testsFailed++;
+                    html += `<tr><td style="padding: 5px;">${test.name}</td><td style="padding: 5px; color: red;">❌ ERROR: ${error.message}</td></tr>`;
+                }
+            }
+            
+            html += '</table>';
+            html += `<h3>Results: ${testsPassed} passed, ${testsFailed} failed</h3>`;
+            
+            results.innerHTML = html;
+            
+            // Auto-add test games if all tests pass
+            if (testsFailed === 0) {
+                setTimeout(addTestGames, 1000);
+            }
+        }
+        
+        function testMapFeatures() {
+            runAutomaticTests();
+            getUserLocation();
+            setTimeout(addTestGames, 1500);
+        }
+        
+        // Join game function for testing
+        window.joinGame = function(gameId) {
+            alert('Join game: ' + gameId);
+        };
+        
+        window.requireLogin = function(gameId) {
+            alert('Login required to join game: ' + gameId);
+        };
+    </script>
+</body>
+</html>

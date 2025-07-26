@@ -15,8 +15,8 @@ window.PlayNowPage = {
       [locationResult.userLocation.lat, locationResult.userLocation.lng] :
       null;
 
-    if (!window.googleMap && !window.map) {
-      window.initializeMap(userLocation);
+    if (!window.map) {
+      window.initializeMapLibre('map');
     }
 
     // Set up event listeners
@@ -151,8 +151,8 @@ window.PlayNowPage = {
       this.displayPlayNowResults(data, sport);
 
       // Update map markers with all activities
-      if (window.googleMap || window.map) {
-        this.updateMapMarkersForPlayNow(data.activities);
+      if (window.maplibreManager && window.maplibreManager.getMap()) {
+        window.maplibreManager.loadGames();
       }
     } catch (error) {
       console.error('Failed to find games:', error);
