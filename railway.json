@@ -7,7 +7,7 @@
   "deploy": {
     "numReplicas": 1,
     "startCommand": "gunicorn railway_integration:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --log-level info",
-    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyType": "on-failure",
     "restartPolicyMaxRetries": 3,
     "healthcheckPath": "/health",
     "healthcheckTimeout": 30
