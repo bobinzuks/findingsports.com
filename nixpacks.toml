@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["nodejs-18_x"]
+
+[phases.install]
+cmds = ["cd mockup/backend && npm install --production"]
+
+[start]
+cmd = "cd mockup/backend && node server-railway.js"
