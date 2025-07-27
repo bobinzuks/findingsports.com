@@ -535,38 +535,48 @@
                             });
                     },
                     (err) => {
-                        // Location denied or error
+                        // Location denied or error - use selected location from dropdown
                         console.log('Location error:', err.message);
+                        console.log('Using selected location from dropdown instead');
                         
-                        // Show location permission message
+                        // Get selected location from dropdown
+                        const locationSelect = document.getElementById('locationSelect');
+                        const selectedLocation = locationSelect ? locationSelect.value : 'vancouver';
+                        
+                        // City coordinates
+                        const cityCoords = {
+                            'vancouver': { lat: 49.2827, lng: -123.1207, name: 'Vancouver' },
+                            'burnaby': { lat: 49.2487, lng: -122.9808, name: 'Burnaby' },
+                            'richmond': { lat: 49.1666, lng: -123.1336, name: 'Richmond' },
+                            'surrey': { lat: 49.1913, lng: -122.8490, name: 'Surrey' }
+                        };
+                        
+                        const cityData = cityCoords[selectedLocation] || cityCoords.vancouver;
+                        
+                        // Automatically use selected city
+                        console.log(`Using ${cityData.name} as default location`);
+                        
+                        // Show loading while fetching games
                         mainContent.innerHTML = `
-                            <div style="padding: 3rem; text-align: center; max-width: 600px; margin: 0 auto;">
-                                <h2 style="color: #ff6b35;">📍 Location Access Needed</h2>
-                                <p style="margin: 2rem 0; font-size: 1.1em;">
-                                    To find games near you, please enable location access in your browser.
-                                </p>
-                                <div style="background: #f0f0f0; padding: 2rem; border-radius: 8px; margin: 2rem 0;">
-                                    <p style="margin-bottom: 1rem;"><strong>Or choose a city:</strong></p>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                                        <button onclick="playNowForCity(49.2827, -123.1207, 'Vancouver')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Vancouver</button>
-                                        <button onclick="playNowForCity(49.2487, -122.9808, 'Burnaby')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Burnaby</button>
-                                        <button onclick="playNowForCity(49.1666, -123.1336, 'Richmond')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Richmond</button>
-                                        <button onclick="playNowForCity(49.1913, -122.8490, 'Surrey')" style="padding: 0.75rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Surrey</button>
-                                    </div>
-                                    
-                                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd;">
-                                        <p style="margin-bottom: 0.5rem;"><strong>Or enter your location:</strong></p>
-                                        <div style="display: flex; gap: 0.5rem;">
-                                            <input type="text" id="customLocation" placeholder="Enter city or address" style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
-                                            <button onclick="searchCustomLocation()" style="padding: 0.75rem 1.5rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>
-                                        </div>
-                                    </div>
+                            <div style="padding: 3rem; text-align: center;">
+                                <h2 style="color: #ff6b35;">Finding games in ${cityData.name}...</h2>
+                                <div style="margin-top: 2rem;">
+                                    <div style="width: 60px; height: 60px; border: 4px solid #f0f0f0; border-top-color: #ff6b35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
                                 </div>
-                                <button onclick="location.reload()" style="padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                    Back to Home
-                                </button>
+                                <p style="margin-top: 2rem; color: #666;">Location access denied - using ${cityData.name} as default</p>
                             </div>
                         `;
+                        
+                        // Fetch games for selected city
+                        fetch(`/api/play-now?lat=${cityData.lat}&lng=${cityData.lng}&radius=15`)
+                            .then(r => r.json())
+                            .then(data => {
+                                window.displayPlayNowResults(data, cityData.lat, cityData.lng, cityData.name);
+                            })
+                            .catch(err => {
+                                console.error('Play Now API error:', err);
+                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
+                            });
                     }
                 );
             } else {

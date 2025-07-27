@@ -146,6 +146,11 @@ app.use(express.static(path.join(__dirname, '..'), {
   }
 }));
 
+// Root route - serve HTML
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
 // Health check endpoint for Railway
 app.get('/api/health', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
