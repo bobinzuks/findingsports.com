@@ -4,7 +4,7 @@
   "description": "Finding Sports backend with 10-agent scraping swarm",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "echo 'Starting at 1753583950873' && node server.js",
     "dev": "nodemon server.js",
     "swarm": "node services/sports-scraping-swarm/deploy-swarm.js",
     "test": "jest --coverage",
