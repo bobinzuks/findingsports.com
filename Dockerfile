@@ -3,6 +3,7 @@ FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
+# Force rebuild 1753583913938
 
 # Copy package files
 COPY mockup/backend/package*.json ./mockup/backend/
