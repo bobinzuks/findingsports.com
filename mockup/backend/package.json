@@ -1,6 +1,6 @@
 {
   "name": "finding-sports-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Finding Sports backend with 10-agent scraping swarm",
   "main": "server.js",
   "scripts": {
