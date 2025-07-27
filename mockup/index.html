@@ -46,7 +46,9 @@
             href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
         />
-        <!-- MapLibre GL JS CSS will be loaded dynamically -->
+        <!-- MapLibre GL JS -->
+        <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+        <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
         <style>
             /* Hide social section by default - moved to bottom */
             .social-section {
@@ -846,6 +848,18 @@
             console.log('Running deployment check...');
             checkDeployment();
         }, 1000);
+        
+        // Initialize main map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the main map
+            if (window.initializeMapLibre) {
+                window.initializeMapLibre('map').then(() => {
+                    console.log('Main map initialized');
+                }).catch(err => {
+                    console.error('Failed to initialize main map:', err);
+                });
+            }
+        });
         </script>
         
         <!-- Performance Monitor (load first) -->

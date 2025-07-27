@@ -46,6 +46,7 @@
     "express-rate-limit": "^8.0.1",
     "express-slow-down": "^2.1.0",
     "express-validator": "^7.2.1",
+    "geohash": "^0.0.1",
     "google-auth-library": "^9.2.0",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",

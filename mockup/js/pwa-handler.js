@@ -147,21 +147,14 @@ class PWAHandler {
     this.showNotification('Offline mode', 'Your messages will be sent when you\'re back online');
   }
   
-  // Update online status in UI
+  // Update online status in UI - DISABLED
   updateOnlineStatus() {
-    const statusElement = document.getElementById('connectionStatus');
-    if (statusElement) {
-      statusElement.className = this.isOnline ? 'online' : 'offline';
-      statusElement.textContent = this.isOnline ? 'Online' : 'Offline';
-    }
-    
-    // Update social feed UI
-    if (window.SocialFeedPage) {
+    // Online status indicator has been removed from UI
+    // Only update chat input placeholder if offline
+    if (window.SocialFeedPage && !this.isOnline) {
       const chatInput = document.getElementById('messageInput');
       if (chatInput) {
-        chatInput.placeholder = this.isOnline 
-          ? `Message #${window.SocialFeedPage.currentChannel}`
-          : `Offline - messages will be sent later`;
+        chatInput.placeholder = `Offline - messages will be sent later`;
       }
     }
   }

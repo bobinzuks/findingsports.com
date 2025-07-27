@@ -19,16 +19,8 @@ window.LanguageService = {
 
   // Initialize language service
   initialize() {
-    // Get saved language preference
-    this.currentLanguage = localStorage.getItem('preferredLanguage') || navigator.language.split('-')[0] || 'en';
-
-    // Add language selector to header
-    this.addLanguageSelector();
-
-    // Apply translations if not English
-    if (this.currentLanguage !== 'en') {
-      this.translatePage();
-    }
+    // Language service is disabled - language selector has been removed
+    return;
   },
 
   // Add language selector to header

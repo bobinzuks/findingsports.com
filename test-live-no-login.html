@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Live Site - No Login Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #ff6b35;
+        }
+        .test-section {
+            background: #f4f4f4;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #27ae60;
+            color: white;
+        }
+        .fail {
+            background: #e74c3c;
+            color: white;
+        }
+        .pending {
+            background: #f39c12;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Live Site Test - No Login Required</h1>
+    
+    <div class="test-section">
+        <h2>✅ Completed Changes</h2>
+        <ul>
+            <li>✅ Removed login requirement from map features</li>
+            <li>✅ Removed login requirement from Play Now functionality</li>
+            <li>✅ Removed login requirement from custom location search</li>
+            <li>✅ "Join Now" button works without login (shows alert)</li>
+            <li>✅ Changes committed and pushed to GitHub</li>
+            <li>✅ Site deployed to Railway</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Test Actions</h2>
+        <button onclick="window.open('https://findingsports.com', '_blank')">Open Live Site</button>
+        <button onclick="testPlayNow()">Test Play Now Feature</button>
+        <button onclick="testAPI()">Test API Endpoints</button>
+        <button onclick="document.getElementById('siteFrame').src = 'https://findingsports.com'">Load Site Below</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="results">
+            <div class="status pending">Click buttons above to run tests...</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🌐 Live Site Preview</h2>
+        <iframe id="siteFrame" src="https://findingsports.com"></iframe>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="status pending">Testing API endpoints...</div>';
+            
+            try {
+                const endpoints = [
+                    { url: '/api/venues', name: 'Venues API' },
+                    { url: '/api/sports', name: 'Sports API' },
+                    { url: '/api/games', name: 'Games API' },
+                    { url: '/api/play-now?lat=49.2827&lng=-123.1207', name: 'Play Now API' }
+                ];
+                
+                let html = '';
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`https://findingsports.com${endpoint.url}`);
+                        const status = response.ok ? 'PASS' : 'FAIL';
+                        html += `<div class="status ${response.ok ? 'pass' : 'fail'}">${endpoint.name}: ${status} (${response.status})</div>`;
+                    } catch (error) {
+                        html += `<div class="status fail">${endpoint.name}: FAIL (${error.message})</div>`;
+                    }
+                }
+                
+                results.innerHTML = html;
+            } catch (error) {
+                results.innerHTML = `<div class="status fail">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function testPlayNow() {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="status pass">Play Now Test Instructions</div>
+                <ol>
+                    <li>Click "Play Now" button on the site</li>
+                    <li>Allow location access (or choose a city)</li>
+                    <li>Map should display without login requirement</li>
+                    <li>Games should list without login requirement</li>
+                    <li>"Join Now" buttons should work (show alert)</li>
+                    <li>Custom location search should work without login</li>
+                </ol>
+            `;
+        }
+        
+        // Run API test on load
+        window.onload = () => {
+            setTimeout(testAPI, 1000);
+        };
+    </script>
+</body>
+</html>
