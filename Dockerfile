@@ -28,3 +28,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Start command - use the main server
 WORKDIR /app/mockup/backend
 CMD ["node", "server.js"]
+# Build timestamp: 2025-07-27T02:37:39.058Z
