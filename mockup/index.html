@@ -677,63 +677,27 @@
         
         // MapLibre initialization is handled by maplibre-implementation.js
         // The map will automatically get user location and display game pins
-            new google.maps.Marker({
-                position: { lat: userLat, lng: userLng },
-                map: map,
-                title: 'Your Location',
-                icon: {
-                    url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-                }
-            });
-            
-            // Add markers for games
-            const allActivities = [
-                ...(activities.happeningNow || []),
-                ...(activities.startingSoon || []),
-                ...(activities.laterToday || []),
-                ...(activities.openCourts || []),
-                ...(activities.pickupGames || [])
-            ];
-            
-            allActivities.forEach(game => {
-                if (game.lat && game.lng) {
-                    const marker = new google.maps.Marker({
-                        position: { lat: parseFloat(game.lat), lng: parseFloat(game.lng) },
-                        map: map,
-                        title: `${game.sport || 'Sport'} at ${game.venue || 'Location'}`,
-                        icon: {
-                            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-                        }
-                    });
-                    
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: `
-                            <div style="padding: 10px;">
-                                <h4>${game.sport || 'Sport'}</h4>
-                                <p>📍 ${game.venue || 'Location'}</p>
-                                <p>🕐 ${game.time || game.startTime || 'Time TBD'}</p>
-                                ${game.distance ? `<p>🚗 ${game.distance} away</p>` : ''}
-                            </div>
-                        `
-                    });
-                    
-                    marker.addListener('click', () => {
-                        infoWindow.open(map, marker);
-                    });
-                }
-            });
-            
-            // Fit bounds to show all markers
-            const bounds = new google.maps.LatLngBounds();
-            bounds.extend({ lat: userLat, lng: userLng });
-            
-            allActivities.forEach(game => {
-                if (game.lat && game.lng) {
-                    bounds.extend({ lat: parseFloat(game.lat), lng: parseFloat(game.lng) });
-                }
-            });
-            
-            map.fitBounds(bounds);
+        // NOTE: Google Maps code has been removed and replaced with login functionality
+        
+        // Check login status for enhanced features
+        const auth = checkAuth();
+        if (!auth.isLoggedIn) {
+            console.log('User not logged in - prompting for login for full map features');
+            // Show login prompt in place of map markers
+            const mapContainer = document.getElementById('playNowMap');
+            if (mapContainer) {
+                const loginPrompt = document.createElement('div');
+                loginPrompt.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; z-index: 1000;';
+                loginPrompt.innerHTML = `
+                    <h3 style="color: #ff6b35; margin-bottom: 1rem;">Login Required</h3>
+                    <p style="margin-bottom: 1.5rem;">Login to see game locations on the map and join games</p>
+                    <button onclick="requireLogin()" style="padding: 0.75rem 2rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                        Login Now
+                    </button>
+                `;
+                mapContainer.appendChild(loginPrompt);
+            }
+        }
         };
         
         // Search custom location using Google Places
@@ -757,34 +721,50 @@
                 </div>
             `;
             
-            // Use Google Geocoding API
-            if (window.google && window.google.maps) {
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: location }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        const lat = results[0].geometry.location.lat();
-                        const lng = results[0].geometry.location.lng();
-                        const formattedAddress = results[0].formatted_address;
-                        
-                        // Fetch games for this location
-                        fetch(`/api/play-now?lat=${lat}&lng=${lng}&radius=15`)
-                            .then(r => r.json())
-                            .then(data => {
-                                window.displayPlayNowResults(data, lat, lng, formattedAddress);
-                            })
-                            .catch(err => {
-                                console.error('Play Now API error:', err);
-                                mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
-                            });
-                    } else {
-                        alert('Location not found. Please try a different search.');
-                        window.playNow(); // Go back to location selection
-                    }
-                });
+            // Check if user is logged in before allowing location search
+            const auth = checkAuth();
+            if (!auth.isLoggedIn) {
+                alert('Please login to search for custom locations');
+                requireLogin();
+                return;
+            }
+            
+            // Use default city coordinates as a simple fallback
+            // In a real app, this would use a proper geocoding service
+            const cityCoordinates = {
+                'vancouver': { lat: 49.2827, lng: -123.1207 },
+                'burnaby': { lat: 49.2487, lng: -122.9808 },
+                'richmond': { lat: 49.1666, lng: -123.1336 },
+                'surrey': { lat: 49.1913, lng: -122.8490 },
+                'north vancouver': { lat: 49.3201, lng: -123.0736 },
+                'west vancouver': { lat: 49.3275, lng: -123.1600 }
+            };
+            
+            const searchTerm = location.toLowerCase();
+            let foundCity = null;
+            
+            // Check if the search term matches any known city
+            for (const [city, coords] of Object.entries(cityCoordinates)) {
+                if (searchTerm.includes(city)) {
+                    foundCity = { name: city, ...coords };
+                    break;
+                }
+            }
+            
+            if (foundCity) {
+                // Fetch games for this location
+                fetch(`/api/play-now?lat=${foundCity.lat}&lng=${foundCity.lng}&radius=15`)
+                    .then(r => r.json())
+                    .then(data => {
+                        window.displayPlayNowResults(data, foundCity.lat, foundCity.lng, location);
+                    })
+                    .catch(err => {
+                        console.error('Play Now API error:', err);
+                        mainContent.innerHTML = '<div style="padding: 2rem; text-align: center;"><h2>Error loading games</h2><button onclick="location.reload()">Try Again</button></div>';
+                    });
             } else {
-                // Fallback: just use Vancouver coordinates
-                alert('Google Maps not loaded. Using Vancouver as default.');
-                window.playNowForCity(49.2827, -123.1207, 'Vancouver');
+                alert('Location not found. Please try one of: Vancouver, Burnaby, Richmond, Surrey, North Vancouver, West Vancouver');
+                window.playNow(); // Go back to location selection
             }
         };
         
