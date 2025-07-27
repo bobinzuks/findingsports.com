@@ -42,15 +42,10 @@ const server = http.createServer((req, res) => {
         return;
     }
     
-    // Root endpoint
+    // Root endpoint - redirect to index.html
     if (req.url === '/' || req.url === '') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-            message: 'Finding Sports API', 
-            status: 'running',
-            port: PORT,
-            deployment: process.env.RAILWAY_DEPLOYMENT_ID || 'local'
-        }));
+        res.writeHead(301, { 'Location': '/index.html' });
+        res.end();
         return;
     }
     
