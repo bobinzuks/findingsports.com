@@ -68,9 +68,11 @@
   // Initialize MapLibre map
   window.initializeMapLibre = async function (containerId = 'map') {
     try {
+      console.log('Initializing MapLibre for container:', containerId);
+      
       // Check if MapLibre is loaded
       if (!window.maplibregl) {
-        console.error('MapLibre GL JS not loaded');
+        console.error('MapLibre GL JS not loaded, loading now...');
         await loadMapLibreGL();
       }
 
@@ -80,9 +82,15 @@
         return;
       }
 
-      // Clear existing content
+      // Clear existing content and ensure visibility
       container.innerHTML = '';
+      container.style.display = 'block';
+      container.style.width = '100%';
+      container.style.height = container.style.height || '500px';
+      container.style.position = 'relative';
 
+      console.log('Creating MapLibre map instance...');
+      
       // Create map instance
       map = new maplibregl.Map({
         container: containerId,
@@ -488,4 +496,23 @@
     clearMarkers: clearGameMarkers,
     getMap: () => map
   };
+  
+  // Auto-initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, checking for map containers...');
+      // Initialize main map if container exists
+      if (document.getElementById('map')) {
+        console.log('Found main map container, initializing...');
+        window.initializeMapLibre('map');
+      }
+    });
+  } else {
+    // DOM already loaded
+    console.log('DOM already loaded, checking for map containers...');
+    if (document.getElementById('map')) {
+      console.log('Found main map container, initializing...');
+      window.initializeMapLibre('map');
+    }
+  }
 })();
