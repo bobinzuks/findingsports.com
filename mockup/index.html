@@ -6,6 +6,30 @@
         <meta name="deployment-version" content="2025-01-16-ultra-secure-social-feed" />
         <meta name="railway-deployment" content="ultra-secure-social-auth-integrated" />
         <title>Finding Sports - Find Sports Near You</title>
+        
+        <!-- ULTIMATE NUCLEAR FIX - Load FIRST before anything else -->
+        <script src="js/ultimate-nuclear-fix.js"></script>
+        
+        <!-- INLINE NUCLEAR FIX - Runs immediately -->
+        <script>
+        // Remove unwanted elements IMMEDIATELY
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(function() {
+                // Find and destroy language selector
+                document.querySelectorAll('*').forEach(function(el) {
+                    if (el.textContent === '🌐 English ▼' || el.textContent === '? Help') {
+                        el.remove();
+                    }
+                });
+                // Ensure login button
+                var headerRight = document.querySelector('.header-right, .user-menu');
+                if (headerRight && !headerRight.querySelector('.login-btn')) {
+                    headerRight.innerHTML = '<button class="login-btn" style="padding: 12px 24px; background: #ff6b35; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="window.location.href=\'/login.html\'">Login</button>';
+                }
+            }, 100);
+        });
+        </script>
+        
         <!-- Deployment timestamp: 2025-01-16T22:00:00Z - ULTRA SECURE: XSS Protected + CSRF + Rate Limited -->
         <link rel="stylesheet" href="css/styles.css?v=1752683265404" />
         <link rel="stylesheet" href="css/background-enhancement.css?v=1752683265404" />
