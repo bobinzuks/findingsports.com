@@ -1,64 +1,71 @@
 #!/bin/bash
 
-echo "🔍 Verifying deployment and nuclear fixes..."
+echo "===================="
+echo "DEPLOYMENT VERIFICATION SCRIPT"
+echo "===================="
+echo ""
 
 # Colors for output
-RED='\033[0;31m'
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-URL="https://findingsports.com"
+echo "1. Testing live API endpoints..."
+echo ""
 
-echo -e "\n📡 Checking if site is live..."
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+# Test API v2 endpoint
+echo "Testing /api/v2/games endpoint:"
+RESPONSE=$(curl -s "https://findingsports.com/api/v2/games")
+GAMES_COUNT=$(echo "$RESPONSE" | grep -o '"sport"' | wc -l)
 
-if [ "$HTTP_STATUS" -eq 200 ]; then
-    echo -e "${GREEN}✅ Site is live (HTTP $HTTP_STATUS)${NC}"
+if [ $GAMES_COUNT -gt 0 ]; then
+    echo -e "${GREEN}✓ API v2 returns $GAMES_COUNT games${NC}"
 else
-    echo -e "${RED}❌ Site returned HTTP $HTTP_STATUS${NC}"
-    exit 1
+    echo -e "${RED}✗ API v2 returns no games${NC}"
 fi
 
-echo -e "\n🔍 Checking for unwanted elements..."
+# Test old API endpoint for comparison
+echo ""
+echo "Testing /api/games endpoint (old):"
+OLD_RESPONSE=$(curl -s "https://findingsports.com/api/games")
+OLD_GAMES=$(echo "$OLD_RESPONSE" | grep -o '"games":\[\]' | wc -l)
 
-# Check for language selector
-LANG_SELECTOR=$(curl -s "$URL" | grep -c "🌐.*English")
-if [ "$LANG_SELECTOR" -gt 0 ]; then
-    echo -e "${RED}❌ Language selector still visible in HTML${NC}"
+if [ $OLD_GAMES -gt 0 ]; then
+    echo -e "${YELLOW}⚠ Old API returns empty array (expected)${NC}"
 else
-    echo -e "${GREEN}✅ Language selector not found in HTML${NC}"
+    echo -e "${GREEN}✓ Old API response received${NC}"
 fi
 
-# Check for help button
-HELP_BUTTON=$(curl -s "$URL" | grep -c "Help.*button\|help-btn")
-if [ "$HELP_BUTTON" -gt 0 ]; then
-    echo -e "${RED}❌ Help button still visible in HTML${NC}"
+# Check if index.html uses new API
+echo ""
+echo "2. Checking if frontend uses API v2..."
+INDEX_CONTENT=$(curl -s "https://findingsports.com/index.html")
+API_V2_COUNT=$(echo "$INDEX_CONTENT" | grep -c "/api/v2/games")
+
+if [ $API_V2_COUNT -gt 0 ]; then
+    echo -e "${GREEN}✓ Frontend updated to use API v2 ($API_V2_COUNT references found)${NC}"
 else
-    echo -e "${GREEN}✅ Help button not found in HTML${NC}"
+    echo -e "${RED}✗ Frontend still using old API${NC}"
 fi
 
-# Check if nuclear fix is loaded
-NUCLEAR_FIX=$(curl -s "$URL" | grep -c "ultimate-nuclear-fix.js")
-if [ "$NUCLEAR_FIX" -gt 0 ]; then
-    echo -e "${GREEN}✅ Nuclear fix script is loaded${NC}"
+# Summary
+echo ""
+echo "===================="
+echo "SUMMARY:"
+echo "===================="
+
+if [ $GAMES_COUNT -gt 0 ] && [ $API_V2_COUNT -gt 0 ]; then
+    echo -e "${GREEN}✓ DEPLOYMENT SUCCESSFUL!${NC}"
+    echo -e "${GREEN}✓ Games are now loading from API v2${NC}"
+    echo -e "${GREEN}✓ Frontend has been updated${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "1. Deploy to Railway: git add -A && git commit -m '🚀 Fix games loading - use API v2 endpoint' && git push"
+    echo "2. Check live site after deployment"
 else
-    echo -e "${RED}❌ Nuclear fix script NOT loaded${NC}"
+    echo -e "${RED}✗ ISSUES DETECTED${NC}"
+    echo "Please review the changes and ensure:"
+    echo "- index.html is updated to use /api/v2/games"
+    echo "- The API v2 endpoint is returning data"
 fi
-
-# Check if language service is loaded
-LANG_SERVICE=$(curl -s "$URL" | grep -c "language-service.js")
-if [ "$LANG_SERVICE" -gt 0 ]; then
-    echo -e "${YELLOW}⚠️  Language service is loaded (this is causing the issue!)${NC}"
-else
-    echo -e "${GREEN}✅ Language service not loaded${NC}"
-fi
-
-echo -e "\n📊 Summary:"
-echo "The language selector is being added by language-service.js AFTER the nuclear fix runs."
-echo "Solution: We need to either:"
-echo "1. Remove language-service.js from being loaded"
-echo "2. Create a more aggressive fix that overrides the LanguageService"
-echo "3. Make the nuclear fix run continuously with MutationObserver"
-
-echo -e "\n🔧 Creating enhanced nuclear fix..."

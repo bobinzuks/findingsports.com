@@ -284,8 +284,8 @@
             // Show loading
             container.innerHTML = '<div style="padding: 3rem; text-align: center;"><h2>Searching for games...</h2></div>';
             
-            // Fetch games
-            fetch('/api/games')
+            // Fetch games from API v2 for aggregated data
+            fetch('/api/v2/games')
                 .then(r => r.json())
                 .then(data => {
                     const games = data.games || [];
@@ -293,14 +293,28 @@
                         <div style="padding: 2rem;">
                             <h2>Drop-in Games (${games.length} found)</h2>
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem;">
-                                ${games.map(g => `
-                                    <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                        <h3>${g.sport || 'Sport'}</h3>
-                                        <p>📍 ${g.venue || 'Location TBD'}</p>
-                                        <p>🕐 ${g.time || 'Time TBD'}</p>
-                                        <button style="width: 100%; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join</button>
-                                    </div>
-                                `).join('')}
+                                ${games.map(g => {
+                                    const venue = g.venue?.name || g.venue || 'Location TBD';
+                                    const address = g.venue?.address || g.address || '';
+                                    const time = g.startTime ? new Date(g.startTime).toLocaleString('en-US', { 
+                                        weekday: 'short', 
+                                        month: 'short', 
+                                        day: 'numeric', 
+                                        hour: 'numeric', 
+                                        minute: '2-digit' 
+                                    }) : g.time || 'Time TBD';
+                                    const sport = g.sport || g.title?.split(' ')[0] || 'Sport';
+                                    
+                                    return `
+                                        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                            <h3 style="color: #ff6b35;">${sport.charAt(0).toUpperCase() + sport.slice(1)}</h3>
+                                            <p>📍 ${venue}</p>
+                                            ${address ? `<p style="font-size: 0.9em; color: #666;">${address}</p>` : ''}
+                                            <p>🕐 ${time}</p>
+                                            <button style="width: 100%; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join</button>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                             <button onclick="location.reload()" style="margin-top: 2rem; padding: 0.75rem 2rem; background: #333; color: white; border: none; border-radius: 8px;">Back</button>
                         </div>
@@ -822,20 +836,46 @@
                     if (gamesSection2) gamesSection2.style.display = 'block';
                     if (mapSection2) mapSection2.style.display = 'block';
                     
-                    // Load games
-                    fetch('/api/games')
+                    // Load games from API v2 for aggregated data
+                    fetch('/api/v2/games')
                         .then(r => r.json())
                         .then(data => {
                             const games = data.games || [];
                             const gamesList = document.getElementById('gamesList');
                             if (gamesList) {
-                                gamesList.innerHTML = games.map(g => `
-                                    <div style="background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
-                                        <h3>${g.sport || 'Sport'}</h3>
-                                        <p>📍 ${g.venue || 'Location TBD'}</p>
-                                        <p>🕐 ${g.time || 'Time TBD'}</p>
-                                    </div>
-                                `).join('');
+                                if (games.length === 0) {
+                                    gamesList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No games found. Try searching in a different area.</div>';
+                                } else {
+                                    gamesList.innerHTML = games.map(g => {
+                                        const venue = g.venue?.name || g.venue || 'Location TBD';
+                                        const address = g.venue?.address || g.address || '';
+                                        const time = g.startTime ? new Date(g.startTime).toLocaleString('en-US', { 
+                                            weekday: 'short', 
+                                            month: 'short', 
+                                            day: 'numeric', 
+                                            hour: 'numeric', 
+                                            minute: '2-digit' 
+                                        }) : g.time || 'Time TBD';
+                                        const sport = g.sport || g.title?.split(' ')[0] || 'Sport';
+                                        
+                                        return `
+                                            <div style="background: white; padding: 1.5rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                                <h3 style="color: #ff6b35;">${sport.charAt(0).toUpperCase() + sport.slice(1)}</h3>
+                                                <p>📍 ${venue}</p>
+                                                ${address ? `<p style="font-size: 0.9em; color: #666;">${address}</p>` : ''}
+                                                <p>🕐 ${time}</p>
+                                                <button onclick="joinGame('${g.id || Math.random()}')" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join Game</button>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load games:', err);
+                            const gamesList = document.getElementById('gamesList');
+                            if (gamesList) {
+                                gamesList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Error loading games. Please try again.</div>';
                             }
                         });
                     break;
@@ -928,7 +968,8 @@
             
             // Load games on page load since "Upcoming Games" tab is active by default
             console.log('Loading games on page initialization...');
-            fetch('/api/games')
+            // Use API v2 which has aggregated data from multiple sources
+            fetch('/api/v2/games')
                 .then(r => r.json())
                 .then(data => {
                     const games = data.games || [];
@@ -945,16 +986,33 @@
                                 </div>
                             `;
                         } else {
-                            gamesList.innerHTML = games.map(g => `
-                                <div style="background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                    <h3 style="color: #ff6b35; margin: 0 0 0.5rem 0;">${g.sport || 'Sport'}</h3>
-                                    <p style="margin: 0.5rem 0;">📍 ${g.venue || 'Location TBD'}</p>
-                                    <p style="margin: 0.5rem 0;">🕐 ${g.time || 'Time TBD'}</p>
-                                    ${g.players ? `<p style="margin: 0.5rem 0;">👥 ${g.players} players</p>` : ''}
-                                    ${g.skillLevel ? `<p style="margin: 0.5rem 0;">🎯 ${g.skillLevel}</p>` : ''}
-                                    <button onclick="joinGame('${g.id || Math.random()}')" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join Game</button>
-                                </div>
-                            `).join('');
+                            gamesList.innerHTML = games.map(g => {
+                                // Handle different game data formats from various sources
+                                const venue = g.venue?.name || g.venue || 'Location TBD';
+                                const address = g.venue?.address || g.address || '';
+                                const time = g.startTime ? new Date(g.startTime).toLocaleString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    hour: 'numeric', 
+                                    minute: '2-digit' 
+                                }) : g.time || 'Time TBD';
+                                const sport = g.sport || g.title?.split(' ')[0] || 'Sport';
+                                const capacity = g.capacity?.max || g.capacity || '';
+                                
+                                return `
+                                    <div style="background: white; padding: 1.5rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                        <h3 style="color: #ff6b35; margin: 0 0 0.5rem 0;">${sport.charAt(0).toUpperCase() + sport.slice(1)}</h3>
+                                        <p style="margin: 0.5rem 0;">📍 ${venue}</p>
+                                        ${address ? `<p style="margin: 0.5rem 0; font-size: 0.9em; color: #666;">${address}</p>` : ''}
+                                        <p style="margin: 0.5rem 0;">🕐 ${time}</p>
+                                        ${capacity ? `<p style="margin: 0.5rem 0;">👥 Capacity: ${capacity} players</p>` : ''}
+                                        ${g.requirements && g.requirements.length > 0 ? `<p style="margin: 0.5rem 0; font-size: 0.9em;">ℹ️ ${g.requirements.join(', ')}</p>` : ''}
+                                        ${g.type || g.centre ? `<p style="margin: 0.5rem 0; font-size: 0.9em; color: #666;">Type: ${g.type || 'Drop-in'}</p>` : ''}
+                                        <button onclick="joinGame('${g.id || Math.random()}')" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join Game</button>
+                                    </div>
+                                `;
+                            }).join('');
                         }
                     }
                 })
