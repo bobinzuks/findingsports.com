@@ -928,5 +928,62 @@
                 });
             }
         </script>
+        
+        <!-- Emergency Header Fix - Remove Online, Language selector, Help -->
+        <script>
+        (function() {
+            'use strict';
+            
+            function removeHeaderElements() {
+                // Find and remove Online indicator, Help button, Language selector
+                document.querySelectorAll('*').forEach(el => {
+                    const text = el.textContent.trim();
+                    if (text === 'Online' || text.includes('🌐') || text === '?' || text === 'Help' || 
+                        text.includes('English') || el.classList.contains('help-btn')) {
+                        if (el.parentElement && (el.parentElement.classList.contains('header-right') || 
+                            el.parentElement.tagName === 'HEADER')) {
+                            el.remove();
+                        } else if (el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'BUTTON' || el.tagName === 'A') {
+                            el.remove();
+                        }
+                    }
+                });
+                
+                // Find header-right and ensure it has login button
+                const headerRight = document.querySelector('.header-right');
+                if (headerRight && !headerRight.querySelector('.login-btn')) {
+                    headerRight.innerHTML = '<button class="login-btn" style="padding: 8px 16px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="window.location.href=\'/login.html\'">Login</button>';
+                }
+            }
+            
+            // Run multiple times to catch dynamic content
+            removeHeaderElements();
+            setTimeout(removeHeaderElements, 100);
+            setTimeout(removeHeaderElements, 500);
+            setTimeout(removeHeaderElements, 1000);
+            setTimeout(removeHeaderElements, 2000);
+        })();
+        
+        // Fix map rendering
+        function fixMapDisplay() {
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                mapContainer.style.height = '500px';
+                mapContainer.style.width = '100%';
+                mapContainer.style.backgroundColor = '#f0f0f0';
+                
+                // Trigger map initialization
+                if (window.initializeMapLibre) {
+                    window.initializeMapLibre('map').catch(err => {
+                        console.error('Map init failed:', err);
+                        mapContainer.innerHTML = '<div style="padding: 50px; text-align: center;">Loading map...</div>';
+                    });
+                }
+            }
+        }
+        
+        setTimeout(fixMapDisplay, 1000);
+        setTimeout(fixMapDisplay, 3000);
+        </script>
     </body>
 </html>
