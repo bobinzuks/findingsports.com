@@ -1,0 +1,10 @@
+node_modules/
+screenshots/
+results/
+test-results.json
+report.html
+report.md
+*.log
+.DS_Store
+coverage/
+.env

@@ -7,27 +7,340 @@
         <meta name="railway-deployment" content="nuclear-dom-cleanup-force-deployed" />
         <title>Finding Sports - Find Sports Near You</title>
         
-        <!-- ULTIMATE NUCLEAR FIX v3.0 - Load FIRST before anything else -->
-        <script src="js/ultimate-nuclear-fix.js"></script>
+        <!-- ULTRA AGGRESSIVE NUCLEAR FIX v4.0 - RUNS IMMEDIATELY BEFORE ANYTHING ELSE -->
+        <style>
+            /* NUCLEAR CSS - Force hide ALL unwanted elements with maximum priority */
+            [class*="language"]:not(.language-example),
+            [id*="language"]:not(#language-example),
+            [class*="lang-"]:not(.lang-example),
+            [id*="lang-"]:not(#lang-example),
+            .language-selector,
+            .lang-selector,
+            .language-menu,
+            .lang-menu,
+            .language-dropdown,
+            .lang-dropdown,
+            .language-switcher,
+            .lang-switcher,
+            .language-toggle,
+            .lang-toggle,
+            .language-picker,
+            .lang-picker,
+            .language-chooser,
+            .lang-chooser,
+            .locale-selector,
+            .locale-switcher,
+            .locale-picker,
+            .i18n-selector,
+            .i18n-switcher,
+            .i18n-menu,
+            .translate-menu,
+            .translation-menu,
+            .help-btn,
+            .help-button,
+            .help-menu,
+            .help-link,
+            .help-icon,
+            .online-indicator,
+            .online-status,
+            .connection-status,
+            .status-indicator,
+            *:has-text("🌐"),
+            *:has-text("Help"),
+            *:has-text("?"),
+            *:has-text("English"),
+            *:has-text("Language"),
+            *:has-text("Online"),
+            *:has-text("Status"),
+            [onclick*="language"],
+            [onclick*="lang"],
+            [onclick*="locale"],
+            [onclick*="i18n"],
+            [onclick*="translate"],
+            [onclick*="help"],
+            [href*="/help"],
+            [href*="/language"],
+            [href*="/i18n"],
+            [data-language],
+            [data-lang],
+            [data-locale],
+            [data-i18n],
+            [aria-label*="language" i],
+            [aria-label*="help" i],
+            [title*="language" i],
+            [title*="help" i] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                left: -9999px !important;
+                top: -9999px !important;
+                z-index: -9999 !important;
+            }
+        </style>
         
-        <!-- INLINE NUCLEAR FIX - Runs immediately -->
         <script>
-        // Remove unwanted elements IMMEDIATELY
-        document.addEventListener('DOMContentLoaded', function() {
-            setInterval(function() {
-                // Find and destroy language selector
-                document.querySelectorAll('*').forEach(function(el) {
-                    if (el.textContent === '🌐 English ▼' || el.textContent === '? Help') {
+        // NUCLEAR DOM INTERCEPTOR - Runs IMMEDIATELY, blocks ALL attempts to add unwanted elements
+        (function() {
+            'use strict';
+            
+            // Store original methods
+            const originalCreateElement = document.createElement;
+            const originalAppendChild = Node.prototype.appendChild;
+            const originalInsertBefore = Node.prototype.insertBefore;
+            const originalInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+            const originalOuterHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'outerHTML');
+            const originalTextContent = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+            const originalInnerText = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText');
+            const originalSetAttribute = Element.prototype.setAttribute;
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            
+            // Banned text patterns
+            const bannedPatterns = [
+                /🌐/g, /\?/g, /Help/gi, /Online/gi, /Status/gi, 
+                /Language/gi, /English/gi, /Français/gi, /Español/gi,
+                /中文/g, /日本語/g, /한국어/g, /Deutsch/gi, /Italiano/gi,
+                /Português/gi, /Русский/gi, /العربية/g, /हिन्दी/g,
+                /locale/gi, /i18n/gi, /translate/gi, /translation/gi
+            ];
+            
+            // Check if content contains banned text
+            function containsBannedContent(content) {
+                if (!content) return false;
+                const str = String(content);
+                return bannedPatterns.some(pattern => pattern.test(str));
+            }
+            
+            // Check if element should be blocked
+            function shouldBlockElement(element) {
+                if (!element) return false;
+                
+                // Check tag name
+                if (element.tagName) {
+                    const tag = element.tagName.toLowerCase();
+                    if (tag.includes('language') || tag.includes('lang') || 
+                        tag.includes('help') || tag.includes('i18n')) {
+                        return true;
+                    }
+                }
+                
+                // Check attributes
+                if (element.attributes) {
+                    for (let attr of element.attributes) {
+                        if (attr.name.includes('language') || attr.name.includes('lang') ||
+                            attr.name.includes('help') || attr.name.includes('i18n') ||
+                            attr.value.includes('language') || attr.value.includes('lang') ||
+                            attr.value.includes('help') || attr.value.includes('i18n')) {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Check content
+                if (containsBannedContent(element.textContent) || 
+                    containsBannedContent(element.innerText) ||
+                    containsBannedContent(element.innerHTML)) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Override createElement
+            document.createElement = function(tagName) {
+                const element = originalCreateElement.call(this, tagName);
+                
+                // Block language/help related elements
+                if (tagName.toLowerCase().includes('language') || 
+                    tagName.toLowerCase().includes('lang') ||
+                    tagName.toLowerCase().includes('help') ||
+                    tagName.toLowerCase().includes('i18n')) {
+                    // Return a dummy element that does nothing
+                    const dummy = originalCreateElement.call(this, 'div');
+                    dummy.style.display = 'none';
+                    return dummy;
+                }
+                
+                return element;
+            };
+            
+            // Override appendChild
+            Node.prototype.appendChild = function(child) {
+                if (shouldBlockElement(child)) {
+                    console.warn('Blocked element append:', child);
+                    return child;
+                }
+                return originalAppendChild.call(this, child);
+            };
+            
+            // Override insertBefore
+            Node.prototype.insertBefore = function(newNode, referenceNode) {
+                if (shouldBlockElement(newNode)) {
+                    console.warn('Blocked element insert:', newNode);
+                    return newNode;
+                }
+                return originalInsertBefore.call(this, newNode, referenceNode);
+            };
+            
+            // Override innerHTML
+            Object.defineProperty(Element.prototype, 'innerHTML', {
+                set: function(value) {
+                    if (containsBannedContent(value)) {
+                        // Clean the content
+                        let cleaned = String(value);
+                        bannedPatterns.forEach(pattern => {
+                            cleaned = cleaned.replace(pattern, '');
+                        });
+                        originalInnerHTML.set.call(this, cleaned);
+                    } else {
+                        originalInnerHTML.set.call(this, value);
+                    }
+                },
+                get: originalInnerHTML.get
+            });
+            
+            // Override textContent
+            Object.defineProperty(Node.prototype, 'textContent', {
+                set: function(value) {
+                    if (containsBannedContent(value)) {
+                        console.warn('Blocked text content:', value);
+                        return;
+                    }
+                    originalTextContent.set.call(this, value);
+                },
+                get: originalTextContent.get
+            });
+            
+            // Override setAttribute
+            Element.prototype.setAttribute = function(name, value) {
+                if (name.includes('language') || name.includes('lang') || 
+                    name.includes('help') || name.includes('i18n') ||
+                    String(value).includes('language') || String(value).includes('lang') ||
+                    String(value).includes('help') || String(value).includes('i18n')) {
+                    console.warn('Blocked attribute:', name, value);
+                    return;
+                }
+                return originalSetAttribute.call(this, name, value);
+            };
+            
+            // Override addEventListener to block language/help related events
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                const listenerStr = listener ? listener.toString() : '';
+                if (listenerStr.includes('language') || listenerStr.includes('lang') ||
+                    listenerStr.includes('help') || listenerStr.includes('i18n')) {
+                    console.warn('Blocked event listener');
+                    return;
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+            
+            // Continuous DOM cleaner - runs forever
+            function cleanDOM() {
+                // Remove all elements with banned content
+                document.querySelectorAll('*').forEach(el => {
+                    if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+                    
+                    // Check text content
+                    const text = (el.textContent || '').trim();
+                    const hasOnlyText = el.childNodes.length === 1 && el.childNodes[0].nodeType === 3;
+                    
+                    if (hasOnlyText && containsBannedContent(text)) {
                         el.remove();
+                        return;
+                    }
+                    
+                    // Check attributes
+                    if (el.attributes) {
+                        for (let attr of el.attributes) {
+                            if (attr.name.includes('language') || attr.name.includes('lang') ||
+                                attr.name.includes('help') || attr.name.includes('i18n')) {
+                                el.remove();
+                                return;
+                            }
+                        }
+                    }
+                    
+                    // Check classes and IDs
+                    const classAndId = (el.className + ' ' + el.id).toLowerCase();
+                    if (classAndId.includes('language') || classAndId.includes('lang') ||
+                        classAndId.includes('help') || classAndId.includes('i18n') ||
+                        classAndId.includes('locale') || classAndId.includes('translate')) {
+                        el.remove();
+                        return;
                     }
                 });
-                // Ensure login button
-                var headerRight = document.querySelector('.header-right, .user-menu');
+                
+                // Ensure login button exists
+                const headerRight = document.querySelector('.header-right, .user-menu');
                 if (headerRight && !headerRight.querySelector('.login-btn')) {
                     headerRight.innerHTML = '<button class="login-btn" style="padding: 12px 24px; background: #ff6b35; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="window.location.href=\'/login.html\'">Login</button>';
                 }
-            }, 100);
-        });
+            }
+            
+            // Run cleaner immediately and continuously
+            cleanDOM();
+            setInterval(cleanDOM, 50); // Run every 50ms forever
+            
+            // Also run on DOM changes
+            if (window.MutationObserver) {
+                const observer = new MutationObserver(cleanDOM);
+                observer.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    characterData: true
+                });
+            }
+            
+            // Block script loading for language/i18n files
+            const originalScriptSrc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+            Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+                set: function(value) {
+                    if (String(value).includes('i18n') || String(value).includes('language') ||
+                        String(value).includes('lang') || String(value).includes('locale') ||
+                        String(value).includes('translate')) {
+                        console.warn('Blocked script:', value);
+                        return;
+                    }
+                    originalScriptSrc.set.call(this, value);
+                },
+                get: originalScriptSrc.get
+            });
+            
+            // Block fetch/XHR for language files
+            const originalFetch = window.fetch;
+            window.fetch = function(url, ...args) {
+                if (String(url).includes('i18n') || String(url).includes('language') ||
+                    String(url).includes('lang') || String(url).includes('locale') ||
+                    String(url).includes('translate')) {
+                    console.warn('Blocked fetch:', url);
+                    return Promise.reject(new Error('Blocked'));
+                }
+                return originalFetch.call(this, url, ...args);
+            };
+            
+            // Run cleaners on various load events
+            document.addEventListener('DOMContentLoaded', cleanDOM);
+            window.addEventListener('load', cleanDOM);
+            document.addEventListener('readystatechange', cleanDOM);
+            
+            // Override any attempts to restore language functionality
+            Object.defineProperties(window, {
+                'i18n': { value: undefined, writable: false, configurable: false },
+                'I18n': { value: undefined, writable: false, configurable: false },
+                'i18next': { value: undefined, writable: false, configurable: false },
+                'translate': { value: undefined, writable: false, configurable: false },
+                'translator': { value: undefined, writable: false, configurable: false },
+                'languageSelector': { value: undefined, writable: false, configurable: false },
+                'langSelector': { value: undefined, writable: false, configurable: false }
+            });
+            
+            console.log('NUCLEAR DOM INTERCEPTOR ACTIVE - Language/Help elements will be destroyed');
+        })();
         </script>
         
         <!-- Deployment timestamp: 2025-01-16T22:00:00Z - ULTRA SECURE: XSS Protected + CSRF + Rate Limited -->
@@ -56,7 +369,7 @@
         <link rel="stylesheet" href="css/gamification.css?v=1752683265404" />
         <link rel="stylesheet" href="css/microinteractions.css?v=1752683265404" />
         <link rel="stylesheet" href="css/pwa-offline.css?v=1752683265404" />
-        <link rel="stylesheet" href="css/i18n-rtl.css?v=1752683265404" />
+        <!-- REMOVED i18n CSS: <link rel="stylesheet" href="css/i18n-rtl.css?v=1752683265404" /> -->
         <link rel="stylesheet" href="css/sport-icons.css?v=1752683265404" />
         <link rel="stylesheet" href="css/login-styles.css" />
         
@@ -247,9 +560,9 @@
         <script src="js/quick-setup-wizard.js?v=1752683265404"></script>
         <script src="js/leagues.js?v=1752683265404"></script>
         <script src="js/sport-rules.js?v=1752683265404"></script>
-        <!-- Language and i18n services removed - nuclear fix handles UI cleanup -->
-        <!-- <script src="js/i18n-service.js?v=1752683265404"></script> -->
-        <!-- <script src="js/social-feed-i18n-integration.js?v=1752683265404"></script> -->
+        <!-- Language and i18n services PERMANENTLY REMOVED - nuclear fix handles UI cleanup -->
+        <!-- REMOVED: <script src="js/i18n-service.js?v=1752683265404"></script> -->
+        <!-- REMOVED: <script src="js/social-feed-i18n-integration.js?v=1752683265404"></script> -->
         <script src="js/debug-utils.js?v=1752683265404"></script>
         <script src="js/map-debug.js?v=1752683265404"></script>
         <script src="js/map-init-fix.js?v=1752683265404"></script>
@@ -1033,12 +1346,8 @@
         <script src="js/login-component.js?v=1752683265404"></script>
         <script src="js/remove-header-elements.js"></script>
         <script src="js/aggressive-header-cleaner.js"></script>
-        <script src="js/map-cleanup.js?v=1753559800000"></script>
-        <script src="js/maplibre-implementation.js?v=1753559800000"></script>
-        <script src="js/map-init-fix.js"></script>
-        <script src="js/map-force-init.js"></script>
-        <script src="js/map-debug-live.js"></script>
-        <script src="js/map-gray-box-fix.js"></script>
+        <!-- Unified MapLibre Fix - Replaces all other map scripts -->
+        <script src="js/maplibre-unified-fix.js?v=1753708925829"></script>
         <script src="js/sport-icons.js?v=1752683265404"></script>
         
         <!-- PWA Scripts -->
@@ -1058,6 +1367,9 @@
                 });
             }
         </script>
+        
+        <!-- Games Display Fix - Ensures all 11 games from API v2 are shown -->
+        <script src="js/games-display-fix.js?v=1753708925829"></script>
         
         <!-- Emergency Header Fix v3 - Nuclear Option - Deploy: 1753683000 -->
         <script>

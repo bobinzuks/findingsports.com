@@ -1,0 +1,81 @@
+{
+  "sessionId": "session-1753708925833-7a3fok4wc",
+  "checkpointId": "checkpoint-1753708955839-2x1m9n5et",
+  "checkpointName": "auto-save-1753708955838",
+  "timestamp": "2025-07-28T13:22:35.839Z",
+  "data": {
+    "timestamp": "2025-07-28T13:22:35.838Z",
+    "changeCount": 5,
+    "changesByType": {
+      "swarm_created": [
+        {
+          "type": "swarm_created",
+          "data": {
+            "swarmId": "swarm-1753708925829-gwatxnmd4",
+            "swarmName": "hive-1753708925812",
+            "objective": "continue",
+            "workerCount": 8
+          },
+          "timestamp": "2025-07-28T13:22:05.836Z"
+        }
+      ],
+      "agent_activity": [
+        {
+          "type": "agent_activity",
+          "data": {
+            "agentId": "worker-swarm-1753708925829-gwatxnmd4-0",
+            "activity": "spawned",
+            "data": {
+              "type": "researcher",
+              "name": "Researcher Worker 1"
+            }
+          },
+          "timestamp": "2025-07-28T13:22:05.839Z"
+        },
+        {
+          "type": "agent_activity",
+          "data": {
+            "agentId": "worker-swarm-1753708925829-gwatxnmd4-1",
+            "activity": "spawned",
+            "data": {
+              "type": "coder",
+              "name": "Coder Worker 2"
+            }
+          },
+          "timestamp": "2025-07-28T13:22:05.840Z"
+        },
+        {
+          "type": "agent_activity",
+          "data": {
+            "agentId": "worker-swarm-1753708925829-gwatxnmd4-2",
+            "activity": "spawned",
+            "data": {
+              "type": "analyst",
+              "name": "Analyst Worker 3"
+            }
+          },
+          "timestamp": "2025-07-28T13:22:05.840Z"
+        },
+        {
+          "type": "agent_activity",
+          "data": {
+            "agentId": "worker-swarm-1753708925829-gwatxnmd4-3",
+            "activity": "spawned",
+            "data": {
+              "type": "tester",
+              "name": "Tester Worker 4"
+            }
+          },
+          "timestamp": "2025-07-28T13:22:05.841Z"
+        }
+      ]
+    },
+    "statistics": {
+      "tasksProcessed": 0,
+      "tasksCompleted": 0,
+      "memoryUpdates": 0,
+      "agentActivities": 4,
+      "consensusDecisions": 0
+    }
+  }
+}

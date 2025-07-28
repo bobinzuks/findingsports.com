@@ -1,0 +1,25 @@
+{
+  "name": "finding-sports-cross-browser-tests",
+  "version": "1.0.0",
+  "description": "Cross-browser testing suite for Finding Sports nuclear fix verification",
+  "main": "test-runner.js",
+  "scripts": {
+    "test": "node test-runner.js",
+    "test:chrome": "node test-runner.js --browser=chromium",
+    "test:firefox": "node test-runner.js --browser=firefox",
+    "test:safari": "node test-runner.js --browser=webkit",
+    "test:all": "node test-runner.js --all",
+    "install-browsers": "npx playwright install",
+    "report": "node generate-report.js"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.48.2",
+    "playwright": "^1.48.2",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.2.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
