@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Screenshot Capture Tool</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        iframe { width: 100%; height: 800px; border: 2px solid #333; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #results { background: #f0f0f0; padding: 20px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Finding Sports Deep Testing Tool</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Homepage UI Elements</h2>
+        <button onclick="captureHomepage()">Capture Homepage Screenshot</button>
+        <button onclick="checkUIElements()">Check for Removed Elements</button>
+        <div id="test1-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Map Without Login</h2>
+        <button onclick="testMapAccess()">Test Map Access</button>
+        <div id="test2-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Play Now Button</h2>
+        <button onclick="testPlayNow()">Click Play Now & Count Games</button>
+        <div id="test3-results"></div>
+    </div>
+
+    <iframe id="testFrame" src="https://findingsports.com"></iframe>
+
+    <div id="results">
+        <h3>Test Results Log:</h3>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const log = (msg) => {
+            document.getElementById('log').innerHTML += `<p>${new Date().toISOString()}: ${msg}</p>`;
+        };
+
+        function captureHomepage() {
+            log('Capturing homepage screenshot...');
+            // Use browser screenshot API or canvas
+            const frame = document.getElementById('testFrame');
+            log('Homepage loaded: ' + frame.src);
+        }
+
+        function checkUIElements() {
+            log('Checking for removed UI elements...');
+            const frame = document.getElementById('testFrame');
+            try {
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                
+                // Check for language selector
+                const langSelector = doc.querySelector('.language-selector, .fa-globe, [class*="language"]');
+                log('Language selector found: ' + (langSelector ? 'YES - FAIL' : 'NO - PASS'));
+                
+                // Check for online indicator
+                const onlineIndicator = doc.querySelector('.online-indicator, .status-online, [class*="online"]');
+                log('Online indicator found: ' + (onlineIndicator ? 'YES - FAIL' : 'NO - PASS'));
+                
+                // Check for help button
+                const helpButton = doc.querySelector('.help-btn, .fa-question, [class*="help"]');
+                log('Help button found: ' + (helpButton ? 'YES - FAIL' : 'NO - PASS'));
+                
+            } catch(e) {
+                log('Cross-origin error - need to test differently: ' + e.message);
+            }
+        }
+
+        function testMapAccess() {
+            log('Testing map access without login...');
+            // Check if map loads
+        }
+
+        function testPlayNow() {
+            log('Testing Play Now button...');
+            // Click and count games
+        }
+    </script>
+</body>
+</html>

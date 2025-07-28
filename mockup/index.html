@@ -906,9 +906,11 @@
         <!-- Map Scripts -->
         <script src="js/login-component.js?v=1752683265404"></script>
         <script src="js/remove-header-elements.js"></script>
+        <script src="js/aggressive-header-cleaner.js"></script>
         <script src="js/map-cleanup.js?v=1753559800000"></script>
         <script src="js/maplibre-implementation.js?v=1753559800000"></script>
         <script src="js/map-init-fix.js"></script>
+        <script src="js/map-force-init.js"></script>
         <script src="js/sport-icons.js?v=1752683265404"></script>
         
         <!-- PWA Scripts -->
@@ -929,7 +931,7 @@
             }
         </script>
         
-        <!-- Emergency Header Fix - Remove Online, Language selector, Help -->
+        <!-- Emergency Header Fix v3 - Nuclear Option - Deploy: 1753683000 -->
         <script>
         (function() {
             'use strict';
@@ -937,9 +939,16 @@
             function removeHeaderElements() {
                 // Find and remove Online indicator, Help button, Language selector
                 document.querySelectorAll('*').forEach(el => {
-                    const text = el.textContent.trim();
+                    // Skip if it's a script or style tag
+                    if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+                    
+                    const text = (el.textContent || '').trim();
+                    const innerText = (el.innerText || '').trim();
+                    
+                    // Remove if contains any banned text
                     if (text === 'Online' || text.includes('🌐') || text === '?' || text === 'Help' || 
-                        text.includes('English') || el.classList.contains('help-btn')) {
+                        text.includes('English') || innerText === 'Online' || innerText === 'Help' ||
+                        el.classList.contains('help-btn') || el.classList.contains('online-indicator')) {
                         if (el.parentElement && (el.parentElement.classList.contains('header-right') || 
                             el.parentElement.tagName === 'HEADER')) {
                             el.remove();
