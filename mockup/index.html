@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="deployment-version" content="2025-01-16-ultra-secure-social-feed" />
-        <meta name="railway-deployment" content="ultra-secure-social-auth-integrated" />
+        <meta name="deployment-version" content="2025-01-27-nuclear-fixes-complete" />
+        <meta name="railway-deployment" content="nuclear-dom-cleanup-force-deployed" />
         <title>Finding Sports - Find Sports Near You</title>
         
         <!-- ULTIMATE NUCLEAR FIX - Load FIRST before anything else -->
-        <script src="js/ultimate-nuclear-fix.js"></script>
+        <script src="js/enhanced-nuclear-fix.js"></script>
         
         <!-- INLINE NUCLEAR FIX - Runs immediately -->
         <script>
@@ -925,6 +925,46 @@
                     console.error('Failed to initialize main map:', err);
                 });
             }
+            
+            // Load games on page load since "Upcoming Games" tab is active by default
+            console.log('Loading games on page initialization...');
+            fetch('/api/games')
+                .then(r => r.json())
+                .then(data => {
+                    const games = data.games || [];
+                    const gamesList = document.getElementById('gamesList');
+                    console.log('Games loaded:', games.length);
+                    
+                    if (gamesList) {
+                        if (games.length === 0) {
+                            gamesList.innerHTML = `
+                                <div style="text-align: center; padding: 3rem; color: #666;">
+                                    <p style="font-size: 1.2em;">No games found near Vancouver</p>
+                                    <p style="margin-top: 1rem;">Be the first to submit a game!</p>
+                                    <a href="/submit-game.html" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem; background: #ff6b35; color: white; text-decoration: none; border-radius: 8px;">Submit a Game</a>
+                                </div>
+                            `;
+                        } else {
+                            gamesList.innerHTML = games.map(g => `
+                                <div style="background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <h3 style="color: #ff6b35; margin: 0 0 0.5rem 0;">${g.sport || 'Sport'}</h3>
+                                    <p style="margin: 0.5rem 0;">📍 ${g.venue || 'Location TBD'}</p>
+                                    <p style="margin: 0.5rem 0;">🕐 ${g.time || 'Time TBD'}</p>
+                                    ${g.players ? `<p style="margin: 0.5rem 0;">👥 ${g.players} players</p>` : ''}
+                                    ${g.skillLevel ? `<p style="margin: 0.5rem 0;">🎯 ${g.skillLevel}</p>` : ''}
+                                    <button onclick="joinGame('${g.id || Math.random()}')" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Join Game</button>
+                                </div>
+                            `).join('');
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load games on initialization:', err);
+                    const gamesList = document.getElementById('gamesList');
+                    if (gamesList) {
+                        gamesList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Error loading games. Please try refreshing the page.</div>';
+                    }
+                });
         });
         </script>
         
@@ -939,6 +979,8 @@
         <script src="js/maplibre-implementation.js?v=1753559800000"></script>
         <script src="js/map-init-fix.js"></script>
         <script src="js/map-force-init.js"></script>
+        <script src="js/map-debug-live.js"></script>
+        <script src="js/map-gray-box-fix.js"></script>
         <script src="js/sport-icons.js?v=1752683265404"></script>
         
         <!-- PWA Scripts -->

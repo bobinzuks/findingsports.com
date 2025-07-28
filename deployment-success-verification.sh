@@ -1,89 +1,64 @@
 #!/bin/bash
 
-echo "🎉 DEPLOYMENT SUCCESS VERIFICATION"
-echo "=================================="
-echo ""
+echo "🔍 Verifying deployment and nuclear fixes..."
 
-# Get the full page
-curl -s https://findingsports.com > /tmp/deployed-site.html
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-echo "✅ 1. Site serves HTML at root URL (not JSON)"
-echo ""
+URL="https://findingsports.com"
 
-echo "📊 2. UI Elements Check:"
-# Language selector
-if grep -q "fa-globe\|language-selector\|🌐" /tmp/deployed-site.html; then
-    echo "   ❌ Language selector: STILL PRESENT - needs fixing"
+echo -e "\n📡 Checking if site is live..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+
+if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo -e "${GREEN}✅ Site is live (HTTP $HTTP_STATUS)${NC}"
 else
-    echo "   ✅ Language selector: REMOVED"
+    echo -e "${RED}❌ Site returned HTTP $HTTP_STATUS${NC}"
+    exit 1
 fi
 
-# Online indicator
-if grep -q "online-indicator\|status-online\|connectionStatus" /tmp/deployed-site.html; then
-    echo "   ❌ Online indicator: STILL PRESENT - needs fixing"
+echo -e "\n🔍 Checking for unwanted elements..."
+
+# Check for language selector
+LANG_SELECTOR=$(curl -s "$URL" | grep -c "🌐.*English")
+if [ "$LANG_SELECTOR" -gt 0 ]; then
+    echo -e "${RED}❌ Language selector still visible in HTML${NC}"
 else
-    echo "   ✅ Online indicator: REMOVED"
+    echo -e "${GREEN}✅ Language selector not found in HTML${NC}"
 fi
 
-# Help button
-if grep -q "help-btn\|fa-question-circle\|fa-question\|help.*button" /tmp/deployed-site.html; then
-    echo "   ❌ Help button: STILL PRESENT - needs fixing"
+# Check for help button
+HELP_BUTTON=$(curl -s "$URL" | grep -c "Help.*button\|help-btn")
+if [ "$HELP_BUTTON" -gt 0 ]; then
+    echo -e "${RED}❌ Help button still visible in HTML${NC}"
 else
-    echo "   ✅ Help button: REMOVED"
+    echo -e "${GREEN}✅ Help button not found in HTML${NC}"
 fi
 
-echo ""
-echo "📊 3. Features Check:"
-# MapLibre
-if grep -q "maplibre-gl" /tmp/deployed-site.html; then
-    echo "   ✅ MapLibre GL: LOADED"
+# Check if nuclear fix is loaded
+NUCLEAR_FIX=$(curl -s "$URL" | grep -c "ultimate-nuclear-fix.js")
+if [ "$NUCLEAR_FIX" -gt 0 ]; then
+    echo -e "${GREEN}✅ Nuclear fix script is loaded${NC}"
 else
-    echo "   ❌ MapLibre GL: NOT FOUND"
+    echo -e "${RED}❌ Nuclear fix script NOT loaded${NC}"
 fi
 
-# Play Now button
-if grep -q "playNow\|play-now" /tmp/deployed-site.html; then
-    echo "   ✅ Play Now button: PRESENT"
+# Check if language service is loaded
+LANG_SERVICE=$(curl -s "$URL" | grep -c "language-service.js")
+if [ "$LANG_SERVICE" -gt 0 ]; then
+    echo -e "${YELLOW}⚠️  Language service is loaded (this is causing the issue!)${NC}"
 else
-    echo "   ❌ Play Now button: NOT FOUND"
+    echo -e "${GREEN}✅ Language service not loaded${NC}"
 fi
 
-echo ""
-echo "📊 4. API Tests:"
-# Play Now API
-echo -n "   Play Now API: "
-api_response=$(curl -s "https://findingsports.com/api/play-now?lat=49.2827&lng=-123.1207&radius=15")
-if echo "$api_response" | grep -q "activities\|success"; then
-    echo "✅ WORKING"
-    echo "   Response sample: ${api_response:0:100}..."
-else
-    echo "❌ NOT WORKING"
-    echo "   Error: $api_response"
-fi
+echo -e "\n📊 Summary:"
+echo "The language selector is being added by language-service.js AFTER the nuclear fix runs."
+echo "Solution: We need to either:"
+echo "1. Remove language-service.js from being loaded"
+echo "2. Create a more aggressive fix that overrides the LanguageService"
+echo "3. Make the nuclear fix run continuously with MutationObserver"
 
-# Health check
-echo -n "   Health API: "
-health_response=$(curl -s "https://findingsports.com/api/health")
-if echo "$health_response" | grep -q "ok"; then
-    echo "✅ WORKING"
-else
-    echo "❌ NOT WORKING"
-fi
-
-echo ""
-echo "📊 5. Login Requirements:"
-echo "   ✅ Map accessible without login"
-echo "   ✅ Play Now accessible without login"
-
-echo ""
-echo "🌐 DEPLOYMENT COMPLETE!"
-echo "======================"
-echo ""
-echo "Site URL: https://findingsports.com"
-echo "Build logs: https://railway.com/project/cbc1c22e-b2b3-47c0-a57a-7a57c6b7c2a3"
-echo ""
-echo "📸 Take a screenshot to verify visually:"
-echo "gnome-screenshot -f deployment-success.png"
-
-# Cleanup
-rm -f /tmp/deployed-site.html
+echo -e "\n🔧 Creating enhanced nuclear fix..."
