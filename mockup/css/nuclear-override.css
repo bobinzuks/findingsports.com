@@ -1,0 +1,109 @@
+/* NUCLEAR CSS OVERRIDE - Hide unwanted elements by force */
+
+/* Hide anything that looks like a language selector */
+*:has-text("English"),
+*:has-text("🌐"),
+[class*="language"],
+[class*="lang"],
+[id*="language"],
+[id*="lang"],
+.globe-icon,
+.language-selector,
+.lang-selector {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Hide help elements */
+*:has-text("Help"),
+*:has-text("?"),
+[class*="help"],
+[id*="help"],
+.help-btn,
+.help-button,
+.question-mark {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Hide online indicators */
+*:has-text("Online"),
+[class*="online"],
+[class*="status"],
+[id*="online"],
+.online-indicator,
+.status-indicator,
+.online-status {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Force login button to be visible */
+.login-btn {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 12px 24px !important;
+    background: #ff6b35 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+}
+
+/* Fix map container */
+#map,
+.map-container {
+    display: block !important;
+    width: 100% !important;
+    height: 500px !important;
+    min-height: 500px !important;
+    background-color: #f0f0f0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Hide any element containing exact text */
+*:contains("🌐 English ▼"),
+*:contains("? Help") {
+    display: none !important;
+}
+
+/* Nuclear option for header-right */
+.header-right > *:not(.login-btn),
+.user-menu > *:not(.login-btn) {
+    display: none !important;
+}
+
+/* Ensure header-right is visible */
+.header-right,
+.user-menu {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
