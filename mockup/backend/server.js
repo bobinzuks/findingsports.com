@@ -837,7 +837,16 @@ app.get('/api/location/search/:searchId', (req, res) => {
 
 // Catch all handler - serve index.html for client-side routing
 // This MUST be after all API routes but before error handler
+// IMPORTANT: Don't serve HTML for static file requests!
 app.get('*', (req, res) => {
+  // Check if this is a request for a static file
+  const ext = path.extname(req.path);
+  if (ext && ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.json', '.woff', '.woff2', '.ttf'].includes(ext)) {
+    // Let the static middleware handle it, or return 404
+    return res.status(404).send('File not found');
+  }
+  
+  // For all other routes, serve the index.html
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
@@ -854,4 +863,4 @@ server.listen(PORT, '0.0.0.0', () => {
   });
 });
 
-// Deployment forced at 2025-07-27T02:37:39.054Z
+// Deployment forced at 2025-08-01T22:52:00.000Z - Fixed catch-all route
