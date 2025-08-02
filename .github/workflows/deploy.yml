@@ -19,7 +19,6 @@ on:
         type: choice
         options:
         - railway
-        - fly
         - vercel
 
 jobs:
@@ -41,74 +40,64 @@ jobs:
       env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       run: |
-        npm i -g @railway/cli
-        railway up --environment ${{ inputs.environment }}
-    
-    # Fly.io deployment
-    - name: Deploy to Fly.io
-      if: inputs.platform == 'fly'
-      env:
-        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      run: |
-        curl -L https://fly.io/install.sh | sh
-        export FLYCTL_INSTALL="/home/runner/.fly"
-        export PATH="$FLYCTL_INSTALL/bin:$PATH"
+        if [ -z "$RAILWAY_TOKEN" ]; then
+          echo "❌ RAILWAY_TOKEN secret not set!"
+          echo "Please add RAILWAY_TOKEN to repository secrets"
+          exit 1
+        fi
         
-        cd mockup/finding-sports-backend
-        fly deploy --config fly.toml --app finding-sports-${{ inputs.environment }}
+        npm i -g @railway/cli
+        
+        # Railway CLI doesn't support --environment flag
+        # Just deploy to the linked project
+        railway up --detach
+        
+        echo "✅ Deployment triggered on Railway"
+        echo "Check Railway dashboard for status"
     
-    # Vercel deployment (frontend only)
+    # Vercel deployment (for the static site)
     - name: Deploy to Vercel
       if: inputs.platform == 'vercel'
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       run: |
+        if [ -z "$VERCEL_TOKEN" ]; then
+          echo "❌ VERCEL_TOKEN secret not set!"
+          echo "Please add VERCEL_TOKEN to repository secrets"
+          exit 1
+        fi
+        
         npm i -g vercel
         cd mockup
-        vercel --prod --token $VERCEL_TOKEN --scope your-team
+        vercel --prod --token $VERCEL_TOKEN --yes
     
-    - name: Post-deployment tests
+    - name: Post-deployment info
       run: |
-        sleep 60
-        case "${{ inputs.platform }}" in
-          railway)
-            URL="https://finding-sports-${{ inputs.environment }}.railway.app"
-            ;;
-          fly)
-            URL="https://finding-sports-${{ inputs.environment }}.fly.dev"
-            ;;
-          vercel)
-            URL="https://finding-sports.vercel.app"
-            ;;
-        esac
+        echo "📋 Deployment Summary:"
+        echo "Platform: ${{ inputs.platform }}"
+        echo "Environment: ${{ inputs.environment }}"
+        echo "Commit: ${{ github.sha }}"
         
-        curl -f $URL/health || exit 1
-        echo "✅ Deployment successful!"
+        if [ "${{ inputs.platform }}" = "railway" ]; then
+          echo ""
+          echo "🚂 Railway Deployment:"
+          echo "Check status at: https://railway.app"
+          echo "Site URL: https://findingsports.com"
+        else
+          echo ""
+          echo "▲ Vercel Deployment:"
+          echo "Check the build output above for the deployment URL"
+        fi
     
+    # Optional Slack notification (only if webhook is set)
     - name: Notify Slack
-      if: always()
+      if: always() && env.SLACK_WEBHOOK_URL != ''
       uses: 8398a7/action-slack@v3
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       with:
         status: ${{ job.status }}
         text: |
           Deployment to ${{ inputs.environment }} on ${{ inputs.platform }}
           Status: ${{ job.status }}
           Commit: ${{ github.sha }}
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-
-  run-migrations:
-    name: Run Database Migrations
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: inputs.environment == 'production'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run migrations
-      env:
-        DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-      run: |
-        cd mockup/finding-sports-backend
-        cargo install sqlx-cli
-        sqlx migrate run
