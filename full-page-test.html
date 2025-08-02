@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Full Page Test</title>
+</head>
+<body>
+    <h1>Testing Finding Sports Page Content</h1>
+    <button onclick="testPage()">Test Finding Sports Now</button>
+    
+    <div id="results" style="margin: 20px; padding: 20px; border: 1px solid #ccc;">
+        <h2>Results will appear here...</h2>
+    </div>
+
+    <script>
+    async function testPage() {
+        const results = document.getElementById('results');
+        results.innerHTML = '<h2>Testing...</h2>';
+        
+        try {
+            // Fetch the page
+            const response = await fetch('https://findingsports.com/', {
+                cache: 'no-cache',
+                mode: 'cors'
+            });
+            
+            const html = await response.text();
+            
+            // Parse and analyze
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Check what's in the page
+            const bodyText = doc.body.innerText || '';
+            const hasContent = bodyText.length > 100;
+            const hasHeader = html.includes('<header');
+            const hasMap = html.includes('id="map"');
+            const hasNuclearFix = html.includes('nuclear-fix-v6');
+            const hasIncognitoFix = html.includes('incognito-fix');
+            
+            // Check for language selector
+            const hasLanguageSelector = html.includes('🌐 English');
+            const hasHelpButton = html.includes('? Help');
+            
+            // Display results
+            let resultHTML = '<h2>Page Analysis:</h2>';
+            resultHTML += '<table border="1" cellpadding="5">';
+            resultHTML += `<tr><td>Page has content:</td><td>${hasContent ? '✅ Yes' : '❌ No'}</td></tr>`;
+            resultHTML += `<tr><td>Body text length:</td><td>${bodyText.length} characters</td></tr>`;
+            resultHTML += `<tr><td>Has header:</td><td>${hasHeader ? '✅ Yes' : '❌ No'}</td></tr>`;
+            resultHTML += `<tr><td>Has map:</td><td>${hasMap ? '✅ Yes' : '❌ No'}</td></tr>`;
+            resultHTML += `<tr><td>Nuclear Fix loaded:</td><td>${hasNuclearFix ? '✅ Yes' : '❌ No'}</td></tr>`;
+            resultHTML += `<tr><td>Incognito Fix loaded:</td><td>${hasIncognitoFix ? '✅ Yes' : '❌ No'}</td></tr>`;
+            resultHTML += `<tr><td>Language selector:</td><td>${hasLanguageSelector ? '❌ Still visible' : '✅ Removed'}</td></tr>`;
+            resultHTML += `<tr><td>Help button:</td><td>${hasHelpButton ? '❌ Still visible' : '✅ Removed'}</td></tr>`;
+            resultHTML += '</table>';
+            
+            // Show first 500 chars of body content
+            resultHTML += '<h3>Body Content Preview:</h3>';
+            resultHTML += '<pre style="background: #f0f0f0; padding: 10px; overflow: auto;">';
+            resultHTML += bodyText.substring(0, 500).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            resultHTML += '...</pre>';
+            
+            // Test JavaScript files
+            resultHTML += '<h3>JavaScript File Tests:</h3>';
+            
+            const jsTests = [
+                'https://findingsports.com/js/ultimate-nuclear-fix-v6.js',
+                'https://findingsports.com/js/incognito-fix.js'
+            ];
+            
+            for (const jsUrl of jsTests) {
+                try {
+                    const jsResponse = await fetch(jsUrl, { cache: 'no-cache' });
+                    const jsText = await jsResponse.text();
+                    const isJS = jsText.includes('function') || jsText.includes('var ');
+                    const isHTML = jsText.includes('<!doctype');
+                    
+                    resultHTML += `<p>${jsUrl.split('/').pop()}: `;
+                    if (isHTML) {
+                        resultHTML += '❌ Returns HTML instead of JavaScript</p>';
+                    } else if (isJS) {
+                        resultHTML += '✅ Returns JavaScript correctly</p>';
+                    } else {
+                        resultHTML += '❓ Unknown content type</p>';
+                    }
+                } catch (e) {
+                    resultHTML += `<p>${jsUrl}: ❌ Error: ${e.message}</p>`;
+                }
+            }
+            
+            results.innerHTML = resultHTML;
+            
+        } catch (error) {
+            results.innerHTML = `<h2>Error:</h2><p style="color: red;">${error.message}</p>`;
+        }
+    }
+    </script>
+</body>
+</html>
