@@ -3,7 +3,7 @@ FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
-# Force rebuild 1738359600002
+# Force rebuild 1738359600005 - WHITE SCREEN FIX
 
 # Copy package files
 COPY mockup/backend/package*.json ./mockup/backend/
