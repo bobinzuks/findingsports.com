@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finding Sports - Browser Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test { margin: 20px 0; padding: 20px; border: 2px solid #ddd; }
+        .pass { background: #d4edda; border-color: #28a745; }
+        .fail { background: #f8d7da; border-color: #dc3545; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Finding Sports Browser Test</h1>
+    
+    <div class="test">
+        <h2>Manual Test Instructions:</h2>
+        <ol>
+            <li><strong>Clear Cache:</strong> Press Ctrl+Shift+Delete, select "All time", clear everything</li>
+            <li><strong>Test Regular Mode:</strong> 
+                <button onclick="window.open('https://findingsports.com', '_blank')">Open in Regular Mode</button>
+            </li>
+            <li><strong>Test Incognito Mode:</strong> Right-click the button above → "Open in Incognito Window"</li>
+        </ol>
+    </div>
+    
+    <div class="test">
+        <h2>Expected Results:</h2>
+        <ul>
+            <li>✅ Page loads with content (not white/blank)</li>
+            <li>✅ NO language selector (🌐 English ▼)</li>
+            <li>✅ NO help button (? Help)</li>
+            <li>✅ Login button visible</li>
+            <li>✅ Map or content area visible</li>
+        </ul>
+    </div>
+    
+    <div class="test">
+        <h2>Automated Test:</h2>
+        <button onclick="runTest()">Run Automated Check</button>
+        <div id="results"></div>
+    </div>
+    
+    <script>
+    async function runTest() {
+        const results = document.getElementById('results');
+        results.innerHTML = '<p>Testing...</p>';
+        
+        try {
+            const response = await fetch('https://findingsports.com', { mode: 'no-cors' });
+            results.innerHTML = '<p style="color: green;">✅ Site is reachable</p>';
+            results.innerHTML += '<p>Note: Full test requires manual verification due to CORS</p>';
+        } catch (e) {
+            results.innerHTML = '<p style="color: red;">❌ Error: ' + e.message + '</p>';
+        }
+    }
+    </script>
+</body>
+</html>
