@@ -29,9 +29,9 @@
             '.help-btn', '.help-button',
             '.help-menu', '.help-link',
             '.help-icon', '.help-toggle',
-            'button:has-text("?")',
-            'button:has-text("Help")',
-            'a:has-text("Help")',
+            'button[title*="?"]',
+            'button[title*="Help"]',
+            'a[title*="Help"]',
             '[aria-label*="help" i]',
             '[title*="help" i]',
             
@@ -39,9 +39,9 @@
             '.online-indicator', '.online-status',
             '.connection-status', '.status-indicator',
             '.user-status', '.status-badge',
-            'span:has-text("Online")',
-            'div:has-text("Online")',
-            '[class*="status"]:has-text("Online")',
+            'span[title*="Online"]',
+            'div[title*="Online"]',
+            '[class*="status"][title*="Online"]',
             
             // Data attributes
             '[data-language]', '[data-lang]',
@@ -75,20 +75,15 @@
                             console.log('Destroyed by XPath:', selector);
                         }
                     }
-                } else if (selector.includes(':has-text(')) {
-                    // Custom text matcher
-                    const textMatch = selector.match(/:has-text\("([^"]+)"\)/);
-                    if (textMatch) {
-                        const searchText = textMatch[1];
-                        const baseSelector = selector.split(':has-text')[0];
-                        const elements = document.querySelectorAll(baseSelector || '*');
-                        elements.forEach(elem => {
-                            if (elem.textContent && elem.textContent.includes(searchText)) {
-                                elem.remove();
-                                console.log('Destroyed by text match:', searchText);
-                            }
-                        });
-                    }
+                } else if (selector.includes('[title*=')) {
+                    // Handle title attribute selectors
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(elem => {
+                        if (elem && elem.parentNode) {
+                            elem.remove();
+                            console.log('Destroyed by title attribute:', selector);
+                        }
+                    });
                 } else {
                     // Regular CSS selector
                     document.querySelectorAll(selector).forEach(elem => {

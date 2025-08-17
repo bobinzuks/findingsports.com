@@ -1,8 +1,6 @@
 /* NUCLEAR CSS OVERRIDE - Hide unwanted elements by force */
 
 /* Hide anything that looks like a language selector */
-*:has-text("English"),
-*:has-text("🌐"),
 [class*="language"],
 [class*="lang"],
 [id*="language"],
@@ -21,8 +19,6 @@
 }
 
 /* Hide help elements */
-*:has-text("Help"),
-*:has-text("?"),
 [class*="help"],
 [id*="help"],
 .help-btn,
@@ -39,9 +35,8 @@
 }
 
 /* Hide online indicators */
-*:has-text("Online"),
-[class*="online"],
-[class*="status"],
+[class*="online"]:not(.online-user):not(.online-users-list),
+[class*="status"]:not(.status-indicator),
 [id*="online"],
 .online-indicator,
 .status-indicator,
@@ -88,9 +83,11 @@
     overflow: hidden !important;
 }
 
-/* Hide any element containing exact text */
-*:contains("🌐 English ▼"),
-*:contains("? Help") {
+/* Hide any element containing exact text - using attribute selectors instead */
+[title*="English"],
+[title*="Help"],
+[aria-label*="English"],
+[aria-label*="Help"] {
     display: none !important;
 }
 

@@ -68,13 +68,13 @@
             .online-status,
             .connection-status,
             .status-indicator,
-            *:has-text("🌐"),
-            *:has-text("Help"),
-            *:has-text("?"),
-            *:has-text("English"),
-            *:has-text("Language"),
-            *:has-text("Online"),
-            *:has-text("Status"),
+            [title*="🌐"],
+            [title*="Help"],
+            [title*="?"],
+            [title*="English"],
+            [title*="Language"],
+            [title*="Online"],
+            [title*="Status"],
             [onclick*="language"],
             [onclick*="lang"],
             [onclick*="locale"],
@@ -371,8 +371,7 @@
         <!-- Deployment timestamp: 2025-01-16T22:00:00Z - ULTRA SECURE: XSS Protected + CSRF + Rate Limited -->
         
         <!-- NUCLEAR CSS OVERRIDE - Force hide unwanted elements -->
-        <!-- Disabled: Contains invalid :has-text() selectors causing CSS parsing errors
-        <link rel="stylesheet" href="css/nuclear-override.css" /> -->
+        <link rel="stylesheet" href="css/nuclear-override.css" />
         
         <link rel="stylesheet" href="css/styles.css?v=1753777900000" />
         <link rel="stylesheet" href="css/background-enhancement.css?v=1753777900000" />
@@ -413,6 +412,8 @@
             href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
         />
+        <!-- FontAwesome for login component icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <!-- MapLibre GL JS -->
         <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet" />
         <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
@@ -556,6 +557,8 @@
         -->
         <script src="js/drop-in-games.js?v=1753777900000"></script>
         <script src="js/social-feed.js?v=1753777900000"></script>
+        <script src="js/social-feed-fix.js?v=1753777900000"></script>
+        <script src="js/social-feed-debug.js?v=1753777900000"></script>
         <script src="js/gamification.js?v=1753777900000"></script>
         <script src="js/microinteractions.js?v=1753777900000"></script>
         <script src="js/mobile-microinteractions.js?v=1753777900000"></script>
@@ -1294,8 +1297,20 @@
             checkDeployment();
         }, 1000);
         
+        // Ensure LoginManager is available
+        function ensureLoginManager() {
+            if (!window.loginManager && window.LoginManager) {
+                console.log('Initializing LoginManager fallback...');
+                window.loginManager = new LoginManager();
+            }
+        }
+        
         // Initialize main map when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure LoginManager is initialized
+            ensureLoginManager();
+            setTimeout(ensureLoginManager, 100);
+            setTimeout(ensureLoginManager, 500);
             // Initialize the main map
             if (window.initializeMapLibre) {
                 window.initializeMapLibre('map').then(() => {
@@ -1429,16 +1444,28 @@
                 // Find header-right and ensure it has login button
                 const headerRight = document.querySelector('.header-right');
                 if (headerRight && !headerRight.querySelector('.login-btn')) {
-                    headerRight.innerHTML = '<button class="login-btn" style="padding: 8px 16px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="window.location.href=\'/login.html\'">Login</button>';
+                    // Only add fallback if loginManager is not available
+                    if (window.loginManager) {
+                        // Let LoginManager handle the proper button creation
+                        window.loginManager.createLoginUI();
+                    } else {
+                        // Fallback button that calls the modal function when available
+                        headerRight.innerHTML = '<button class="login-btn" style="padding: 8px 16px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="window.loginManager ? loginManager.showLoginModal() : window.location.href=\'/login.html\'">Login</button>';
+                    }
                 }
             }
             
-            // Run multiple times to catch dynamic content
+            // Run multiple times to catch dynamic content, but respect LoginManager
             removeHeaderElements();
             setTimeout(removeHeaderElements, 100);
             setTimeout(removeHeaderElements, 500);
-            setTimeout(removeHeaderElements, 1000);
-            setTimeout(removeHeaderElements, 2000);
+            // Wait longer for LoginManager to initialize before final cleanup
+            setTimeout(() => {
+                // Final check - only run if LoginManager hasn't created proper buttons
+                if (!document.querySelector('.auth-section')) {
+                    removeHeaderElements();
+                }
+            }, 2000);
         })();
         
         // Fix map rendering
