@@ -290,6 +290,103 @@ app.use('/api/version', require('./routes/version-check'));
 
 // Moderation endpoints
 app.use('/api', require('./routes/moderation'));
+
+// Admin endpoints - create test users
+app.post('/api/admin/create-test-users', async (req, res) => {
+    try {
+        const testUsers = [
+            {
+                email: 'admin@findingsports.com',
+                password: 'admin123',
+                name: 'Admin User',
+                username: 'admin',
+                role: 'admin',
+                permissions: {
+                    manageUsers: true,
+                    manageContent: true,
+                    manageSystem: true
+                }
+            },
+            {
+                email: 'moderator@findingsports.com',
+                password: 'moderator123',
+                name: 'Moderator User',
+                username: 'moderator',
+                role: 'moderator',
+                permissions: {
+                    moderateContent: true,
+                    manageReports: true
+                }
+            },
+            {
+                email: 'test@findingsports.com',
+                password: 'test123',
+                name: 'Test User',
+                username: 'testuser',
+                role: 'user',
+                permissions: {}
+            }
+        ];
+
+        const createdUsers = [];
+        for (const userData of testUsers) {
+            // Check if user already exists
+            let userExists = false;
+            for (const [id, u] of users) {
+                if (u.email === userData.email) {
+                    userExists = true;
+                    createdUsers.push({ email: userData.email, status: 'already exists' });
+                    break;
+                }
+            }
+
+            if (!userExists) {
+                // Hash password
+                const passwordHash = await bcrypt.hash(userData.password, 10);
+                
+                // Create user
+                const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const user = {
+                    id: userId,
+                    email: userData.email,
+                    username: userData.username,
+                    name: userData.name,
+                    passwordHash,
+                    provider: 'local',
+                    role: userData.role,
+                    permissions: userData.permissions,
+                    bannedUntil: null,
+                    banReason: null,
+                    warningCount: 0,
+                    createdAt: new Date().toISOString(),
+                    onboarded: true,
+                    preferences: {}
+                };
+
+                users.set(userId, user);
+                createdUsers.push({ 
+                    email: userData.email, 
+                    status: 'created',
+                    role: userData.role
+                });
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Test users processed',
+            users: createdUsers,
+            credentials: testUsers.map(u => ({
+                email: u.email,
+                password: u.password,
+                role: u.role
+            }))
+        });
+    } catch (error) {
+        console.error('Error creating test users:', error);
+        res.status(500).json({ error: 'Failed to create test users' });
+    }
+});
 // Gamification endpoints - DISABLED (requires database)
 // app.use('/api/gamification', require('./routes/gamification'));
 // Community and reputation endpoints

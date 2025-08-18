@@ -336,25 +336,30 @@ class LoginManager {
             submitBtn.textContent = 'Signing in...';
             submitBtn.disabled = true;
 
-            // Simulate API call for demo
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Call actual API endpoint
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
             
-            // For demo purposes, create mock user data
-            const mockUser = {
-                id: 1,
-                name: 'Demo User',
-                email: email,
-                avatar: null
-            };
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Login failed');
+            }
             
-            const mockToken = 'demo_token_' + Date.now();
+            const user = data.user;
+            const token = data.token;
 
             // Store auth data
-            localStorage.setItem('authToken', mockToken);
-            localStorage.setItem('userData', JSON.stringify(mockUser));
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('userData', JSON.stringify(user));
             
-            this.token = mockToken;
-            this.currentUser = mockUser;
+            this.token = token;
+            this.currentUser = user;
             this.isLoggedIn = true;
 
             // Update UI
@@ -416,11 +421,11 @@ class LoginManager {
             const mockToken = 'demo_token_' + Date.now();
 
             // Store auth data
-            localStorage.setItem('authToken', mockToken);
-            localStorage.setItem('userData', JSON.stringify(mockUser));
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('userData', JSON.stringify(user));
             
-            this.token = mockToken;
-            this.currentUser = mockUser;
+            this.token = token;
+            this.currentUser = user;
             this.isLoggedIn = true;
 
             // Update UI
@@ -447,8 +452,28 @@ class LoginManager {
 
     async loginWithGoogle() {
         try {
-            // Implement Google OAuth
-            this.showNotification('Google login coming soon!', 'info');
+            // Remove any existing loading animations first
+            const loadingElements = document.querySelectorAll('.onboarding-highlight');
+            loadingElements.forEach(el => el.classList.remove('onboarding-highlight'));
+            
+            // Check if Google Sign-In is available
+            if (window.google && window.google.accounts) {
+                // Trigger Google Sign-In
+                window.google.accounts.id.prompt();
+            } else {
+                // Load Google Sign-In script
+                const script = document.createElement('script');
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.async = true;
+                script.onload = () => {
+                    window.google.accounts.id.initialize({
+                        client_id: '386932037035-k8v833noqjk7m4t641js92fvjmm5ri71.apps.googleusercontent.com',
+                        callback: this.handleGoogleResponse.bind(this)
+                    });
+                    window.google.accounts.id.prompt();
+                };
+                document.head.appendChild(script);
+            }
         } catch (error) {
             this.showNotification('Google login failed', 'error');
         }
@@ -572,12 +597,58 @@ class LoginManager {
             }
         });
     }
+    
+    async handleGoogleResponse(response) {
+        try {
+            // Call backend to verify Google token
+            const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ credential: response.credential })
+            });
+
+            const data = await res.json();
+            
+            if (data.success) {
+                // Store auth data
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                
+                this.token = data.token;
+                this.currentUser = data.user;
+                this.isLoggedIn = true;
+                
+                // Update UI
+                this.createLoginUI();
+                
+                // Close modal if open
+                const modal = document.querySelector('.login-modal-overlay');
+                if (modal) modal.remove();
+                
+                this.showNotification('Successfully signed in with Google!', 'success');
+            } else {
+                this.showNotification(data.error || 'Google login failed', 'error');
+            }
+        } catch (error) {
+            console.error('Google login error:', error);
+            this.showNotification('Google login failed', 'error');
+        }
+    }
 }
 
 // Initialize login manager when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.loginManager = new LoginManager();
+        console.log('LoginManager initialized on DOMContentLoaded');
+    });
+} else {
+    // DOM is already loaded, initialize immediately
     window.loginManager = new LoginManager();
-});
+    console.log('LoginManager initialized immediately (DOM already loaded)');
+}
 
 // Export for global access
 window.LoginManager = LoginManager;

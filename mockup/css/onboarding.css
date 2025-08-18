@@ -163,7 +163,7 @@
   position: relative;
   z-index: 9997;
   box-shadow: 0 0 0 3px #ff6b35, 0 0 20px rgba(255, 107, 53, 0.5);
-  animation: pulse 2s infinite;
+  /* animation: pulse 2s infinite; -- Disabled to prevent stuck loading animation */
 }
 
 /* Welcome Screen */
