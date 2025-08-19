@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Finding Sports</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+                <span class="user-role">Administrator</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#users" class="nav-item active">
+                    <i class="fas fa-users"></i> User Management
+                </a>
+                <a href="#moderators" class="nav-item">
+                    <i class="fas fa-user-shield"></i> Moderators
+                </a>
+                <a href="#games" class="nav-item">
+                    <i class="fas fa-gamepad"></i> Games
+                </a>
+                <a href="#reports" class="nav-item">
+                    <i class="fas fa-flag"></i> Reports
+                </a>
+                <a href="#analytics" class="nav-item">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="#settings" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="/" class="nav-item">
+                    <i class="fas fa-home"></i> Back to Site
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <h1>User Management</h1>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="showAddUserModal()">
+                        <i class="fas fa-plus"></i> Add New User
+                    </button>
+                    <button class="btn-secondary" onclick="showAddModeratorModal()">
+                        <i class="fas fa-user-shield"></i> Add Moderator
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-content">
+                        <h3>Total Users</h3>
+                        <p class="stat-value">1,234</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-user-shield"></i>
+                    <div class="stat-content">
+                        <h3>Moderators</h3>
+                        <p class="stat-value">12</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-gamepad"></i>
+                    <div class="stat-content">
+                        <h3>Active Games</h3>
+                        <p class="stat-value">456</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-flag"></i>
+                    <div class="stat-content">
+                        <h3>Pending Reports</h3>
+                        <p class="stat-value">23</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>All Users</h2>
+                    <div class="table-actions">
+                        <input type="search" placeholder="Search users..." class="search-input">
+                        <select class="filter-select">
+                            <option>All Roles</option>
+                            <option>Admins</option>
+                            <option>Moderators</option>
+                            <option>Users</option>
+                        </select>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" id="newUserPassword" required>
+                    <small>Min. 12 chars, uppercase, lowercase, number, special char</small>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="role">
+                        <option value="user">User</option>
+                        <option value="moderator">Moderator</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Moderator Modal -->
+    <div id="addModeratorModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Moderator</h2>
+                <button class="modal-close" onclick="closeModal('addModeratorModal')">&times;</button>
+            </div>
+            <form id="addModeratorForm">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" id="newModPassword" required>
+                    <small>Min. 12 chars, uppercase, lowercase, number, special char</small>
+                </div>
+                <div class="form-group">
+                    <label>Permissions</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="permissions" value="moderate_content" checked> Moderate Content</label>
+                        <label><input type="checkbox" name="permissions" value="manage_reports" checked> Manage Reports</label>
+                        <label><input type="checkbox" name="permissions" value="ban_users"> Ban Users</label>
+                        <label><input type="checkbox" name="permissions" value="delete_content"> Delete Content</label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addModeratorModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Moderator</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/password-validator.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>
