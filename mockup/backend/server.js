@@ -392,6 +392,9 @@ app.post('/api/admin/create-test-users', async (req, res) => {
 // Community and reputation endpoints
 app.use('/api/community', require('./routes/community'));
 
+// Social Feed API endpoints
+app.use('/api/social', require('./routes/social-feed-api'));
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
