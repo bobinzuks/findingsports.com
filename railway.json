@@ -18,7 +18,7 @@
         "buildCommand": "npm install --production && cd finding-sports-react && npm install && npm run build"
       },
       "deploy": {
-        "startCommand": "NODE_ENV=production npm start"
+        "startCommand": "npm start"
       }
     }
   }
