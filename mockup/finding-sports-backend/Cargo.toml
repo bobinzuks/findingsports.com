@@ -40,7 +40,7 @@ thiserror = "1"
 anyhow = "1"
 
 # Geo
-geo = "0.28"
+geo = "0.31"
 geojson = "0.24"
 
 # HTTP Client for scraping
