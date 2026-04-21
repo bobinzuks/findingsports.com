@@ -1,3 +1,0 @@
-# Main requirements file pointing to Railway-specific requirements
-# This helps Railway auto-detect Python project
--r railway-requirements.txt
