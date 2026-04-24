@@ -34,7 +34,7 @@
   <meta name="twitter:title" content="FindingSports - Find Activities Near You">
   <meta property="og:description" content="Find pickup games, activities and sports venues near you! Hockey, Basketball, Soccer, Pickleball, and 25+ activities.">
   <meta name="twitter:description" content="Find pickup games, activities and sports venues near you! Hockey, Basketball, Soccer, Pickleball, and 25+ activities.">
-  <script type="module" crossorigin src="./assets/index-D9aMYQyP.js"></script>
+  <script type="module" crossorigin src="./assets/index-DhIUnO_R.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-DxrIiA2_.css">
 </head>
 
@@ -47,7 +47,9 @@
       (function(){
         var redir = window.location.search.match(/[?&]p=([^&]+)/);
         if (redir) {
-          var path = '/' + redir[1].replace(/~and~/g, '&');
+          // Reconstruct the full path including the base path for GitHub Pages
+          var base = window.location.hostname.includes('github.io') ? '/findingsports.com' : '';
+          var path = base + '/' + redir[1].replace(/~and~/g, '&');
           var q = window.location.search.match(/[?&]q=([^&]+)/);
           if (q) path += '?' + q[1].replace(/~and~/g, '&');
           window.history.replaceState(null, '', path + window.location.hash);
